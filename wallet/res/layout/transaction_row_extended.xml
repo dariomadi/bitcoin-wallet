@@ -2,24 +2,28 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
 	android:layout_width="match_parent"
 	android:layout_height="match_parent"
-	android:background="@color/bg_list"
+	android:background="@color/knc_background_darker"
 	android:orientation="vertical"
-	android:paddingBottom="8dp"
-	android:paddingLeft="@dimen/list_entry_padding_horizontal"
-	android:paddingRight="@dimen/list_entry_padding_horizontal"
-	android:paddingTop="8dp" >
+	android:paddingBottom="0dp"
+	android:paddingLeft="15dp"
+	android:paddingRight="15dp"
+	android:paddingTop="0dp" >
 
 	<LinearLayout
-		android:layout_width="match_parent"
-		android:layout_height="wrap_content"
-		android:baselineAligned="true"
-		android:orientation="horizontal" >
+	    android:layout_width="match_parent"
+	    android:layout_height="80dp"
+	    android:layout_marginBottom="0dp"
+	    android:layout_marginTop="8dp"
+	    android:orientation="horizontal"
+	    android:paddingBottom="0dp" >
 
-		<de.schildbach.wallet.util.CircularProgressView
+		 <com.kncwallet.wallet.util.CircularProgressView
 			android:id="@+id/transaction_row_confidence_circular"
 			android:layout_width="@dimen/symbol_size_normal"
 			android:layout_height="@dimen/symbol_size_normal"
-			android:layout_marginRight="8dp" />
+			android:layout_marginRight="8dp"
+			android:layout_marginTop="28dp"
+			 />
 
 		<TextView
 			android:id="@+id/transaction_row_confidence_textual"
@@ -29,21 +33,76 @@
 			android:gravity="center_horizontal"
 			android:textSize="@dimen/font_size_normal"
 			android:textStyle="bold" />
+		
+		<LinearLayout
+		    android:paddingTop="2dp"
+		    android:layout_width="0dp"
+		    android:layout_height="wrap_content"
+		    android:layout_weight="1"
+		    android:layout_gravity="left"
+		    android:orientation="vertical">
+		    
+		    <com.kncwallet.wallet.ui.CurrencyTextView
+				android:id="@+id/transaction_row_value"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:textSize="20sp"
+				android:textColor="#FFFFFF" />
 
-		<TextView
-			android:id="@+id/transaction_row_time"
-			android:layout_width="wrap_content"
-			android:layout_height="wrap_content"
-			android:layout_marginRight="8dp"
-			android:textSize="@dimen/font_size_normal"
-			android:textStyle="bold" />
+		    <LinearLayout
+		        android:orientation="horizontal"
+		        android:layout_width="wrap_content"
+		        android:layout_height="wrap_content">
+		        
+		        <TextView
+					android:id="@+id/transaction_row_fromto"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:layout_marginRight="6dp"
+					android:layout_gravity="left"
+					android:textColor="@color/knc_mid_text"
+					android:textSize="15sp" />
+		        
+		        <TextView
+					android:id="@+id/transaction_row_address"
+					android:layout_width="0px"
+					android:layout_height="wrap_content"
+					android:layout_gravity="left"
+					android:layout_weight="1"
+					android:paddingRight="8dp"
+					android:gravity="left"
+					android:singleLine="true"
+					android:textColor="@color/knc_highlight"
+					android:textSize="15sp" />
+		        
+		    </LinearLayout>
 
-		<TextView
-			android:id="@+id/transaction_row_fromto"
-			android:layout_width="wrap_content"
-			android:layout_height="wrap_content"
-			android:layout_marginRight="8dp"
-			android:textSize="@dimen/font_size_normal" />
+		    
+		    <TextView
+				android:id="@+id/transaction_row_time"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_marginRight="4dp"
+				android:textSize="15sp"
+				android:textColor="@color/knc_dark_text" />
+		    
+		</LinearLayout>
+		
+		<ImageView
+		    android:id="@+id/transaction_row_contact_image"
+		    android:layout_width="72dp"
+		    android:layout_height="72dp"
+		    android:minWidth="72dp"
+		    android:maxWidth="72dp"
+		    android:layout_marginTop="16dp"
+		    android:src="#FF0000"
+		    android:scaleType="fitXY"
+		    android:layout_gravity="right"
+		    />	    
+		
+
+
+		<!-- 
 
 		<ImageView
 			android:id="@+id/transaction_row_coinbase"
@@ -52,25 +111,9 @@
 			android:layout_marginRight="6dp"
 			android:baselineAlignBottom="true"
 			android:src="@drawable/coinbase"
-			android:visibility="gone" />
+			android:visibility="gone" />-->
+		
 
-		<TextView
-			android:id="@+id/transaction_row_address"
-			android:layout_width="0px"
-			android:layout_height="wrap_content"
-			android:layout_gravity="left"
-			android:layout_weight="1"
-			android:gravity="left"
-			android:singleLine="true"
-			android:textSize="@dimen/font_size_normal" />
-
-		<de.schildbach.wallet.ui.CurrencyTextView
-			android:id="@+id/transaction_row_value"
-			android:layout_width="wrap_content"
-			android:layout_height="wrap_content"
-			android:layout_gravity="right"
-			android:layout_marginLeft="8dp"
-			android:textSize="@dimen/font_size_normal" />
 	</LinearLayout>
 
 	<LinearLayout
@@ -78,7 +121,7 @@
 		android:layout_width="match_parent"
 		android:layout_height="wrap_content"
 		android:orientation="horizontal"
-		android:paddingTop="4dp" >
+		android:paddingTop="0dp" >
 
 		<View
 			android:layout_width="@dimen/symbol_size_normal"

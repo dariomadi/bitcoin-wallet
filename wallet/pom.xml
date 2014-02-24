@@ -6,7 +6,7 @@
 
 	<artifactId>wallet</artifactId>
 	<packaging>apk</packaging>
-	<version>3.36-test</version>
+	<version>3.30-test</version>
 	<name>Bitcoin Wallet</name>
 
 	<parent>
@@ -14,6 +14,20 @@
 		<artifactId>base</artifactId>
 		<version>1</version>
 	</parent>
+    
+    <repositories>
+        <repository>
+            <id>crashlytics-repo</id>
+            <url>http://download.crashlytics.com/maven</url>
+        </repository>
+    </repositories>
+
+    <pluginRepositories>
+        <pluginRepository>
+            <id>crashlytics-plugin-repo</id>
+            <url>http://download.crashlytics.com/maven</url>
+        </pluginRepository>
+    </pluginRepositories>
 
 	<dependencies>
 
@@ -53,7 +67,7 @@
 		<dependency>
 			<groupId>com.google</groupId>
 			<artifactId>bitcoinj</artifactId>
-			<version>0.11.1</version>
+			<version>0.10.3</version>
 		</dependency>
 
 		<!-- de.schildbach.wallet.integration.android.* -->
@@ -105,6 +119,28 @@
 			<version>4.11</version>
 			<scope>test</scope>
 		</dependency>
+
+    	<!--  Gson: Java to Json conversion -->
+		<dependency>
+		      <groupId>com.google.code.gson</groupId>
+		      <artifactId>gson</artifactId>
+		      <version>2.2.4</version>
+		      <scope>compile</scope>
+        </dependency>
+
+        <!-- Crashlytics - crash reporting -->
+        <dependency>
+            <groupId>com.crashlytics.android</groupId>
+            <artifactId>crashlytics</artifactId>
+            <version>[1.0.2,)</version>
+        </dependency>
+
+        <!-- LibPhoneNumber - for normalization -->
+        <dependency>
+            <groupId>com.googlecode.libphonenumber</groupId>
+            <artifactId>libphonenumber</artifactId>
+            <version>3.1</version>
+        </dependency>
 
 	</dependencies>
 
@@ -181,7 +217,26 @@
 						<exclude>android:android</exclude>
 					</excludes>
 				</configuration>
-			</plugin>
+            </plugin>
+            <plugin>
+                <groupId>com.crashlytics</groupId>
+                <artifactId>crashlytics-maven</artifactId>
+                <version>1.1.0</version>
+                <executions>
+                    <execution>
+                        <id>GenerateResources</id>
+                        <goals>
+                            <goal>GenerateResources</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>CleanupResources</id>
+                        <goals>
+                        <goal>CleanupResources</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
 		</plugins>
 	</build>
 

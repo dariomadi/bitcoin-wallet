@@ -24,6 +24,7 @@ import java.math.BigInteger;
 import org.junit.Test;
 
 import com.google.bitcoin.core.NetworkParameters;
+import com.kncwallet.wallet.util.GenericUtils;
 
 /**
  * @author Andreas Schildbach

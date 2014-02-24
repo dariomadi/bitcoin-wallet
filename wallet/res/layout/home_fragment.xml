@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+ >
+        
+	<LinearLayout
+		android:id="@+id/wallet_balance"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:paddingTop="@dimen/activity_vertical_margin"
+		android:paddingLeft="@dimen/activity_horizontal_margin"
+    	android:paddingRight="@dimen/activity_horizontal_margin"
+		android:gravity="center"
+		android:orientation="vertical" >
+
+	   	<include android:id="@+id/header" 
+	            layout="@layout/include_header"
+	            android:visibility="gone"
+    	/>
+	    
+		<com.kncwallet.wallet.ui.CurrencyTextView
+			android:id="@+id/wallet_balance_btc"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_marginTop="10dp"
+			android:textSize="@dimen/font_size_wallet_balance"
+			android:textColor="@color/knc_highlight" />
+		
+		<com.kncwallet.wallet.ui.CurrencyTextView
+				android:id="@+id/wallet_balance_local"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_marginTop="10dp"
+				android:textColor="@color/knc_highlight"
+				android:textSize="@dimen/font_size_wallet_balance"
+				android:visibility="gone" />
+		
+		<TextView android:id="@+id/bitcoin_address_label"
+		    android:textSize="@dimen/font_size_wallet_address"
+		    android:textColor="@color/knc_dark_text"
+		    android:layout_width="wrap_content"
+		    android:layout_height="wrap_content"
+		    android:textStyle="bold"
+		    android:layout_marginTop="12dp"
+		    android:visibility="gone"
+		     />
+		
+	</LinearLayout>
+	
+	<TextView
+		android:id="@+id/wallet_balance_progress"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_gravity="center"
+		android:textColor="@color/fg_less_significant"
+		android:textSize="@dimen/font_size_small"
+		android:visibility="gone" />
+	
+	<com.kncwallet.wallet.util.ViewPagerTabs
+		android:id="@+id/transactions_pager_tabs"
+		android:layout_width="match_parent"
+		android:layout_height="32dp"
+		android:background="@color/knc_background_lighter"
+		android:paddingTop="8dp"
+		android:layout_marginTop="24dp" />
+
+	<android.support.v4.view.ViewPager
+		android:id="@+id/transactions_pager"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:layout_gravity="bottom|center_horizontal"
+		android:background="@color/knc_background_darker" />
+	
+	<!-- <LinearLayout
+		android:id="@+id/wallet_transactions"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:paddingTop="@dimen/activity_vertical_margin"
+		android:gravity="center"
+		android:orientation="vertical" >
+	    
+
+		
+	</LinearLayout>-->
+	
+
+
+</LinearLayout>

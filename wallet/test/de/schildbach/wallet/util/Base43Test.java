@@ -22,6 +22,8 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
+import com.kncwallet.wallet.util.Base43;
+
 /**
  * @author Andreas Schildbach
  */

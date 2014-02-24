@@ -1,18 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-	<dimen name="font_size_tiny">12sp</dimen>
-	<dimen name="font_size_small">15sp</dimen>
-	<dimen name="font_size_normal">18sp</dimen>
-	<dimen name="font_size_large">24sp</dimen>
-	<dimen name="font_size_xlarge">28sp</dimen>
-	<dimen name="font_size_huge">42sp</dimen>
-	<dimen name="symbol_size_normal">14sp</dimen>
-	<dimen name="list_entry_padding_horizontal">12dp</dimen>
-	<dimen name="list_entry_padding_horizontal_lax">20dp</dimen>
-	<dimen name="list_entry_padding_vertical">6dp</dimen>
-	<dimen name="divider_currency_padding">0dp</dimen>
-	<dimen name="wallet_address_qr_size">96dp</dimen>
-	<dimen name="wallet_address_qr_size_large">128dp</dimen>
+    <dimen name="font_size_tiny">12sp</dimen>
+    <dimen name="font_size_small">15sp</dimen>
+    <dimen name="font_size_normal">18sp</dimen>
+    <dimen name="font_size_large">24sp</dimen>
+    <dimen name="font_size_xlarge">28sp</dimen>
+    <dimen name="font_size_huge">42sp</dimen>
+    <dimen name="symbol_size_normal">14sp</dimen>
+    <dimen name="list_entry_padding_horizontal">12dp</dimen>
+    <dimen name="list_entry_padding_vertical">6dp</dimen>
+    <dimen name="divider_currency_padding">0dp</dimen>
+    <dimen name="wallet_address_qr_size">96dp</dimen>
+    <dimen name="wallet_address_qr_size_large">256dp</dimen>
+    <dimen name="activity_horizontal_margin">16dp</dimen>
+    <dimen name="activity_vertical_margin">10dp</dimen>
+    <dimen name="font_size_heading">14sp</dimen>
+    <string name="font_weight_heading">bold</string>
+    <dimen name="font_size_wallet_balance">38sp</dimen>
+    <dimen name="font_size_wallet_balance_small">32sp</dimen>
+    <dimen name="font_size_wallet_address">14sp</dimen>
+    <dimen name="header_padding">3dp</dimen>
 
 </resources>

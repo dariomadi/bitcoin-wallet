@@ -1,0 +1,284 @@
+END-USER LICENSE AGREEMENT FOR THE KNC WALLET APP (“EULA”)
+
+Parts of this app and its accompanying online or electronic documentation (the “App”) have been produced by and are the property of KnC Group AB (“KnC”). KnC is referred to as “us”, “we”, and “our” in this EULA. We are a company registered in Sweden, with company number 556948-9932. Our registered office is at KnC Group AB, Birger Jarlsgatan, 33 5tr, 111 45, Stockholm, Sweden. You can contact us by post to our registered office address or by email to info@kncwallet.com
+
+THE TERMS AND CONDITIONS BELOW SET OUT THE AGREEMENT BETWEEN YOU (“YOU”) AND US FOR THE DOWNLOAD AND USE OF THE APP SO PLEASE READ THEM CAREFULLY.
+
+BY DOWNLOADING AND USING THE APP YOU ARE AGREEING TO BE BOUND BY AND BECOME A PARTY TO THIS EULA AND THE PRIVACY POLICY. IF YOU DO NOT AGREE TO ALL OF THE TERMS OF THIS EULA OR PRIVACY POLICY YOU SHOULD NOT DOWNLOAD OR USE THE APP.
+
+1. IMPORTANT TERMS
+
+1.1 Some risks associated with bitcoin are set out in clause 3below.
+
+1.2 The EULA limits KnC’s liability as set out in clause 14 below.
+
+1.3 If you are under the age of 18 you must get your parent or guardian’s permission to download and use the KnC Software which forms a part of the App.
+
+1.4 Your use of the App is subject to your compliance with any terms and conditions required by Google from time to time.
+
+2. About the App
+
+2.1 The App is enables users to operate their own bitcoin wallet, by storing bitcoin directly onto the phone running the App. Bitcoin can be sent between the App wallet and the wallets of other App users or to any other bitcoin address.
+
+2.2 The App enables users to make bitcoin transactions. KnC is not a money transmitter or a money services business.
+
+2.3 The App is a compilation of two pieces of software to form what is called an ‘aggregate’.
+
+2.4 The first piece of software constituting the aggregate was developed by Andreas Schildbach. It is a bitcoin wallet for android devices (the “Core Software”). The Core Software is licensed to us under the GNU General Public License v.3 and you are permitted to use the Core Software in accordance with the terms of that license. You can find out more about the Core Software at https://github.com/schildbach/bitcoin-wallet.
+
+2.5 The second piece of software constituting the aggregate (the “KnC Software”)_was developed by KnC. You are permitted to use the KnC Software in accordance with this EULA.
+
+2.6 Where this EULA contradicts the rights in the Core Software licensed under the GNU General Public License v.3, the terms of the GNU General Public License v.3 will prevail in respect of the contradictory part only.
+
+2.7 The privacy policy is in an important document which governs our use of the personal and anonymous data that we obtain from your use of the KnC Software. We only use this data in accordance with our privacy policy.
+
+3. About Bitcoin
+
+3.1 Bitcoins may not be appropriate for everyone. Before making use of bitcoin you should learn about them to ensure they are appropriate for you. As with all currencies, there are some risks associated with using bitcoin. Some of the risks particular to bitcoin include:
+
+3.1.1 Loss of bitcoin due to hardware malfunction – if the phone running the App breaks, you could lose the bitcoin stored on that phone;
+
+3.1.2 Currency fluctuation - the price of bitcoin may fall sharply and may even fall to zero;
+
+3.1.3 Bitcoin transactions may be unconfirmed for a period of time. Although very unlikely, some bitcoin transactions may never be confirmed - bitcoin transactions which are unconfirmed are not completed;
+
+3.1.4 Bitcoin transactions are irreversible - if you send bitcoin to the wrong person, you may be unable to recover those bitcoin;
+
+3.1.5 Bitcoin may be lost if you lose or forget any PINs or passwords necessary to access and spend those bitcoin;
+
+3.1.6 Unknown technical defects inherent in bitcoin; and
+
+3.1.7 New regulation which impacts on bitcoin use.
+
+3.2 By agreeing to this EULA or by using the KnC Software, you are indicating your acceptance of the risks associated with bitcoin.
+
+4. User Accounts
+
+4.1 By downloading or using the KnC Software, you confirm that you are either over 18 years of age, or if you are under 18 years old, that you are 13 years of age or older and you have obtained your parent or guardian’s consent to download, and use the KnC Software.
+
+4.2 When you run the App for the first time, a wallet will be created and paired with your phone number. Other users of the App will be able to send bitcoin to this wallet by using your phone number.
+
+4.3 In accordance with our privacy policy, we will remotely store your phone number and other information necessary to enable people to send bitcoin to you.
+
+4.4 When the wallet is created, we will also allocate you with a corresponding “Private Key”. The Private Key enables any bitcoin sent to the App wallet to be spent. For security reasons, we do not keep a backup of your Private Key.
+
+4.5 IF YOUR PRIVATE KEYS ARE LOST OR DELETED, YOU WILL BE UNABLE TO SPEND THE BITCOIN STORED IN THE APP. More information on how you can backup your own Private Key is set out below.
+
+4.6 You have the option to use a PIN to secure access to the App. If you activate the PIN, it will be required to spend any stored bitcoin.
+
+4.7 Your PIN is personal to you and must not be disclosed to any other person. We are entitled to assume that any use of the App is made by you. You are solely responsible and liable for any use of the App.
+
+4.8 IT IS UP TO YOU TO TAKE WHATEVER SECURITY MEASURES YOU THINK NECESSARY TO ENSURE THAT YOUR PIN AND YOUR PHONE ARE SECURE. WE ARE NOT LIABLE FOR ANY IMPROPER USE OF THE APP OR YOUR PIN BY YOU OR ANY OTHER PERSON. IF YOU THINK ANY OTHER PERSON KNOWS YOUR PIN, OR THAT YOUR PHONE HAS BEEN USED OR ACCESSED BY ANY OTHER PERSON WITHOUT YOUR PERMISSION, YOU MUST CHANGE YOUR PIN AND INFORM US IMMEDIATELY.
+
+5. YOUR USE OF THE APP AND THE KNC SOFTWARE
+
+5.1 As a condition of using the KnC Software, our privacy policy shall apply. You confirm that you have read the privacy policy and that you understand how we collect personal and anonymous data. All data that we collect is used to understand and improve your use of the App to provide the functionality of the App, or as otherwise set out in the privacy policy.
+
+5.2 Subject to the privacy settings in the App which you set, we may send you push notifications whilst the App is installed.
+
+5.3 When making transactions using the App, you are responsible for deciding what tax should or should not be applied, paid, reported or collected.
+
+5.4 You must not (whether yourself or through a third party acting on your behalf or for your benefit), attempt, whether or not successfully, to:
+
+5.4.1 reproduce, distribute, publically display or perform, translate, modify, adapt, create derivative works from, deconstruct, reverse engineer, decompile or disassemble in any manner any Further Features which may be made available subject to clause 10or any part of any of them, including but not limited to any character, graphic, associated software or proprietary communications protocol used by the software or any utilities, applications, emulators or tools derived therefrom;
+
+5.4.2 mine, buy, sell, exchange, hold, own or otherwise use or exploit bitcoin in any way which is prohibited by the laws, regulations or regulatory guidance which apply to you. You are responsible for remaining aware of any changes to applicable laws, regulations or regulatory guidance;
+
+5.4.3 defraud us or any of our other users or access any information which belongs to us or any of our other users; or
+
+5.4.4 use the KnC Software in a way which causes unreasonable demands on our technology or technical infrastructure, or breach or circumnavigate any of our security measures.
+
+6. Backing Up
+
+6.1 The App gives you the option to backup your Private Keys to external third party providers (“Backup”). WE STRONGLY RECOMMEND THAT YOU BACKUP YOUR PRIVATE KEYS REGULARLY. If you Backup and your phone or the App is lost or damaged, you will be able to recover your Private Keys from the Backup.
+
+6.2 Backup may require you to enter additional passwords or undertake additional security measures.
+
+6.3 Backup is subject to the terms of the third party backup providers and we do not make any warranty, undertaking or representation in respect of such providers.
+
+6.4 IT IS UP TO YOU TO TAKE WHATEVER SECURITY MEASURES YOU THINK NECESSARY TO ENSURE THAT YOUR BACKUP IS SECURE. WE ARE NOT LIABLE FOR ANY IMPROPER USE OF YOUR BACKUP BY YOU OR ANY OTHER PERSON.
+
+7. OWNERSHIP OF THE APP AND CONTENT
+
+7.1 All intellectual property in the App, except for User Content (please see clause 9) is owned by us and/or our licensors. The intellectual property in the Core Software is owned by Andreas Schildbach and licensed to us. We own the intellectual property in the KnC Software.
+
+7.2 ‘KnC’ is a registered trade mark belonging to us. All rights are reserved by us in the trade mark.
+
+7.3 All intellectual property rights in the Further Features and content on the Further Features (except for User Content), including but not limited to text, software, scripts, code, designs, graphics, photos, sounds, music, videos, applications, interactive features and all other content ("Content") belongs to us and/or our licensors. All of our rights are reserved.
+
+7.4 You are not sold the Core Software, the KnC Software, the Further Features or any Content, but are granted a personal licence to use the same in accordance with this EULA.
+
+8. LINKS TO WEBSITES, OTHER APPS AND THIRD PARTY SERVICES
+
+8.1 Where we make available links to other websites or apps in the App, such links are provided for your information and convenience only. We are not responsible for the content or performance of the linked website or app, and you are responsible for reviewing the linked website’s or app’s terms of use or privacy policy.
+
+8.2 If you permit any third party to access the App (whether this access is enabled through the App itself or through a third party application), you acknowledge that you remain solely responsible for any actions or omissions enabled by the grant of your permission.
+
+9. USER CONTENT
+
+9.1 To the extent that the App allows you to publish any content, data or other information (“User Content”), then you acknowledge that we may copy, store, adapt, modify, and use the User Content to enable us to provide the App and the User Content to you and others (as applicable).
+
+9.2 You retain all ownership of your User Content that you upload, and you are free to use it elsewhere.
+
+9.3 You hereby grant us a non-exclusive, irrevocable and perpetual, royalty free, worldwide, sub-licensable and transferable right to copy, adapt, modify and use the User Content, and you acknowledge that we may make the User Content available to other users of the App.
+
+9.4 You confirm that any User Content shall be your own original work and you shall not infringe the intellectual property rights or privacy rights of any third party or defame any person.
+
+9.5 To the extent that the KnC Software allows you to message or communicate with other users of the KnC Software, then you must take care in the type of information you wish to share. For example, you should only share personal information or your contact details with people you trust. You must not send any abusive or offensive material. We do not moderate any communications that you may send from the App or which may be sent to you.
+
+9.6 We will use your User Content in accordance with our privacy policy.
+
+9.7 After you delete the App, your User Content shall remain on our servers for a limited period of time as part of our backup system.
+
+10. Further FEATURES
+
+10.1 We may in the future offer further in-app content or features for you to purchase, download and use in the App (“Further Features”). Further Features are a part of the KnC Software. If you agree to purchase and/or download Further Features, we grant you a non-exclusive, personal, revocable, non-transferable license to use the Further Content in the App on the terms of this EULA.
+
+10.2 Further Features may be made available subject to additional terms, which we will notify to you before you purchase and/or download any Further Features.
+
+11. SYSTEM REQUIREMENTS
+
+This App has been developed to work on the latest version of the Google Android software at the time of its release. Google may from time to time update the Android software, and we will endeavour, but not be obligated, to update the App if applicable to ensure that its functionality and performance continues with any updated Android release. It is your obligation to ensure that you are using the latest public release of the Android software.
+
+12. INDEMNITY
+
+12.1 You agree to indemnify us and keep us indemnified from and against all claims, damages, expenses, costs and liabilities (including legal fees) relating to or arising from:
+
+12.1.1 your use of the KnC Software;
+
+12.1.2 any actions or omissions of any third party that accesses the KnC Software (whether this access is enabled through the App itself or through a third party application); and
+
+12.1.3 any breach or suspected breach of this EULA by you or from your violation of any law or the rights of any third party.
+
+13. TERM AND TERMINATION
+
+13.1 This EULA takes effect upon your download and/or use of the App and remains effective until terminated by either of us. You may terminate this EULA at any time by removing the App from the phone on which it is installed. The EULA shall automatically terminate if you fail to comply with any term or condition of this EULA. Upon termination you shall cease all use of the App and delete all copies of the App. YOU SHOULD NOT DELETE THE APP WITHOUT HAVING BACKED-UP YOUR PRIVATE KEYS,
+
+13.2 The following clauses of the EULA shall survive termination: Clause 7(Ownership), Clause 12(Indemnity), Clause 13(Term and Termination), Clause 14(Limitation of Liability) and Clause 15(General Provisions).
+
+14. OUR LIMITATIONS OF LIABILITY
+
+14.1 The App is provided ‘AS IS’ and on an ‘AS AVAILABLE’ basis without any representation, endorsement or warranty of any kind, including but not limited to implied warranties of satisfactory quality, fitness for purpose, non-infringement, compatibility, security and/or accuracy.
+
+14.2 We do not guarantee that (i) the App will be free of errors, viruses, bugs or other defects; or (ii) that the App or any information displayed or distributed through the App or in the Documentation will be accurate or complete; or (iii) that any defects in the App will be corrected.
+
+14.3 You acknowledge that reliance on any such information shall be at your sole risk. YOU ACKNOWLEDGE THAT THE APP HAS NOT BEEN DEVELOPED TO MEET YOUR INDIVIDUAL REQUIREMENTS AND THAT IT IS THEREFORE YOUR RESPONSIBILITY TO ENSURE THAT THE FACILITIES AND FUNCTIONS OF THE APP MEET YOUR REQUIREMENTS.
+
+14.4 TO THE FULLEST EXTENT PERMISSABLE BY LAW, INCLUDING IN YOUR LOCAL JURISDICTION, WE EXCLUDE ALL LIABILITY FOR ANY LOSS OR DAMAGE, WHETHER SUFFERED DIRECTLY OR INDIRECTLY, IMMEDIATELY OR CONSEQUENTIALLY AND WHETHER ARISING IN CONTRACT, TORT (INCLUDING NEGLIGENCE) OR OTHERWISE, INCLUDING ANY
+
+14.4.1 SPECIAL DAMAGE EVEN IF THE SUPPLIER WAS AWARE OF THE CIRCUMSTANCES IN WHICH SUCH SPECIAL DAMAGE COULD ARISE;
+
+14.4.2 LOSS OF PROFITS;
+
+14.4.3 LOSS OF ANTICIPATED SAVINGS;
+
+14.4.4 LOSS OF BUSINESS OPPORTUNITY;
+
+14.4.5 LOSS OF GOODWILL;
+
+14.4.6 LOSS OR CORRUPTION OF DATA,
+
+14.4.7 LOSS ARISING OUT OF OR IN CONNECTION WITH ANY OF THE RISKS SET OUT IN CLAUSE 3.
+
+14.5 We are not responsible for any loss or damage caused by or as a result of the device on which the app is run or by any products or services paid for with the services of the app or the act or omissions of any seller of any products or services paid for with the services of the app.
+
+14.6 our LIABILITY TO YOU, to the extent we cannot exclude it entirely, shall, where PERMISSABLE BY LAW, BE LIMITED TO [£10].
+
+14.7 NOTHING IN THIS EULA SHALL EXCLUDE OR LIMIT OUR LIABILITY FOR FRAUDULENT MISREPRESENTATIONS OR FOR DEATH OR PERSONAL INJURY RESULTING FROM OUR NEGLIGENCE OR THE NEGLIGENCE BY US, or any liability not capable of limitation by applicable law.
+
+15. GENERAL PROVISIONS
+
+15.1 This EULA sets out the complete understanding and agreement between us and you. No waiver by us of any failure by you to comply with or perform a provision of EULA shall be deemed to be a waiver of any preceding or succeeding failure. In the event that any of the provisions of this EULA are held to be invalid or unenforceable, the remaining provisions will remain in full force and effect.
+
+15.2 This EULA is personal to you. You may not assign, sub-licence, transfer or dispose of the rights licensed under this agreement.
+
+15.3 We may change this EULA for any reason. We will notify you of any changes and you will be required to accept the changes to continue to use the KnC Software.
+
+15.4 If any provision of this EULA is found by a court or regulator to be invalid or unenforceable the other provisions shall continue to apply.
+
+15.5 Subject to your local consumer laws, and in the event of any dispute between you and us, and regarding this EULA and/or your use of the KnC Software, then the laws of England and Wales will apply. You agree that in the event we are unable to settle any dispute with you, then any court or arbitration proceedings shall be held in England, UK only.
+
+Date of Last Revision: Feb 24th 2014
+
+POLICY ON PRIVACY, DATA, COOKIES AND MARKETING COMMUNICATIONS
+
+Date of Last Revision: February 14th 2014
+
+This app and any accompanying online or electronic documentation (the “App”) have been produced by and are the property of KnC Group AB (“KnC”). KnC is referred to as “us”, “we”, and “our” in this Privacy Policy. We are a company registered in Sweden, with company number 556948-9932. Our registered office is at Birger Jarlsgatan, 33 5tr, 111 45, Stockholm, Sweden. You can contact us by post to our registered office address or by email to info@kncwallet.com.
+
+Please read the following carefully to understand KnC’s views and practices regarding your personal data and how we will treat it. KnC is committed to protecting your privacy.
+
+This cookies, privacy and data policy (the “Privacy Policy”) tells you about how we collect, manage, use and store information about you which you provide in connection with the App. Please note that this Privacy Policy should be read in connection with the cookies and privacy policy of any applicable third party service provider (“App Store”), such as Google.
+
+The App enables users to operate their own bitcoin wallet, by storing bitcoin directly onto the phone running the App. Bitcoin can be sent between the App wallet and the wallets of other App users or to any other bitcoin address.
+
+In summary, we require permission to access the following data for the following reasons –
+
+    Your phone number, which will be paired the information necessary to enable people to send bitcoin to you, and the phone numbers in your phone’s address book. We store this information remotely, but we do not remotely store information to enable us to know which phone number belongs to which particular individual. We use this information to find out which phone numbers in your address book are paired with other downloads of the App. This means you can find friends who also use the App.
+    The other information in your phone's address book, such as the names and photos attributed to the phone numbers. We access this information on your phone but we do not store it remotely. If we find that one of your friends has also downloaded the App, we access and present this information to you when you communicate or transact with that person using the App.
+    We may also use information in your social media accounts in a comparable way.
+    If you provide contact details to us through the App, we may use that information to contact you about your use of the App or to notify you about our products and services.
+
+1. By installing, accessing, registering to or otherwise using the App, you agree to this Privacy Policy and give explicit and informed consent to the processing of your personal data in accordance with this Privacy Policy. If you do not agree with this Privacy Policy, please do not install, access, register to or otherwise use the App.
+
+2. We will only use information collected about you in accordance with the Data Protection Act 1998.
+
+3. If we ask you to provide certain information by which you can be identified when using our App, then you can be assured that it will only be used in accordance with this Privacy Policy.
+
+4. We may change this Privacy Policy from time to time by updating this page. You should check this page from time to time to ensure that you are happy with any changes.
+
+5. The App is intended for use by those 13 years of age or older. If we learn that a person under the age of 13 has provided us with personal information, we will take steps to delete such information as soon as possible.
+
+6. When you access the App through an App Store depending on your specific privacy settings with that App Store we may be able to access certain information from your account or the information given by you to that App Store. You are advised to review your privacy settings with any App Store.
+
+7. By accessing the App through the App Store you authorise us to collect, store, access and use that information which you have agreed the App Store may provide to us.
+
+8. In addition during your use of the App you agree that the following terms will apply:
+
+8.1 We may ask you for certain information and you may submit personal data to us when processing any correspondence you send us (such as your name, username, email address, and contact details).
+
+8.2 You agree and acknowledge that all data submitted by you in connection with your use of the App will be subject to any additional privacy policy terms of any App Store.
+
+8.3 We may also record which parts of the App you use as part of general user patterns. This information will be kept securely in accordance with an internal security policy and may be used:
+
+8.3.1 to generally run, operate and maintain the App.
+
+8.3.2 for internal record keeping;
+
+8.3.3 to improve the App;
+
+8.3.4 to notify and inform users of updates, new App and / or promotional offers;
+
+8.3.5 to enable and process your use of and generally run the App; and
+
+8.3.6 to collect, where applicable, achievements and goals created in the App.
+
+9. We may also record which parts of the App users use and user patterns. This information will be kept securely in accordance with an internal security policy.
+
+10. We may disclose your personal information to any member of our group, which means our subsidiaries, our ultimate holding company and its subsidiaries, as defined in section 1159 of the UK Companies Act 2006 (both inside and outside of the European Economic Area).
+
+11. We may also disclose and/or license your personal data that we obtain from the use of the App (and other data you submit through the app) to third parties:
+
+11.1.1 in the event that we sell, transfer or buy any business or assets, in which case we may disclose your personal data to the prospective seller or buyer of such business or assets.
+
+11.1.2 if KnC Group AB or substantially all of its assets are acquired by or transferred to a third party, in which case personal data held by it about its customers will be one of the transferred assets.
+
+11.1.3 with a view to preventing fraud or reducing credit risk.
+
+11.1.4 if we are obliged to do so to comply with law, regulations or a court order; if it’s necessary to enforce any of our terms and conditions or any other agreements to which we area party; if it is necessary to protect our rights, property or the safety of our customers or App users.
+
+12. We might send you emails about products or services which are similar to or related to the App, or contact you by email with information about the App. We will not send you any other emails or pass your information on to third parties unless you give your consent or you have given it already.
+
+13. By subscribing to or using the App and submitting your data you agree to the uses set out in this Privacy Policy.
+
+14. If you believe we have information about you that you do not want us to have or that is incorrect please contact us as described below and we shall correct or remove the data as you request as soon as is reasonably practicable.
+
+15. If you have any other concerns over privacy, this Privacy Policy or the App please contact us as described below.
+
+16. It may be necessary for us to transfer your information to countries outside the European Union which do not provide the same level of protection. If we for any reason need to do so, we will make sure that the information is transferred in accordance with this Privacy Policy and the Data Protection Act 1998 and other applicable data protection laws so that your personal data is kept secure.
+
+17. The App may contain links to other websites or services of interest. However, once you have used these links to leave our App, you should note that we do not have any control over those third party sites or services. Therefore, we cannot be responsible for the protection and privacy of any information which you provide whilst visiting such sites and such sites are not governed by this privacy statement. You should exercise caution and look at the privacy statement applicable to the website in question. Such sites and services have not been verified or reviewed by us and we have no liability for any use and access to them.
+
+18. For the purpose of the Data Protection Act 1998, the data controller is KnC Group AB with company number 556948-9932 whose registered office is KnC Group AB, Birger Jarlsgatan, 33 5tr, 111 45, Stockholm, Sweden.
+
+19. All questions, comments or enquiries should be directed by email to us at info@kncwallet.com

@@ -79,36 +79,25 @@
 	</string>
 	<string name="help_safety">
 <![CDATA[
+		<p><b>Hints and Tips</b></p>
 		<p>
-			<b>Important safety notes:</b>
+			The tips below are important. If you are new to Bitcoin, please read them carefully.
+			More details and helpful information can be found on our website www.kncwallet.com
 		</p>
 		<p>
-			Bitcoins are stored on the device.
-			<b>If you lose it, you\'ll lose your Bitcoins.</b>
+			Please write down your wallet backup password, we cannot recover this. KnC do not keep copies of your wallet or any of your passwords or PINs.
+		</p>
+		<p>Bitcoins are stored on your phone. If you lose your phone you may lose your Bitcoins!</p>
+		<p>
+			Always create a backup of your private keys and store them somewhere safe. This can be Cloud Storage such as a Dropbox account or Google Drive and you should always choose a strong password for your key backup. You can do this easily from the settings page in the KnC Wallet.
 		</p>
 		<p>
-			This means you need to <b>back up your wallet</b>!
-			Use the in-app backup facility for this, rather than a third party backup app.
-			Keep your backup safe and remember the password.
+			Only carry small amounts of Bitcoin on your phone, treat them like physical cash, just carry what you need for a day.
 		</p>
-		<p>
-			<b>Before uninstalling</b> (or clearing app data/wiping your device), <b>transfer your Bitcoins to another wallet</b>.
-			Remaining Bitcoins will be lost.
-		</p>
-		<p>
-			<b>Payments are irreversible</b>.
-			If you send your Bitcoins into the void, there is almost no way to get them back.
-		</p>
-		<p>
-			<b>Keep your mobile device safe!</b>
-			Do not root your device.
-			Do only install apps you fully trust.
-			Malicious apps could be trying to steal your wallet.
-		</p>
-		<p>
-			Keep the risk low!
-			<b>Only use with small amounts</b> for day use.
-		</p>
+		<p>Before you uninstall or delete your app data, remember to move your Bitcoins to another wallet first as deleting your app data will delete your Bitcoins!</p>
+		<p>Use a PIN to protect your phone and your KnC Wallet. You can enable the KnC Wallet pin in the settings page.</p>
+		<p>Finally, have fun with Bitcoin!</p>
+		<p>For full terms and conditions of use, please see www.kncwallet.com</p>
 	]]>
 	</string>
 

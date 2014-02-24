@@ -12,7 +12,7 @@
 		android:gravity="center"
 		android:orientation="vertical" >
 
-		<de.schildbach.wallet.ui.CurrencyTextView
+		<com.kncwallet.wallet.ui.CurrencyTextView
 			android:id="@+id/wallet_balance_btc"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
@@ -26,7 +26,7 @@
 			android:foregroundGravity="bottom|right"
 			android:paddingRight="8dp" >
 
-			<de.schildbach.wallet.ui.CurrencyTextView
+			<com.kncwallet.wallet.ui.CurrencyTextView
 				android:id="@+id/wallet_balance_local"
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
@@ -36,11 +36,9 @@
 
 	<TextView
 		android:id="@+id/wallet_balance_progress"
-		android:layout_width="match_parent"
+		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
 		android:layout_gravity="center"
-		android:layout_marginLeft="@dimen/list_entry_padding_horizontal_lax"
-		android:layout_marginRight="@dimen/list_entry_padding_horizontal_lax"
 		android:textColor="@color/fg_less_significant"
 		android:textSize="@dimen/font_size_small"
 		android:visibility="gone" />

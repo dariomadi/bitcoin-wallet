@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingTop="@dimen/activity_vertical_margin"
+	android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:orientation="vertical" >
+
+   	<include android:id="@+id/header" 
+	         layout="@layout/include_header"
+	         android:visibility="gone"
+    />
+    
+   	<LinearLayout
+		android:id="@+id/wallet_balance"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:gravity="center"
+		android:orientation="vertical" >
+		
+		<com.kncwallet.wallet.ui.CurrencyTextView
+			android:id="@+id/wallet_balance_btc"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:textSize="@dimen/font_size_wallet_balance_small"
+			android:textColor="@color/knc_highlight"
+		 />
+		
+		<com.kncwallet.wallet.ui.CurrencyTextView
+			android:id="@+id/wallet_balance_local"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:textSize="@dimen/font_size_wallet_balance_small"
+			android:textColor="@color/knc_highlight"
+			android:visibility="gone" />
+		
+		<TextView
+			android:id="@+id/wallet_balance_progress"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_gravity="center"
+			android:textColor="@color/fg_less_significant"
+			android:textSize="@dimen/font_size_small"
+			android:visibility="gone" />
+		
+		<FrameLayout
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_gravity="center"
+			android:layout_marginTop="8dp" >
+
+			<ImageView
+				android:id="@+id/request_coins_qr"
+				android:layout_width="@dimen/wallet_address_qr_size_large"
+				android:layout_height="@dimen/wallet_address_qr_size_large"
+				android:layout_gravity="center"
+				android:background="@drawable/qrcode_frame"
+				android:scaleType="centerInside" />
+		</FrameLayout>
+		
+		<TextView android:id="@+id/bitcoin_address_label"
+		    android:textSize="@dimen/font_size_wallet_address"
+		    android:textColor="@color/knc_dark_text"
+		    android:layout_width="wrap_content"
+		    android:layout_height="wrap_content"
+		    android:textStyle="bold"
+		    android:textIsSelectable="true"
+		    android:layout_marginTop="12dp"
+		     />
+   	</LinearLayout>
+   	<LinearLayout
+   	    android:id="@+id/receive_buttons"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:layout_marginTop="12dp"
+		android:gravity="center"
+		android:orientation="horizontal"
+		android:visibility="gone"
+		>
+		<Button
+		    android:id="@+id/receive_button_email"
+		    android:text="@string/receive_email_button_text"
+		    android:layout_width="0dp"
+		    android:layout_height="wrap_content"
+		    android:layout_weight="10"
+		/>
+		
+		<Button
+		    android:id="@+id/receive_button_copy"
+		    android:layout_width="0dp"
+		    android:layout_height="wrap_content"
+		    android:layout_weight="10"
+		    android:text="@string/receive_clipboard_button_text"
+		/>
+   	    
+   	</LinearLayout>
+
+</LinearLayout>

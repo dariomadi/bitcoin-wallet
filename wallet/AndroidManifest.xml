@@ -1,217 +1,223 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-	xmlns:tools="http://schemas.android.com/tools"
-	package="de.schildbach.wallet_test"
-	android:installLocation="internalOnly"
-	android:versionCode="157"
-	android:versionName="3.36-test" >
+    xmlns:tools="http://schemas.android.com/tools"
+    package="com.kncwallet.wallet_test"
+    android:installLocation="internalOnly"
+    android:versionCode="5"
+    android:versionName="0.9.1-test" >
 
-	<uses-sdk
-		android:minSdkVersion="10"
-		android:targetSdkVersion="11"
-		tools:ignore="OldTargetApi" />
+    <uses-sdk
+        android:minSdkVersion="14"
+        android:targetSdkVersion="14"
+        tools:ignore="OldTargetApi" />
 
-	<uses-permission android:name="android.permission.INTERNET" />
-	<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-	<uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-	<uses-permission android:name="android.permission.NFC" />
-	<uses-permission android:name="android.permission.CAMERA" />
-	<uses-permission android:name="android.permission.VIBRATE" />
-	<uses-permission android:name="android.permission.WAKE_LOCK" />
-	<uses-permission android:name="android.permission.BROADCAST_STICKY" />
-	<uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
-	<uses-permission android:name="android.permission.BLUETOOTH" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.NFC" />
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.BROADCAST_STICKY" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.BLUETOOTH" />
+    <uses-permission android:name="android.permission.READ_CONTACTS" />
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
-	<uses-feature
-		android:name="android.hardware.touchscreen"
-		android:required="false" />
-	<uses-feature
-		android:name="android.hardware.nfc"
-		android:required="false" />
-	<uses-feature
-		android:name="android.hardware.camera"
-		android:required="false" />
-	<uses-feature
-		android:name="android.hardware.camera.front"
-		android:required="false" />
-	<uses-feature
-		android:name="android.hardware.camera.autofocus"
-		android:required="false" />
-	<uses-feature
-		android:name="android.hardware.camera.flash"
-		android:required="false" />
-	<uses-feature
-		android:name="android.hardware.screen.landscape"
-		android:required="false" />
-	<uses-feature
-		android:name="android.hardware.bluetooth"
-		android:required="false" />
+    <uses-feature
+        android:name="android.hardware.touchscreen"
+        android:required="false" />
+    <uses-feature
+        android:name="android.hardware.nfc"
+        android:required="false" />
+    <uses-feature
+        android:name="android.hardware.camera"
+        android:required="false" />
+    <uses-feature
+        android:name="android.hardware.camera.front"
+        android:required="false" />
+    <uses-feature
+        android:name="android.hardware.camera.autofocus"
+        android:required="false" />
+    <uses-feature
+        android:name="android.hardware.camera.flash"
+        android:required="false" />
+    <uses-feature
+        android:name="android.hardware.screen.landscape"
+        android:required="false" />
+    <uses-feature
+        android:name="android.hardware.bluetooth"
+        android:required="false" />
 
-	<supports-screens
-		android:anyDensity="true"
-		android:largeScreens="true"
-		android:normalScreens="true"
-		android:smallScreens="true"
-		android:xlargeScreens="true" />
+    <supports-screens
+        android:anyDensity="true"
+        android:largeScreens="true"
+        android:normalScreens="true"
+        android:smallScreens="true"
+        android:xlargeScreens="true" />
 
-	<application
-		android:name="de.schildbach.wallet.WalletApplication"
-		android:allowBackup="false"
-		android:hardwareAccelerated="true"
-		android:icon="@drawable/app_icon"
-		android:label="@string/app_name"
-		android:theme="@style/My.Theme" >
-		<activity
-			android:name="de.schildbach.wallet.ui.WalletActivity"
-			android:configChanges="keyboard|keyboardHidden"
-			android:launchMode="singleTask" />
+    <application
+        android:name="com.kncwallet.wallet.WalletApplication"
+        android:allowBackup="false"
+        android:hardwareAccelerated="true"
+        android:icon="@drawable/ic_launcher"
+        android:label="@string/app_name"
+        android:theme="@style/My.Theme" >
+        <activity
+            android:name="com.kncwallet.wallet.ui.PinSettingsActivity"
+            android:configChanges="keyboard|keyboardHidden"
+            android:label="@string/title_activity_pin_settings"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name="com.kncwallet.wallet.ui.WalletActivity"
+            android:label="@string/app_name"
+            android:configChanges="keyboard|keyboardHidden"
+            android:launchMode="singleTask"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="adjustNothing" />
+        
+        <activity-alias
+            android:name="com.kncwallet.wallet.WalletActivity"
+            android:clearTaskOnLaunch="true"
+            android:targetActivity="com.kncwallet.wallet.ui.WalletActivity" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
 
-		<activity-alias
-			android:name="de.schildbach.wallet.WalletActivity"
-			android:targetActivity="de.schildbach.wallet.ui.WalletActivity" >
-			<intent-filter>
-				<action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.nfc.action.NDEF_DISCOVERED" />
 
-				<category android:name="android.intent.category.LAUNCHER" />
-			</intent-filter>
-			<intent-filter>
-				<action android:name="android.nfc.action.NDEF_DISCOVERED" />
+                <data android:mimeType="application/x-btctx" />
 
-				<data android:mimeType="application/x-btctx" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity-alias>
 
-				<category android:name="android.intent.category.DEFAULT" />
-			</intent-filter>
-		</activity-alias>
+        <activity
+            android:name="com.kncwallet.wallet.ui.SendCoinsActivity"
+            android:configChanges="keyboard|keyboardHidden"
+            android:label="@string/send_coins_activity_title"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="adjustResize" >
+            <!-- <intent-filter android:label="@string/send_coins_activity_title" >
+                <action android:name="android.intent.action.VIEW" />
 
-		<activity
-			android:name="de.schildbach.wallet.ui.SendCoinsActivity"
-			android:configChanges="keyboard|keyboardHidden"
-			android:label="@string/send_coins_activity_title"
-			android:screenOrientation="behind"
-			android:windowSoftInputMode="adjustResize" >
-			<intent-filter android:label="@string/send_coins_activity_title" >
-				<action android:name="android.intent.action.VIEW" />
+                <data android:scheme="bitcoin" />
 
-				<data android:scheme="bitcoin" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+            </intent-filter>
+            <intent-filter android:label="@string/send_coins_activity_title" >
+                <action android:name="android.nfc.action.NDEF_DISCOVERED" />
 
-				<category android:name="android.intent.category.DEFAULT" />
-				<category android:name="android.intent.category.BROWSABLE" />
-			</intent-filter>
-			<intent-filter android:label="@string/send_coins_activity_title" >
-				<action android:name="android.nfc.action.NDEF_DISCOVERED" />
+                <data android:scheme="bitcoin" />
 
-				<data android:scheme="bitcoin" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>-->
+        </activity>
+        <activity
+            android:name="com.kncwallet.wallet.ui.SendCoinsQrActivity"
+            android:configChanges="keyboard|keyboardHidden"
+            android:screenOrientation="portrait"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar" >
+        </activity>
+        <activity
+            android:name="com.kncwallet.wallet.ui.RequestCoinsActivity"
+            android:configChanges="keyboard|keyboardHidden"
+            android:label="@string/request_coins_activity_title"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name="com.kncwallet.wallet.ui.AddressBookActivity"
+            android:configChanges="keyboard|keyboardHidden"
+            android:label="@string/address_book_activity_title"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name="com.kncwallet.wallet.ui.ExchangeRatesActivity"
+            android:configChanges="keyboard|keyboardHidden"
+            android:label="@string/exchange_rates_activity_title"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name="com.kncwallet.wallet.ui.NetworkMonitorActivity"
+            android:configChanges="keyboard|keyboardHidden"
+            android:label="@string/network_monitor_activity_title"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name="com.kncwallet.wallet.ui.PreferencesActivity"
+            android:label="@string/preferences_activity_title"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name="com.kncwallet.wallet.ui.AboutActivity"
+            android:label="@string/about_title"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name="com.kncwallet.wallet.ui.ImportKeysActivity"
+            android:configChanges="orientation|keyboard|keyboardHidden"
+            android:screenOrientation="portrait"
+            android:theme="@style/My.Theme.Dialog" >
+            <intent-filter android:label="@string/import_keys_intent_filter_action" >
+                <action android:name="android.intent.action.VIEW" />
 
-				<category android:name="android.intent.category.DEFAULT" />
-			</intent-filter>
-			<intent-filter android:label="@string/send_coins_activity_title">
-				<action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
 
-				<data android:mimeType="application/bitcoin-paymentrequest" />
+                <data android:mimeType="x-bitcoin/private-keys" />
+                <data android:mimeType="application/octet-stream" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name="com.kncwallet.wallet.ui.ScanActivity"
+            android:configChanges="orientation|keyboard|keyboardHidden"
+            android:screenOrientation="landscape"
+            android:stateNotNeeded="true"
+            android:theme="@style/My.Theme.Fullscreen"
+            android:windowSoftInputMode="stateAlwaysHidden" />
 
-				<category android:name="android.intent.category.DEFAULT" />
-			</intent-filter>
-			<intent-filter android:label="@string/send_coins_activity_title" >
-				<action android:name="android.nfc.action.NDEF_DISCOVERED" />
+        <provider
+            android:name="com.kncwallet.wallet.AddressBookProvider"
+            android:authorities="com.kncwallet.wallet_test.address_book"
+            android:exported="false" />
+        <provider
+            android:name="com.kncwallet.wallet.ExchangeRatesProvider"
+            android:authorities="com.kncwallet.wallet_test.exchange_rates"
+            android:exported="false" />
 
-				<data android:mimeType="application/bitcoin-paymentrequest" />
+        <service
+            android:name="com.kncwallet.wallet.service.BlockchainServiceImpl"
+            android:exported="false" />
+        <service
+            android:name="com.kncwallet.wallet.offline.AcceptBluetoothService"
+            android:exported="false" />
 
-				<category android:name="android.intent.category.DEFAULT" />
-			</intent-filter>
-		</activity>
-		<activity
-			android:name="de.schildbach.wallet.ui.SendCoinsQrActivity"
-			android:configChanges="keyboard|keyboardHidden"
-			android:theme="@android:style/Theme.Translucent.NoTitleBar" >
-		</activity>
-		<activity
-			android:name="de.schildbach.wallet.ui.RequestCoinsActivity"
-			android:configChanges="keyboard|keyboardHidden"
-			android:label="@string/request_coins_activity_title"
-			android:screenOrientation="behind"
-			android:windowSoftInputMode="adjustResize" />
-		<activity
-			android:name="de.schildbach.wallet.ui.AddressBookActivity"
-			android:configChanges="keyboard|keyboardHidden"
-			android:label="@string/address_book_activity_title"
-			android:screenOrientation="behind" />
-		<activity
-			android:name="de.schildbach.wallet.ui.ExchangeRatesActivity"
-			android:configChanges="keyboard|keyboardHidden"
-			android:label="@string/exchange_rates_activity_title"
-			android:screenOrientation="behind" />
-		<activity
-			android:name="de.schildbach.wallet.ui.NetworkMonitorActivity"
-			android:configChanges="keyboard|keyboardHidden"
-			android:label="@string/network_monitor_activity_title"
-			android:screenOrientation="behind" />
-		<activity
-			android:name="de.schildbach.wallet.ui.PreferencesActivity"
-			android:label="@string/preferences_activity_title"
-			android:screenOrientation="behind" />
-		<activity
-			android:name="de.schildbach.wallet.ui.AboutActivity"
-			android:label="@string/about_title"
-			android:screenOrientation="behind" />
-		<activity
-			android:name="de.schildbach.wallet.ui.ImportKeysActivity"
-			android:configChanges="orientation|keyboard|keyboardHidden"
-			android:theme="@style/My.Theme.Dialog" >
-			<intent-filter android:label="@string/import_keys_intent_filter_action" >
-				<action android:name="android.intent.action.VIEW" />
+        <receiver android:name="com.kncwallet.wallet.service.AutosyncReceiver" >
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.PACKAGE_REPLACED" />
 
-				<category android:name="android.intent.category.DEFAULT" />
+                <data android:scheme="package" />
+            </intent-filter>
+        </receiver>
 
-				<data android:mimeType="x-bitcoin/private-keys" />
-				<data android:mimeType="application/octet-stream" />
-			</intent-filter>
-		</activity>
-		<activity
-			android:name="de.schildbach.wallet.ui.ScanActivity"
-			android:configChanges="orientation|keyboard|keyboardHidden"
-			android:screenOrientation="landscape"
-			android:stateNotNeeded="true"
-			android:theme="@style/My.Theme.Fullscreen"
-			android:windowSoftInputMode="stateAlwaysHidden" />
+        <activity
+            android:name="com.kncwallet.wallet.ui.PinEntryActivity"
+            android:label="@string/title_activity_pin_entry"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateVisible|adjustPan" >
+        </activity>
 
-		<provider
-			android:name="de.schildbach.wallet.AddressBookProvider"
-			android:authorities="de.schildbach.wallet_test.address_book"
-			android:exported="false" />
-		<provider
-			android:name="de.schildbach.wallet.ExchangeRatesProvider"
-			android:authorities="de.schildbach.wallet_test.exchange_rates"
-			android:exported="false" />
+        <meta-data
+            android:name="com.crashlytics.ApiKey"
+            android:value="65d0704322709c4f5c4c44c45986ec00efa39284" />
 
-		<receiver
-			android:name="de.schildbach.wallet.WalletBalanceWidgetProvider"
-			android:label="Bitcoin Wallet Balance" >
-			<intent-filter>
-				<action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-			</intent-filter>
+        <activity
+            android:name="com.kncwallet.wallet.ui.WelcomeActivity"
+            android:label="@string/title_activity_welcome"
+            android:screenOrientation="portrait" >
+        </activity>
 
-			<meta-data
-				android:name="android.appwidget.provider"
-				android:resource="@xml/wallet_balance_widget" />
-		</receiver>
-
-		<service
-			android:name="de.schildbach.wallet.service.BlockchainServiceImpl"
-			android:exported="false" />
-		<service
-			android:name="de.schildbach.wallet.offline.AcceptBluetoothService"
-			android:exported="false" />
-
-		<receiver android:name="de.schildbach.wallet.service.AutosyncReceiver" >
-			<intent-filter>
-				<action android:name="android.intent.action.BOOT_COMPLETED" />
-			</intent-filter>
-			<intent-filter>
-				<action android:name="android.intent.action.PACKAGE_REPLACED" />
-
-				<data android:scheme="package" />
-			</intent-filter>
-		</receiver>
-	</application>
+    </application>
 
 </manifest>

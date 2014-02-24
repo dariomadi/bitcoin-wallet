@@ -4,7 +4,7 @@
 
 	<modelVersion>4.0.0</modelVersion>
 
-	<groupId>de.schildbach.wallet</groupId>
+	<groupId>com.kncwallet.wallet</groupId>
 	<artifactId>base</artifactId>
 	<name>base</name>
 	<version>1</version>
@@ -70,7 +70,7 @@
 				<plugin>
 					<groupId>com.jayway.maven.plugins.android.generation2</groupId>
 					<artifactId>android-maven-plugin</artifactId>
-					<version>3.7.0</version>
+					<version>3.8.0</version>
 					<configuration>
 						<genDirectory>${basedir}/gen</genDirectory>
 					</configuration>

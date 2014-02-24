@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="match_parent"
+	android:layout_height="match_parent"
+	android:layout_margin="8dp"
+	android:orientation="vertical" >
+
+    <TextView
+        android:id="@+id/welcome_message"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/welcome_message"
+        android:layout_marginLeft="@dimen/list_entry_padding_horizontal"
+        android:layout_marginRight="@dimen/list_entry_padding_horizontal"
+        android:layout_marginTop="10dp"
+        android:textSize="@dimen/font_size_normal"
+        />
+    
+    <EditText
+        android:id="@+id/welcome_phone_number_input"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="@dimen/list_entry_padding_horizontal"
+        android:layout_marginRight="@dimen/list_entry_padding_horizontal"
+        android:layout_marginBottom="15dp"
+        android:layout_marginTop="10dp"
+        android:ems="10"
+        android:hint="@string/welcome_phone_number_hint"
+        android:inputType="phone"
+        android:singleLine="true"
+        android:textSize="@dimen/font_size_normal" >
+        <requestFocus />
+    </EditText>
+    
+    <TextView
+        android:id="@+id/phone_number_label"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="@dimen/list_entry_padding_horizontal"
+        android:layout_marginRight="@dimen/list_entry_padding_horizontal"
+        android:layout_marginBottom="10dp"
+        android:text="@string/welcome_privacy_message" />
+	
+</LinearLayout>
