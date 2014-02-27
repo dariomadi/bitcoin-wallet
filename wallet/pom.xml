@@ -6,11 +6,11 @@
 
 	<artifactId>wallet</artifactId>
 	<packaging>apk</packaging>
-	<version>3.30-test</version>
+    <version>1.0-test</version>
 	<name>Bitcoin Wallet</name>
 
 	<parent>
-		<groupId>de.schildbach.wallet</groupId>
+		<groupId>com.kncwallet.wallet</groupId>
 		<artifactId>base</artifactId>
 		<version>1</version>
 	</parent>
