@@ -6,3 +6,4 @@ local.properties
 bin/
 gen/
 target/
+wallet/res/values/com_crashlytics_export_strings.xml
