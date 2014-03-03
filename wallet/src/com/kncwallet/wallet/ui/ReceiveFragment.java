@@ -151,6 +151,12 @@ public class ReceiveFragment extends SherlockFragment {
 	
 	private void updateShareIntent()
 	{
+		if(lastSelectedAddress == null)
+			return;
+		
+		if(shareActionProvider == null)
+			return;
+		
 		// update share intent
 		shareActionProvider.setShareHistoryFileName(null);
 		final IntentBuilder builder = IntentBuilder.from(activity);
