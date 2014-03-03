@@ -36,7 +36,7 @@ import com.google.bitcoin.core.ECKey;
 import com.kncwallet.wallet.Constants;
 import com.kncwallet.wallet.util.ViewPagerTabs;
 
-import com.kncwallet.wallet_test.R;
+import com.kncwallet.wallet.R;
 
 /**
  * @author Andreas Schildbach

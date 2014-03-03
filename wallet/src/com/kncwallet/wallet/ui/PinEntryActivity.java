@@ -20,7 +20,7 @@ package com.kncwallet.wallet.ui;
 import com.actionbarsherlock.app.ActionBar;
 import com.kncwallet.wallet.Constants;
 
-import com.kncwallet.wallet_test.R;
+import com.kncwallet.wallet.R;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.app.Activity;

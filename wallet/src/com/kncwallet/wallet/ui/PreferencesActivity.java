@@ -49,7 +49,7 @@ import com.kncwallet.wallet.util.CrashReporter;
 import com.kncwallet.wallet.util.ErrorResponse;
 import com.kncwallet.wallet.util.WebRequestCompleted;
 
-import com.kncwallet.wallet_test.R;
+import com.kncwallet.wallet.R;
 
 /**
  * @author Andreas Schildbach

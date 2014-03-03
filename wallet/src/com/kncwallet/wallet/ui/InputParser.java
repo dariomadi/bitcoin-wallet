@@ -42,7 +42,7 @@ import com.kncwallet.wallet.Constants;
 import com.kncwallet.wallet.util.Bluetooth;
 import com.kncwallet.wallet.util.Qr;
 
-import com.kncwallet.wallet_test.R;
+import com.kncwallet.wallet.R;
 
 /**
  * @author Andreas Schildbach

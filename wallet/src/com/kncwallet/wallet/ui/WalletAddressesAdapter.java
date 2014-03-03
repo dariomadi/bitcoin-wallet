@@ -43,7 +43,7 @@ import com.kncwallet.wallet.AddressBookProvider;
 import com.kncwallet.wallet.Constants;
 import com.kncwallet.wallet.util.WalletUtils;
 
-import com.kncwallet.wallet_test.R;
+import com.kncwallet.wallet.R;
 
 public class WalletAddressesAdapter extends BaseAdapter
 {

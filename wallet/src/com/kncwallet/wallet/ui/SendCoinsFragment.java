@@ -99,7 +99,7 @@ import com.kncwallet.wallet.util.GenericUtils;
 import com.kncwallet.wallet.util.WalletUtils;
 
 import de.schildbach.wallet.integration.android.BitcoinIntegration;
-import com.kncwallet.wallet_test.R;
+import com.kncwallet.wallet.R;
 
 /**
  * @author Andreas Schildbach

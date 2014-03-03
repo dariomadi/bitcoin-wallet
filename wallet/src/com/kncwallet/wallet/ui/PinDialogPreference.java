@@ -17,7 +17,7 @@
 
 package com.kncwallet.wallet.ui;
 
-import com.kncwallet.wallet_test.R;
+import com.kncwallet.wallet.R;
 import android.content.Context;
 import android.preference.DialogPreference;
 import android.util.AttributeSet;

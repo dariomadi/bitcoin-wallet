@@ -54,7 +54,7 @@ import com.kncwallet.wallet.Constants;
 import com.kncwallet.wallet.util.CircularProgressView;
 import com.kncwallet.wallet.util.WalletUtils;
 
-import com.kncwallet.wallet_test.R;
+import com.kncwallet.wallet.R;
 
 /**
  * @author Andreas Schildbach

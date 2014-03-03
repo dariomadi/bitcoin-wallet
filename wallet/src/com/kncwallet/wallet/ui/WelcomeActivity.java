@@ -19,7 +19,7 @@ import com.kncwallet.wallet.util.AsyncWebRequest;
 import com.kncwallet.wallet.util.ErrorResponse;
 import com.kncwallet.wallet.util.WebRequestCompleted;
 
-import com.kncwallet.wallet_test.R;
+import com.kncwallet.wallet.R;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.app.Activity;
