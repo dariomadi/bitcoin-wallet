@@ -176,11 +176,11 @@
 
         <provider
             android:name="com.kncwallet.wallet.AddressBookProvider"
-            android:authorities="com.kncwallet.wallet_test.address_book"
+            android:authorities="com.kncwallet.wallet.address_book"
             android:exported="false" />
         <provider
             android:name="com.kncwallet.wallet.ExchangeRatesProvider"
-            android:authorities="com.kncwallet.wallet_test.exchange_rates"
+            android:authorities="com.kncwallet.wallet.exchange_rates"
             android:exported="false" />
 
         <service
