@@ -474,9 +474,17 @@ public final class SendCoinsFragment extends SherlockFragment
 			public void onFocusChange(final View v, final boolean hasFocus)
 			{
 				if (hasFocus)
+				{
 					actionMode = activity.startActionMode(new ReceivingAddressActionMode());
+				}
 				else
-					actionMode.finish();
+				{
+					if(actionMode != null)
+					{
+						actionMode.finish();
+					}
+				}
+					
 			}
 		});
 
