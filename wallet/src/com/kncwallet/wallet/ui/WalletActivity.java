@@ -365,6 +365,9 @@ public final class WalletActivity extends AbstractBindServiceActivity implements
 	private List<AddressBookContact> requestedContacts;
 	public void lookupRemoteContacts(List<AddressBookContact> contacts)
 	{
+		if(requestedContacts == null)
+			return;
+		
 		requestedContacts = contacts;
 		ContactsRequest payload = new ContactsRequest(contacts);
 		
