@@ -178,7 +178,7 @@ public class AddressBookProvider extends ContentProvider
 
 	public static Bitmap loadContactPhoto(ContentResolver cr, long  id,long photo_id) 
 	{
-		if(id == -1)
+		if(id < 0)
 			return null;
 	    Uri uri = ContentUris.withAppendedId(ContactsContract.Contacts.CONTENT_URI, id);
 	    InputStream input = ContactsContract.Contacts.openContactPhotoInputStream(cr, uri);
