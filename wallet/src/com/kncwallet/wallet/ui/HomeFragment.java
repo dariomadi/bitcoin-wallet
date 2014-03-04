@@ -142,7 +142,7 @@ public final class HomeFragment extends SherlockFragment
 		super.onCreate(savedInstanceState);
 		setHasOptionsMenu(true);
 		//TODO: make sure this doesnt break anything!
-		setRetainInstance(true);
+		//setRetainInstance(true);
 	}
 	
 	@Override

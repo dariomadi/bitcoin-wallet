@@ -127,7 +127,7 @@ public class ReceiveFragment extends SherlockFragment {
 		super.onCreate(savedInstanceState);
 		
 		//TODO: make sure this doesnt break anything!
-		setRetainInstance(true);
+		//setRetainInstance(true);
 	}
 	
 	@Override

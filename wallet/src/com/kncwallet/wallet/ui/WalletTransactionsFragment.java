@@ -42,7 +42,7 @@ public final class WalletTransactionsFragment extends Fragment
 	{
 		super.onCreate(savedInstanceState);
 
-		setRetainInstance(true);
+		//setRetainInstance(true);
 	}
 
 	@Override
