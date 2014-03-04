@@ -241,6 +241,9 @@ public class TransactionsListFragment extends SherlockListFragment implements Lo
 			@Override
 			public boolean onPrepareActionMode(final ActionMode mode, final Menu menu)
 			{
+				if(!isAdded())
+					return false;
+				
 				try
 				{
 					final Date time = tx.getUpdateTime();
