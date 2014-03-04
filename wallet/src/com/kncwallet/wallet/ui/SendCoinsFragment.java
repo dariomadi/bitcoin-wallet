@@ -1033,7 +1033,7 @@ public final class SendCoinsFragment extends SherlockFragment
 			{
 				state = State.FAILED;
 				updateView();
-
+				reset();
 				activity.longToast(R.string.send_coins_error_msg);
 			}
 		}.sendCoinsOffline(sendRequest); // send asynchronously
