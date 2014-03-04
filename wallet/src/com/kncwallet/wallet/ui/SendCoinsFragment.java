@@ -71,6 +71,7 @@ import android.widget.CursorAdapter;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.actionbarsherlock.app.SherlockFragment;
 import com.actionbarsherlock.app.SherlockListFragment;
@@ -622,7 +623,12 @@ public final class SendCoinsFragment extends SherlockFragment
 		final BigInteger amount = (BigInteger) extras.getSerializable(SendCoinsFragment.INTENT_EXTRA_AMOUNT);
 		final String bluetoothMac = extras.getString(SendCoinsFragment.INTENT_EXTRA_BLUETOOTH_MAC);
 
-		update(address, addressLabel, amount, bluetoothMac);
+		try {
+			update(address, addressLabel, amount, bluetoothMac);
+		} catch (Exception ex)
+		{
+			activity.longToast("Cannot process bitcoin request");
+		}
 	}
 
 	private void initStateFromBitcoinUri(@Nonnull final Uri bitcoinUri)
@@ -767,7 +773,12 @@ public final class SendCoinsFragment extends SherlockFragment
 					@Override
 					protected void bitcoinRequest(final Address address, final String addressLabel, final BigInteger amount, final String bluetoothMac)
 					{
-						update(address != null ? address.toString() : null, addressLabel, amount, null);
+						try {
+							update(address != null ? address.toString() : null, addressLabel, amount, null);
+						} catch (Exception ex)
+						{
+							activity.longToast("Cannot process bitcoin request");
+						}
 					}
 
 					@Override
@@ -1227,41 +1238,65 @@ public final class SendCoinsFragment extends SherlockFragment
 	public void update(final String receivingAddress, final String receivingLabel, @Nullable final BigInteger amount,
 			@Nullable final String bluetoothMac)
 	{
-		try
-		{
-			validatedAddress = new AddressAndLabel(Constants.NETWORK_PARAMETERS, receivingAddress, receivingLabel);
-			receivingAddressView.setText(null);
-		}
-		catch (final Exception x)
-		{
-			receivingAddressView.setText(receivingAddress);
-			validatedAddress = null;
-			log.info("problem parsing address: '" + receivingAddress + "'", x);
-		}
-
-		if (amount != null)
-			amountCalculatorLink.setBtcAmount(amount);
-
-		// focus
-		if (receivingAddress != null && amount == null)
-			amountCalculatorLink.requestFocus();
-		else if (receivingAddress != null && amount != null)
-			viewGo.requestFocus();
-
-		this.bluetoothMac = bluetoothMac;
-
-		bluetoothAck = null;
-
-		updateView();
-
-		handler.postDelayed(new Runnable()
-		{
-			@Override
-			public void run()
+			//maybe view is null?
+			if(getView() == null)
+				return;
+			
+			if(receivingAddressView == null)
+				receivingAddressView = (AutoCompleteTextView) getView().findViewById(R.id.send_coins_receiving_address);
+			
+			if(viewGo == null)
+				viewGo = (Button) getView().findViewById(R.id.send_coins_go);
+			
+			final CurrencyAmountView btcAmountView = (CurrencyAmountView) getView().findViewById(R.id.send_coins_amount_btc);
+			btcAmountView.setCurrencySymbol(btcShift == 0 ? Constants.CURRENCY_CODE_BTC : Constants.CURRENCY_CODE_MBTC);
+			btcAmountView.setInputPrecision(btcShift == 0 ? Constants.BTC_MAX_PRECISION : Constants.MBTC_MAX_PRECISION);
+			btcAmountView.setHintPrecision(btcPrecision);
+			btcAmountView.setShift(btcShift);
+	
+			final CurrencyAmountView localAmountView = (CurrencyAmountView) getView().findViewById(R.id.send_coins_amount_local);
+			localAmountView.setInputPrecision(Constants.LOCAL_PRECISION);
+			localAmountView.setHintPrecision(Constants.LOCAL_PRECISION);
+			amountCalculatorLink = new CurrencyCalculatorLink(btcAmountView, localAmountView);
+			
+			if(receivingAddressView == null || viewGo == null)
+				return;
+			
+			try
 			{
-				validateReceivingAddress(true);
-				validateAmounts(true);
+				validatedAddress = new AddressAndLabel(Constants.NETWORK_PARAMETERS, receivingAddress, receivingLabel);
+				receivingAddressView.setText(null);
 			}
-		}, 500);
+			catch (final Exception x)
+			{
+				receivingAddressView.setText(receivingAddress);
+				validatedAddress = null;
+				log.info("problem parsing address: '" + receivingAddress + "'", x);
+			}
+	
+			if (amount != null)
+				amountCalculatorLink.setBtcAmount(amount);
+	
+			// focus
+			if (receivingAddress != null && amount == null)
+				amountCalculatorLink.requestFocus();
+			else if (receivingAddress != null && amount != null)
+				viewGo.requestFocus();
+	
+			//this.bluetoothMac = bluetoothMac;
+	
+			//bluetoothAck = null;
+	
+			updateView();
+	
+			handler.postDelayed(new Runnable()
+			{
+				@Override
+				public void run()
+				{
+					validateReceivingAddress(true);
+					validateAmounts(true);
+				}
+			}, 500);
 	}
 }
