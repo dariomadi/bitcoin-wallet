@@ -69,6 +69,9 @@ public class WelcomeActivity extends Activity {
 	
 	private void showCurrentDialog()
 	{
+		if(this.isFinishing())
+			return;
+		
 		if(!prefs.getBoolean("registrationComplete", false))
 		{
 			if(prefs.getString("clientID", null) != null)
