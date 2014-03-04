@@ -117,10 +117,12 @@ public class WelcomeActivity extends Activity {
                 	   prefs.edit().putString("phoneNumber", phoneNumber).commit();
                 	   if(phoneNumber == null)
                 	   {
+                		   dialog.cancel();
                 		   runOnUiThread(new Runnable() {
                                @Override
                                public void run() {
                             	   Toast.makeText(WelcomeActivity.this, "Invalid phone number", Toast.LENGTH_SHORT).show();
+                            	   showCurrentDialog();
                                }
                 		   });
                 	   } else {
