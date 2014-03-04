@@ -344,6 +344,9 @@ public class WelcomeActivity extends Activity {
 	//display error alert if things go wrong
 	private void displayError(String errorText)
 	{
+		if(this.isFinishing())
+			return;
+		
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setCancelable(false);
         builder.setTitle(R.string.welcome_title);
