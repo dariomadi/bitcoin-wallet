@@ -133,6 +133,9 @@ public class WalletUtils
 
 	public static BigInteger localValue(@Nonnull final BigInteger btcValue, @Nonnull final BigInteger rate)
 	{
+		if(btcValue == null || rate == null)
+			return BigInteger.valueOf(0);
+		
 		return btcValue.multiply(rate).divide(GenericUtils.ONE_BTC);
 	}
 
