@@ -157,6 +157,7 @@ public final class SendCoinsFragment extends SherlockFragment
 
 	private static final int ID_RATE_LOADER = 0;
 	private static final int ID_LIST_LOADER = 1;
+	private static final int ID_BALANCE_LOADER = 2;
 
 	private static final int REQUEST_CODE_SCAN = 0;
 	private static final int REQUEST_CODE_ENABLE_BLUETOOTH = 1;
@@ -687,14 +688,36 @@ public final class SendCoinsFragment extends SherlockFragment
 		amountCalculatorLink.setListener(amountsListener);
 		
 		loaderManager.initLoader(ID_RATE_LOADER, null, rateLoaderCallbacks);
+		loaderManager.initLoader(ID_BALANCE_LOADER, null, balanceLoaderCallbacks);
 
 		updateView();
 	}
 
+	private final LoaderCallbacks<BigInteger> balanceLoaderCallbacks = new LoaderManager.LoaderCallbacks<BigInteger>()
+	{
+		@Override
+		public Loader<BigInteger> onCreateLoader(final int id, final Bundle args)
+		{
+			return new WalletBalanceLoader(activity, wallet);
+		}
+
+		@Override
+		public void onLoadFinished(final Loader<BigInteger> loader, final BigInteger balance)
+		{
+			updateView();
+		}
+
+		@Override
+		public void onLoaderReset(final Loader<BigInteger> loader)
+		{
+		}
+	};
+	
 	@Override
 	public void onPause()
 	{
 		loaderManager.destroyLoader(ID_RATE_LOADER);
+		loaderManager.destroyLoader(ID_BALANCE_LOADER);
 		amountCalculatorLink.setListener(null);
 
 		contentResolver.unregisterContentObserver(contentObserver);
