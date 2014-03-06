@@ -364,11 +364,12 @@ public final class WalletActivity extends AbstractBindServiceActivity implements
 	//on complete, save them locally
 	private List<AddressBookContact> requestedContacts;
 	public void lookupRemoteContacts(List<AddressBookContact> contacts)
-	{
+	{	
+		requestedContacts = contacts;
+		
 		if(requestedContacts == null)
 			return;
 		
-		requestedContacts = contacts;
 		ContactsRequest payload = new ContactsRequest(contacts);
 		
 		String uri = Constants.API_BASE_URL;
