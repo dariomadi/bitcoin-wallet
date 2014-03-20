@@ -47,6 +47,7 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.TextView;
+import android.os.AsyncTask;
 
 import com.actionbarsherlock.app.SherlockFragment;
 import com.actionbarsherlock.view.Menu;
@@ -213,20 +214,33 @@ public final class HomeFragment extends SherlockFragment
 		bitcoinAddressLabel = (TextView) view.findViewById(R.id.bitcoin_address_label);
 		header.setText(R.string.home_heading);
 		
-		//transaction list stuff
-		final ViewPagerTabs pagerTabs = (ViewPagerTabs) view.findViewById(R.id.transactions_pager_tabs);
-		pagerTabs.addTabLabels(R.string.wallet_transactions_fragment_tab_sent, R.string.wallet_transactions_fragment_tab_all,
-				 R.string.wallet_transactions_fragment_tab_received);
-		
-		final PagerAdapter pagerAdapter = new PagerAdapter(getFragmentManager());
-		
-		final ViewPager pager = (ViewPager) view.findViewById(R.id.transactions_pager);
-		
-		pager.setAdapter(pagerAdapter);
-		pager.setOnPageChangeListener(pagerTabs);
-		pager.setCurrentItem(1);
-		pager.setPageMargin(0);
-		pager.setPageMarginDrawable(R.color.knc_background_darker);
+		mPagerTabs = (ViewPagerTabs) view.findViewById(R.id.transactions_pager_tabs);
+		mPagerTabs.addTabLabels(R.string.wallet_transactions_fragment_tab_sent, R.string.wallet_transactions_fragment_tab_all,R.string.wallet_transactions_fragment_tab_received);
+			
+
+		mPagerAdapter = new PagerAdapter(getFragmentManager());
+		mViewPager = (ViewPager) view.findViewById(R.id.transactions_pager);
+	}
+
+	ViewPager mViewPager;
+	PagerAdapter mPagerAdapter;
+	ViewPagerTabs mPagerTabs;
+
+	private class setAdapterClass extends AsyncTask<Void,Void,Void>{
+		protected Void doInBackground(Void... params)
+		{
+			return null;
+		}
+
+		@Override
+		protected void onPostExecute(Void result)
+		{
+			mViewPager.setAdapter(mPagerAdapter);
+			mViewPager.setOnPageChangeListener(mPagerTabs);
+			mViewPager.setCurrentItem(1);
+			mViewPager.setPageMargin(0);
+			mViewPager.setPageMarginDrawable(R.color.knc_background_darker);
+		}
 	}
 
 	@Override
