@@ -26,7 +26,7 @@ import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentManager;
 import android.text.Html;
-import com.kncwallet.wallet_test.R;
+import com.kncwallet.wallet.R;
 
 /**
  * @author Andreas Schildbach

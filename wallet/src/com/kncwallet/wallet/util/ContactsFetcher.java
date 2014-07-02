@@ -8,6 +8,9 @@ package com.kncwallet.wallet.util;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.google.i18n.phonenumbers.NumberParseException;
+import com.google.i18n.phonenumbers.PhoneNumberUtil;
+import com.google.i18n.phonenumbers.Phonenumber;
 import com.kncwallet.wallet.WalletApplication;
 import com.kncwallet.wallet.dto.AddressBookContact;
 
@@ -32,7 +35,24 @@ public class ContactsFetcher extends AsyncTask<Void, Void, List<AddressBookConta
 		_resolver = context.getContentResolver();
 		_phoneNumber = userPhoneNumber;
 	}
-	
+
+    public String FixPhoneNumber(String rawNumber){
+        String fixedNumber = "";
+
+        PhoneNumberUtil phoneUtil = PhoneNumberUtil.getInstance();
+        Phonenumber.PhoneNumber phoneNumberProto;
+
+        try {
+            phoneNumberProto = phoneUtil.parse(rawNumber, WalletApplication.getLocaleFromSim(_context));
+        } catch (NumberParseException e) {
+            return null;
+        }
+
+        fixedNumber = phoneUtil.format(phoneNumberProto, PhoneNumberUtil.PhoneNumberFormat.E164);
+
+        return fixedNumber.replace("+", "");
+    }
+
 	public void setOnCompletedCallback(ContactsRetrieved callback)
 	{
 		_callback = callback;
@@ -51,15 +71,15 @@ public class ContactsFetcher extends AsyncTask<Void, Void, List<AddressBookConta
 			{
 			     String Name=c.getString(c.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME));
 			     String RawNumber = c.getString(c.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
-			     String Number=WalletApplication.FixPhoneNumber(_context, RawNumber);
+                 String Number = FixPhoneNumber(RawNumber);
 			     
 			     int ContactId = c.getInt(c.getColumnIndex(ContactsContract.CommonDataKinds.Phone.CONTACT_ID));
 			     
 			     if(Number == null)
 			     {
-			    	 Log.d(TAG, "Skipping contact " + Name + " no normalized number");
+			    	 Log.e(TAG, "Skipping contact " + Name + " no normalized number");
 			     } else if(Number.equals(_phoneNumber)) {
-			    	 Log.d(TAG, "Skipping contact " + Name + " with own phone number");
+			    	 Log.e(TAG, "Skipping contact " + Name + " with own phone number");
 				 } else {
 			    	 ret.add(new AddressBookContact(Name,Number, RawNumber, ContactId));
 			     }

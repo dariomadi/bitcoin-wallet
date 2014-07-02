@@ -47,6 +47,11 @@ import java.util.TimeZone;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import android.app.ActivityManager;
+import com.actionbarsherlock.view.ActionMode;
+import com.kncwallet.wallet.ui.view.KnCFragment;
+import com.kncwallet.wallet.ui.wizard.WizardWelcomeView;
+import com.kncwallet.wallet.util.*;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.StatusLine;
@@ -56,12 +61,9 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 
 import android.annotation.SuppressLint;
-import android.app.ActionBar.TabListener;
-import android.app.ActionBar;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.app.FragmentTransaction;
 import android.content.ComponentCallbacks2;
 import android.content.ContentResolver;
 import android.content.DialogInterface;
@@ -89,6 +91,7 @@ import android.provider.ContactsContract;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewPager;
 import android.text.format.DateUtils;
 import android.util.Log;
@@ -101,8 +104,11 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.actionbarsherlock.app.ActionBar;
+import com.actionbarsherlock.app.ActionBar.TabListener;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
+
 import com.google.bitcoin.core.Address;
 import com.google.bitcoin.core.ECKey;
 import com.google.bitcoin.core.Transaction;
@@ -123,24 +129,13 @@ import com.kncwallet.wallet.dto.RegistrationResult;
 import com.kncwallet.wallet.dto.ServerResponse;
 import com.kncwallet.wallet.ui.InputParser.BinaryInputParser;
 import com.kncwallet.wallet.ui.InputParser.StringInputParser;
-import com.kncwallet.wallet.util.AsyncWebRequest;
-import com.kncwallet.wallet.util.ContactsFetcher;
-import com.kncwallet.wallet.util.ContactsRetrieved;
-import com.kncwallet.wallet.util.CrashReporter;
-import com.kncwallet.wallet.util.Crypto;
-import com.kncwallet.wallet.util.ErrorResponse;
-import com.kncwallet.wallet.util.HttpGetThread;
-import com.kncwallet.wallet.util.Iso8601Format;
-import com.kncwallet.wallet.util.Nfc;
-import com.kncwallet.wallet.util.WalletUtils;
-import com.kncwallet.wallet.util.WebRequestCompleted;
 
-import com.kncwallet.wallet_test.R;
+import com.kncwallet.wallet.R;
 
 /**
  * @author Andreas Schildbach
  */
-public final class WalletActivity extends AbstractBindServiceActivity implements TabListener, ComponentCallbacks2
+public final class WalletActivity extends AbstractBindServiceActivity implements TabListener, BackgroundCallback
 {
 	private static final int DIALOG_IMPORT_KEYS = 0;
 	private static final int DIALOG_EXPORT_KEYS = 1;
@@ -149,7 +144,7 @@ public final class WalletActivity extends AbstractBindServiceActivity implements
 	private WalletApplication application;
 	private Wallet wallet;
 	private SharedPreferences prefs;
-	
+
 	/**
 	 * The {@link android.support.v4.view.PagerAdapter} that will provide
 	 * fragments for each of the sections. We use a
@@ -164,29 +159,27 @@ public final class WalletActivity extends AbstractBindServiceActivity implements
 	 * The {@link ViewPager} that will host the section contents.
 	 */
 	ViewPager mViewPager;
-	
+
 	public static final int RESULT_CODE_ADDRESSBOOK_SEND = 123;
-	
+
 	public static final String INTENT_EXTRA_ADDRESS = "address";
 	public static final String INTENT_EXTRA_ADDRESS_LABEL = "address_label";
 	public static final String INTENT_EXTRA_AMOUNT = "amount";
 	public static final String INTENT_EXTRA_BLUETOOTH_MAC = "bluetooth_mac";
-	
+
 
 	private static final int REQUEST_CODE_SCAN = 0;
-	
-	//this is called when the app gets backgrounded, 
+
+    private ActionMode currentActionMode;
+
+    //this is called when the app gets backgrounded,
 	//if that has happened, we need to show the pin
 	//entry screen on launch
-	public void onTrimMemory(int level)
+	public void onEnteredBackground()
 	{
-		if (level == ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN)
-		{
-			//app moved to background
-			IsRestartingFromBackground = true;
-		}
+		IsRestartingFromBackground = true;
 	}
-	
+
 	@Override
 	protected void onCreate(final Bundle savedInstanceState)
 	{
@@ -196,25 +189,27 @@ public final class WalletActivity extends AbstractBindServiceActivity implements
 		wallet = application.getWallet();
 		prefs = PreferenceManager.getDefaultSharedPreferences(this);
 
+		application.registerBackgroundCallback(this);
+
 		setContentView(R.layout.wallet_activity);
 
 		if (savedInstanceState == null)
 			checkAlerts();
-		
+
 		touchLastUsed();
 
 		// Set up the action bar.
-		final ActionBar actionBar = getActionBar();
+		final ActionBar actionBar = getSupportActionBar();
 		actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
 		actionBar.setDisplayShowTitleEnabled(false);
-		
+
 		// Create the adapter that will return a fragment for each of the three
 		// primary sections of the app.
 		mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
-		
+
 		mViewPager = (ViewPager) findViewById(R.id.pager);
 		mViewPager.setAdapter(mSectionsPagerAdapter);
-		
+
 		// When swiping between different sections, select the corresponding
 		// tab. We can also use ActionBar.Tab#select() to do this if we have
 		// a reference to the Tab.
@@ -222,10 +217,19 @@ public final class WalletActivity extends AbstractBindServiceActivity implements
 				.setOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
 					@Override
 					public void onPageSelected(int position) {
-						actionBar.setSelectedNavigationItem(position);
+                        int currentIndex = actionBar.getSelectedNavigationIndex();
+
+                        boolean newPosition = currentIndex != position;
+
+                        actionBar.setSelectedNavigationItem(position);
+
+                        if(newPosition){
+                            clearActionMode();
+                            mSectionsPagerAdapter.notifyIsShowing(position);
+                        }
 					}
 				});
-		
+
 		//keep all 3 tabs in memory - this might be a bad idea, but only 1 more than default
 		mViewPager.setOffscreenPageLimit(3);
 		// For each of the sections in the app, add a tab to the action bar.
@@ -238,18 +242,33 @@ public final class WalletActivity extends AbstractBindServiceActivity implements
 					.setText(mSectionsPagerAdapter.getPageTitle(i))
 					.setTabListener(this));
 		}
-				
+
 		actionBar.setSelectedNavigationItem(1);
 		actionBar.setBackgroundDrawable(new ColorDrawable(getResources().getColor(R.color.knc_action_bar_background)));
 		actionBar.setStackedBackgroundDrawable(new ColorDrawable(getResources().getColor(R.color.knc_background_lighter)));
 		actionBar.setIcon(R.drawable.ic_knclogo);
-		
+
 		prefs.registerOnSharedPreferenceChangeListener(prefsListener);
-		
+
 		handleIntent(getIntent());
-		
+
+        Pin.setPinAuthorized(this, false);
+
 	}
-	
+
+    @Override
+    public ActionMode startActionMode(ActionMode.Callback callback) {
+        currentActionMode = super.startActionMode(callback);
+        return currentActionMode;
+    }
+
+    private void clearActionMode()
+    {
+        if(currentActionMode!=null){
+            currentActionMode.finish();
+        }
+    }
+
 	private final OnSharedPreferenceChangeListener prefsListener = new OnSharedPreferenceChangeListener()
 	{
 		@Override
@@ -262,7 +281,7 @@ public final class WalletActivity extends AbstractBindServiceActivity implements
 			}
 		}
 	};
-	
+
 	@Override
 	public void onTabSelected(ActionBar.Tab tab,
 			FragmentTransaction fragmentTransaction) {
@@ -270,7 +289,7 @@ public final class WalletActivity extends AbstractBindServiceActivity implements
 		// the ViewPager.
 		mViewPager.setCurrentItem(tab.getPosition());
 	}
-	
+
 	@Override
 	public void onTabUnselected(ActionBar.Tab tab,
 			FragmentTransaction fragmentTransaction) {
@@ -280,21 +299,21 @@ public final class WalletActivity extends AbstractBindServiceActivity implements
 	public void onTabReselected(ActionBar.Tab tab,
 			FragmentTransaction fragmentTransaction) {
 	}
-	
+
 	//submit a change in default address to the server
 	public void doAddressPatch(Address addr)
-	{	
+	{
 		if(prefs.getBoolean("entry_deleted", false))
 			return;
-		
+
 		String uri = Constants.API_BASE_URL;
 		uri += "entries/";
 		uri += application.GetPhoneNumber();
-		
+
 		AddressPatchRequest payload;
 		payload = new AddressPatchRequest(addr.toString());
-		
-		AsyncWebRequest<AddressPatchRequest, Void> req = 
+
+		AsyncWebRequest<AddressPatchRequest, Void> req =
 				new AsyncWebRequest<AddressPatchRequest, Void>(
 									getBaseContext(),
 									uri,
@@ -302,7 +321,7 @@ public final class WalletActivity extends AbstractBindServiceActivity implements
 									true,
 									payload,
 									null);
-		
+
 		req.setOnCompletedCallback(
 			new WebRequestCompleted<Void>() {
 				@Override
@@ -311,7 +330,7 @@ public final class WalletActivity extends AbstractBindServiceActivity implements
 					//WalletActivity.this.saveMatchingContacts(result);
 					Toast.makeText(WalletActivity.this, "Directory entry updated", Toast.LENGTH_LONG).show();
 				}
-					
+
 				@Override
 				public void onErrorOccurred(ErrorResponse err)
 				{
@@ -323,14 +342,14 @@ public final class WalletActivity extends AbstractBindServiceActivity implements
 
 		req.execute();
 	}
-	
+
 	private boolean isNetworkAvailable() {
-	    android.net.ConnectivityManager connectivityManager 
+	    android.net.ConnectivityManager connectivityManager
 	          = (android.net.ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
 	    android.net.NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
 	    return activeNetworkInfo != null && activeNetworkInfo.isConnected();
 	}
-	
+
 	//get the list of local contacts from the address book
 	//on complete, look them up on the server
 	public void doContactsLookup()
@@ -338,10 +357,10 @@ public final class WalletActivity extends AbstractBindServiceActivity implements
 		final boolean hasNetwork = isNetworkAvailable();
 		if(!hasNetwork)
 			return;
-		
+
 		if(prefs.getBoolean("entry_deleted", false))
 			return;
-		
+
 		ContactsFetcher fetcher = new ContactsFetcher(getBaseContext(), application.GetPhoneNumber());
 		fetcher.setOnCompletedCallback(new ContactsRetrieved() {
 			@Override
@@ -356,30 +375,30 @@ public final class WalletActivity extends AbstractBindServiceActivity implements
 				Toast.makeText(WalletActivity.this, "Failed to load Contacts.", Toast.LENGTH_SHORT).show();
 			}
 		});
-		
+
 		fetcher.execute();
 	}
-	
+
 	//send web request to the server with contacts
 	//on complete, save them locally
 	private List<AddressBookContact> requestedContacts;
 	public void lookupRemoteContacts(List<AddressBookContact> contacts)
-	{	
+	{
 		requestedContacts = contacts;
-		
+
 		if(requestedContacts == null)
 			return;
-		
+
 		ContactsRequest payload = new ContactsRequest(contacts);
-		
+
 		String uri = Constants.API_BASE_URL;
 		uri += "entries/";
 		uri += application.GetPhoneNumber();
 		uri += "/contacts";
-		
+
 		TypeToken<ServerResponse<ArrayList<ContactResponse>>> typeHelper = new TypeToken<ServerResponse<ArrayList<ContactResponse>>>(){};
-		
-		AsyncWebRequest<ContactsRequest, ArrayList<ContactResponse>> req = 
+
+		AsyncWebRequest<ContactsRequest, ArrayList<ContactResponse>> req =
 				new AsyncWebRequest<ContactsRequest, ArrayList<ContactResponse>>(
 									getBaseContext(),
 									uri,
@@ -387,7 +406,7 @@ public final class WalletActivity extends AbstractBindServiceActivity implements
 									true,
 									payload,
 									typeHelper);
-		
+
 		req.setOnCompletedCallback(
 			new WebRequestCompleted<ArrayList<ContactResponse>>() {
 				@Override
@@ -395,7 +414,7 @@ public final class WalletActivity extends AbstractBindServiceActivity implements
 					//WelcomeActivity.this.handleSMSResent();
 					WalletActivity.this.saveMatchingContacts(result);
 				}
-					
+
 				@Override
 				public void onErrorOccurred(ErrorResponse err)
 				{
@@ -407,7 +426,7 @@ public final class WalletActivity extends AbstractBindServiceActivity implements
 
 		req.execute();
 	}
-	
+
 	//Save the contacts we just downloaded
 	//TODO: make this async!
 	public void saveMatchingContacts(ArrayList<ContactResponse> matchedContacts)
@@ -422,13 +441,13 @@ public final class WalletActivity extends AbstractBindServiceActivity implements
 					//something that we requested returned a match!
 					final Uri uri = AddressBookProvider.contentUri(WalletActivity.this.getPackageName()).buildUpon().appendPath(item.bitcoinWalletAddress).build();
 					Boolean isAdd = true;
-					
+
 					ContentResolver contentResolver = getContentResolver();
-					
+
 					//if the address is already in there, just update its stuff
 					if(AddressBookProvider.addressExists(WalletActivity.this, item.bitcoinWalletAddress))
 						isAdd = false;
-					
+
 					String existingAddressForNumber = AddressBookProvider.resolveAddress(WalletActivity.this, item.telephoneNumber);
 					//if the phone number is already in there
 					if(existingAddressForNumber != null)
@@ -439,7 +458,7 @@ public final class WalletActivity extends AbstractBindServiceActivity implements
 							//delete the old address
 							final Uri existingAddressUri = AddressBookProvider.contentUri(WalletActivity.this.getPackageName()).buildUpon().appendPath(existingAddressForNumber).build();
 							contentResolver.delete(existingAddressUri, null, null);
-							
+
 							//don't count this as new when displaying to user
 							newContacts--;
 							//we will then just treat the new one as normal
@@ -450,28 +469,30 @@ public final class WalletActivity extends AbstractBindServiceActivity implements
 					values.put(AddressBookProvider.KEY_LABEL, contact.Label);
 					values.put(AddressBookProvider.KEY_TELEPHONE, contact.TelephoneNumber);
 					values.put(AddressBookProvider.KEY_RAW_TELEPHONE, contact.RawNumber);
-					
+
 					if (isAdd)
 					{
 						contentResolver.insert(uri, values);
 						newContacts++;
 					} else
-					{	
+					{
 						contentResolver.update(uri, values, null, null);
 						break;
 					}
 				}
 			}
 		}
-		
+
 		if(newContacts > 0)
 			Toast.makeText(WalletActivity.this, newContacts + " new contacts added", Toast.LENGTH_SHORT).show();
-			
+
 	}
 
 	public static Boolean IsRestartingFromBackground = false;
 	public static Boolean IsFirstRun = true;
-	
+
+    public static boolean shouldPromptPin = true;
+
 	@Override
 	public void onBackPressed()
 	{
@@ -480,57 +501,63 @@ public final class WalletActivity extends AbstractBindServiceActivity implements
 		IsRestartingFromBackground = true;
 		super.onBackPressed();
 	}
-	
+
 	@Override
 	protected void onStart()
 	{
 		super.onStart();
-		
-		if(IsRestartingFromBackground || IsFirstRun)
-		{
-			if(prefs.getBoolean("app_pin_enabled", false))
-				startActivity(new Intent(this, PinEntryActivity.class));
-		}
-		IsRestartingFromBackground = false;
-		
-		if(!prefs.getBoolean("registrationComplete", false))
-		{
-			startActivity(new Intent(this, WelcomeActivity.class));
-		} else {
-			if(IsFirstRun)
-			{
-				IsFirstRun = false;
-				//kick off an async task to fetch the contacts from the server
-				doContactsLookup();
-			}
-		}
-		
+
+        IsRestartingFromBackground = false;
+
+        if(!prefs.getBoolean("registrationComplete", false))
+        {
+            startActivity(new Intent(this, WelcomeWizardActivity.class));
+        } else {
+            if(IsFirstRun)
+            {
+                IsFirstRun = false;
+                //kick off an async task to fetch the contacts from the server
+                doContactsLookup();
+            }
+        }
+
 	}
-	
+
 	@Override
 	protected void onRestart()
 	{
 		super.onRestart();
 	}
-	
+
 	@Override
 	protected void onResume()
 	{
 		super.onResume();
-		
+
 		//load up the default prefs in case this is first run
-		
+
 		PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
-		
+
 		getWalletApplication().startBlockchainService(true);
-		
+
 		checkLowStorageAlert();
+
+        checkPin();
+
 	}
-	
-	
 
+    private void checkPin() {
 
-	@Override
+        if(prefs.getBoolean(Constants.PREFS_KEY_APP_PIN_ENABLED, false)) {
+            if(!prefs.getBoolean(Constants.PREFS_KEY_APP_PIN_AUTHORIZED, false)){
+                Intent pinIntent = new Intent(this, PinEntryActivity.class);
+                pinIntent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+                startActivity(pinIntent);
+            }
+        }
+    }
+
+    @Override
 	protected void onNewIntent(final Intent intent)
 	{
 		handleIntent(intent);
@@ -539,7 +566,7 @@ public final class WalletActivity extends AbstractBindServiceActivity implements
 	private void handleIntent(@Nonnull final Intent intent)
 	{
 		final String action = intent.getAction();
-		
+
 		if (NfcAdapter.ACTION_NDEF_DISCOVERED.equals(action))
 		{
 			final String inputType = intent.getType();
@@ -566,7 +593,22 @@ public final class WalletActivity extends AbstractBindServiceActivity implements
 					dialog(WalletActivity.this, null, 0, messageResId, messageArgs);
 				}
 			}.parse();
-		}
+
+		}else if(Constants.WIDGET_START_SEND_QR.equals(action)){ //started by widget
+
+            ActionBar actionBar = getSupportActionBar();
+            actionBar.setSelectedNavigationItem(0);
+            handleScan();
+
+        }else if(Constants.WIDGET_START_RECEIVE.equals(action)){
+
+            ActionBar actionBar = getSupportActionBar();
+            actionBar.setSelectedNavigationItem(2);
+
+        }else if(Constants.WIDGET_START_SEND.equals(action)){
+            ActionBar actionBar = getSupportActionBar();
+            actionBar.setSelectedNavigationItem(0);
+        }
 	}
 
 
@@ -596,11 +638,11 @@ public final class WalletActivity extends AbstractBindServiceActivity implements
 
 		return true;
 	}
-	
+
 	static final int ADDRESS_BOOK_REQUEST = 857;
 
 	@Override
-	public boolean onOptionsItemSelected(final MenuItem item)
+    public boolean onMenuItemSelected(int featureId, MenuItem item)
 	{
 		switch (item.getItemId())
 		{
@@ -619,6 +661,10 @@ public final class WalletActivity extends AbstractBindServiceActivity implements
 			case R.id.wallet_options_address_book:
 				startActivityForResult(new Intent(this, AddressBookActivity.class), ADDRESS_BOOK_REQUEST);
 				return true;
+
+            case R.id.home_fragment_options_address_book:
+                startActivityForResult(new Intent(this, AddressBookActivity.class), ADDRESS_BOOK_REQUEST);
+                return true;
 
 			case R.id.wallet_options_exchange_rates:
 				startActivity(new Intent(this, ExchangeRatesActivity.class));
@@ -648,6 +694,18 @@ public final class WalletActivity extends AbstractBindServiceActivity implements
 				HelpDialogFragment.page(getSupportFragmentManager(), R.string.help_safety);
 				return true;
 
+            case R.id.send_coins_options_scan:
+                handleScan();
+                return true;
+            
+            case R.id.wallet_options_empty_wallet:
+                handleEmptyWallet();
+                return true;
+
+            case R.id.wallet_options_paper_wallet:
+                handlePaperWallet();
+                return true;
+
 			/*case R.id.wallet_options_donate:
 				SendCoinsActivity.start(this, Constants.DONATION_ADDRESS, getString(R.string.wallet_donate_address_label), null, null);
 				return true;
@@ -658,14 +716,14 @@ public final class WalletActivity extends AbstractBindServiceActivity implements
 			*/
 		}
 
-		return super.onOptionsItemSelected(item);
+		return true;
 	}
 
-	@Override
+    @Override
 	protected void onActivityResult(int requestCode, int resultCode,
             Intent data) {
 	    super.onActivityResult(requestCode, resultCode, data);
-	    
+
 	    if (requestCode == REQUEST_CODE_SCAN)
 		{
 			if (resultCode == Activity.RESULT_OK)
@@ -680,8 +738,8 @@ public final class WalletActivity extends AbstractBindServiceActivity implements
 						SendCoinsFragment frag = (SendCoinsFragment)WalletActivity.this.mSectionsPagerAdapter.getItem(0);
 						if(frag != null)
 							frag.update(address != null ? address.toString() : null, addressLabel, amount, null);
-						
-						final ActionBar actionBar = getActionBar();
+
+						final ActionBar actionBar = getSupportActionBar();
 						actionBar.setSelectedNavigationItem(0);
 					}
 
@@ -699,26 +757,29 @@ public final class WalletActivity extends AbstractBindServiceActivity implements
 					}
 				}.parse();
 			}
-		} else if (requestCode == ADDRESS_BOOK_REQUEST) {
-            if (resultCode == RESULT_CODE_ADDRESSBOOK_SEND) {
-            	final Bundle extras = data.getExtras();
-            	final String address = extras.getString(SendCoinsFragment.INTENT_EXTRA_ADDRESS);
-        		final String addressLabel = extras.getString(SendCoinsFragment.INTENT_EXTRA_ADDRESS_LABEL);
-        		SendCoinsFragment frag = (SendCoinsFragment) this.mSectionsPagerAdapter.getItem(0);
-        		if(frag != null)
-        			frag.update(address, addressLabel, null, null);
-        		
-        		final ActionBar actionBar = getActionBar();
-        		actionBar.setSelectedNavigationItem(0);
-            }
+		}else if (requestCode == ADDRESS_BOOK_REQUEST && resultCode == WalletActivity.RESULT_CODE_ADDRESSBOOK_SEND) {
+
+            String address = data.getStringExtra(WalletActivity.INTENT_EXTRA_ADDRESS);
+            String label = data.getStringExtra(WalletActivity.INTENT_EXTRA_ADDRESS_LABEL);
+
+            presentSendToAddress(address, label);
+
         }
- 
+
     }
 
 	public void handleScan()
 	{
 		startActivityForResult(new Intent(this, ScanActivity.class), REQUEST_CODE_SCAN);
 	}
+
+    private void handleEmptyWallet() {
+        SendCoinsFragment sendCoinsFragment = mSectionsPagerAdapter.getSendCoinsFragment();
+        if(sendCoinsFragment != null){
+            sendCoinsFragment.handleEmpty();
+            getSupportActionBar().setSelectedNavigationItem(0);
+        }
+    }
 
 	public void handleExportKeys()
 	{
@@ -809,14 +870,12 @@ public final class WalletActivity extends AbstractBindServiceActivity implements
 				files.add(new File(getFilesDir(), filename));
 
 		// sort
-		Collections.sort(files, new Comparator<File>()
-		{
-			@Override
-			public int compare(final File lhs, final File rhs)
-			{
-				return lhs.getName().compareToIgnoreCase(rhs.getName());
-			}
-		});
+		Collections.sort(files, new Comparator<File>() {
+            @Override
+            public int compare(final File lhs, final File rhs) {
+                return lhs.getName().compareToIgnoreCase(rhs.getName());
+            }
+        });
 
 		final FileAdapter adapter = new FileAdapter(this, files)
 		{
@@ -899,14 +958,12 @@ public final class WalletActivity extends AbstractBindServiceActivity implements
 				exportPrivateKeys(password);
 			}
 		});
-		builder.setNegativeButton(R.string.button_cancel, new OnClickListener()
-		{
-			@Override
-			public void onClick(final DialogInterface dialog, final int which)
-			{
-				passwordView.setText(null); // get rid of it asap
-			}
-		});
+		builder.setNegativeButton(R.string.button_cancel, new OnClickListener() {
+            @Override
+            public void onClick(final DialogInterface dialog, final int which) {
+                passwordView.setText(null); // get rid of it asap
+            }
+        });
 		builder.setOnCancelListener(new OnCancelListener()
 		{
 			@Override
@@ -1158,15 +1215,13 @@ public final class WalletActivity extends AbstractBindServiceActivity implements
 
 		if (pm.resolveActivity(binaryIntent, 0) != null)
 		{
-			builder.setNeutralButton(R.string.wallet_version_dialog_button_binary, new DialogInterface.OnClickListener()
-			{
-				@Override
-				public void onClick(final DialogInterface dialog, final int id)
-				{
-					startActivity(binaryIntent);
-					finish();
-				}
-			});
+			builder.setNeutralButton(R.string.wallet_version_dialog_button_binary, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(final DialogInterface dialog, final int id) {
+                    startActivity(binaryIntent);
+                    finish();
+                }
+            });
 		}
 
 		builder.setNegativeButton(R.string.button_dismiss, null);
@@ -1326,89 +1381,114 @@ public final class WalletActivity extends AbstractBindServiceActivity implements
 
 		log.info("invoked archive private keys chooser");
 	}
-	
+
 	public void navigateHome()
 	{
-		final ActionBar actionBar = getActionBar();
+		final ActionBar actionBar = getSupportActionBar();
 		actionBar.setSelectedNavigationItem(1);
 	}
 
-	private class SectionsPagerAdapter extends FragmentPagerAdapter {
-		
-		private SendCoinsFragment _lastSendFragment = null;
-		private HomeFragment _lastHomeFragment = null;
-		private ReceiveFragment _lastReceiveFragment = null;
-		
-		public SectionsPagerAdapter(FragmentManager fm) {
-			super(fm);
-		}
 
-		@Override
-		public Fragment getItem(int position) {
-			// getItem is called to instantiate the fragment for the given page.
-			// Return a DummySectionFragment (defined as a static inner class
-			// below) with the page number as its lone argument.
-			
-			Fragment toDisplay = null;
-			Bundle args;
-			
-			switch(position)
-			{
-				case 0:
-					if(_lastSendFragment == null)
-						_lastSendFragment = new SendCoinsFragment();
-					toDisplay = _lastSendFragment;
-					break;
-				case 1:
-					if(_lastHomeFragment == null)
-						_lastHomeFragment = new HomeFragment();
-					toDisplay = _lastHomeFragment;
-					break;
-				case 2:
-					if(_lastReceiveFragment == null)
-						_lastReceiveFragment = new ReceiveFragment();
-					toDisplay = _lastReceiveFragment;
-					break;
-			}
-			
-			return toDisplay;
+    private class SectionsPagerAdapter extends FragmentPagerAdapter {
 
-		}
+        private SendCoinsFragment _lastSendFragment = null;
+        private HomeFragment _lastHomeFragment = null;
+        private ReceiveFragment _lastReceiveFragment = null;
 
-		@Override
-		public int getCount() {
-			// Show 3 total pages.
-			return 3;
-		}
+        public SectionsPagerAdapter(FragmentManager fm) {
+            super(fm);
+        }
 
-		@Override
-		public CharSequence getPageTitle(int position) {
-			Locale l = Locale.getDefault();
-			switch (position) {
-			case 0:
-				return getString(R.string.send_tab_text).toUpperCase(l);
-			case 1:
-				return getString(R.string.home_tab_text).toUpperCase(l);
-			case 2:
-				return getString(R.string.receive_tab_text).toUpperCase(l);
-			}
-			return null;
-		}
-		
-		@Override
-		public void destroyItem(ViewGroup container, int position, Object object) {
-		    FragmentManager manager = ((Fragment)object).getFragmentManager();
-		    android.support.v4.app.FragmentTransaction trans = manager.beginTransaction();
-		    if(object == _lastSendFragment)
-		    	_lastSendFragment = null;
-		    
-		    if(object == _lastReceiveFragment)
-		    	_lastReceiveFragment = null;
-		    
-		    if(object == _lastHomeFragment)
-		    	_lastHomeFragment = null;
-		    trans.remove((Fragment)object);
-		    trans.commit();
-		}
-	}
+        @Override
+        public KnCFragment getItem(int position) {
+            // getItem is called to instantiate the fragment for the given page.
+            // Return a DummySectionFragment (defined as a static inner class
+            // below) with the page number as its lone argument.
+
+            KnCFragment toDisplay = null;
+            Bundle args;
+
+            switch (position) {
+                case 0:
+                    toDisplay = getSendCoinsFragment();
+                    break;
+                case 1:
+                    if (_lastHomeFragment == null) {
+                        _lastHomeFragment = new HomeFragment();
+                    }
+                    toDisplay = _lastHomeFragment;
+
+
+                    break;
+                case 2:
+                    if (_lastReceiveFragment == null)
+                        _lastReceiveFragment = new ReceiveFragment();
+                    toDisplay = _lastReceiveFragment;
+                    break;
+            }
+
+            return toDisplay;
+
+        }
+
+        @Override
+        public int getCount() {
+            // Show 3 total pages.
+            return 3;
+        }
+
+        @Override
+        public CharSequence getPageTitle(int position) {
+            Locale l = Locale.getDefault();
+            switch (position) {
+                case 0:
+                    return getString(R.string.send_tab_text).toUpperCase(l);
+                case 1:
+                    return getString(R.string.home_tab_text).toUpperCase(l);
+                case 2:
+                    return getString(R.string.receive_tab_text).toUpperCase(l);
+            }
+            return null;
+        }
+
+        @Override
+        public void destroyItem(ViewGroup container, int position, Object object) {
+            FragmentManager manager = ((Fragment) object).getFragmentManager();
+            FragmentTransaction trans = manager.beginTransaction();
+            if (object == _lastSendFragment)
+                _lastSendFragment = null;
+
+            if (object == _lastReceiveFragment)
+                _lastReceiveFragment = null;
+
+            if (object == _lastHomeFragment)
+                _lastHomeFragment = null;
+            trans.remove((Fragment) object);
+            trans.commit();
+        }
+
+        private SendCoinsFragment getSendCoinsFragment()
+        {
+            if (_lastSendFragment == null) {
+                _lastSendFragment = new SendCoinsFragment();
+            }
+            return _lastSendFragment;
+        }
+
+        public void notifyIsShowing(int position) {
+            getItem(position).isShowing();
+        }
+    }
+
+    public void presentSendToAddress(String address, String label) {
+
+        SendCoinsFragment frag = (SendCoinsFragment) this.mSectionsPagerAdapter.getItem(0);
+        if(frag != null)
+            frag.update(address, label, null, null);
+
+        final ActionBar actionBar = getSupportActionBar();
+        actionBar.setSelectedNavigationItem(0);
+    }
+
+
 }

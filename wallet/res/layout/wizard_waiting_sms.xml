@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:orientation="vertical"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent">
+
+    <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:text="@string/wizard_waiting_sms_message"
+            />
+
+    <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/text_view_phone"
+            android:text="+44 7850 155233"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:textColor="@color/knc_highlight"
+            android:gravity="center"
+            android:paddingTop="20dp"
+            android:paddingBottom="20dp"
+            />
+
+    <ProgressBar
+            android:id="@+id/progressBar1"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_centerHorizontal="true"
+            android:indeterminateOnly="@bool/welcome_progress_indeterminate"
+            android:progress="@integer/progress_100" />
+
+    <TextView
+        android:layout_marginTop="20dp"
+        android:id="@+id/text_view_timer"
+        android:gravity="center"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <Button
+        android:layout_marginTop="20dp"
+        android:id="@+id/button_enter_code"
+        android:text="@string/sms_code_manually"
+        android:layout_width="match_parent"
+        android:layout_height="50dp" />
+
+</LinearLayout>

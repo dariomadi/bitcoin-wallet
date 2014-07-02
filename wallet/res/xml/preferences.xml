@@ -3,11 +3,13 @@
 
 	<PreferenceCategory android:title="@string/preference_knc_title">
 	    <com.kncwallet.wallet.ui.PinDialogPreference android:key="app_pin_value" android:summary="@string/preferences_app_pin_value_summary" android:title="@string/preferences_app_pin_value_title"/>
-	    
+
 	    <Preference android:title="@string/preference_remove_title" android:summary="@string/preference_remove_summary" android:key="remove_from_directory" /></PreferenceCategory><PreferenceCategory android:title="@string/preferences_category_main" >
 
+
+
 		<ListPreference
-			android:defaultValue="4"
+			android:defaultValue="2/3"
 			android:entries="@array/preferences_precision_labels"
 			android:entryValues="@array/preferences_precision_values"
 			android:key="btc_precision"
@@ -19,6 +21,18 @@
 			android:key="connectivity_notification"
 			android:summary="@string/preferences_connectivity_notification_summary"
 			android:title="@string/preferences_connectivity_notification_title" />
+
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="prefs_key_fee_info"
+            android:summary="@string/transaction_fee_confirm_setting_summary"
+            android:title="@string/transaction_fee_confirm_setting_title" />
+
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="prefs_key_remove_dust_tx"
+            android:summary="@string/preferences_remove_dust_tx_summary"
+            android:title="@string/preferences_remove_dust_tx_title" />
 
 		<Preference
 			android:key="data_usage"

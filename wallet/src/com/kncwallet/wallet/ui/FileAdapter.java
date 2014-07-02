@@ -28,7 +28,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
-import com.kncwallet.wallet_test.R;
+import com.kncwallet.wallet.R;
 
 /**
  * @author Andreas Schildbach

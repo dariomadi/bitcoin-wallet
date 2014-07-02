@@ -43,7 +43,7 @@ import com.kncwallet.wallet.AddressBookProvider;
 import com.kncwallet.wallet.Constants;
 import com.kncwallet.wallet.util.WalletUtils;
 
-import com.kncwallet.wallet_test.R;
+import com.kncwallet.wallet.R;
 
 public class WalletAddressesAdapter extends BaseAdapter
 {
@@ -146,7 +146,7 @@ public class WalletAddressesAdapter extends BaseAdapter
 	    if(contactImage != null) {
 	    	img.setImageBitmap(contactImage);
 	    } else {
-	    	img.setImageResource(R.drawable.ic_contact_placeholder);
+	    	img.setImageResource(R.drawable.contact_placeholder);
 	    }
 
 		/*if (showKeyCreationTime)

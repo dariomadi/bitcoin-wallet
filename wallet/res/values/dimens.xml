@@ -21,5 +21,9 @@
     <dimen name="font_size_wallet_balance_small">32sp</dimen>
     <dimen name="font_size_wallet_address">14sp</dimen>
     <dimen name="header_padding">3dp</dimen>
+    <bool name="values_small">false</bool>
 
+    <dimen name="dialog_pager">300dp</dimen>
+    <dimen name="dialog_pager_indicator">10dp</dimen>
+    <dimen name="dialog_pager_indicator_spacing">5dp</dimen>
 </resources>

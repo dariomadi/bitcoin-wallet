@@ -9,5 +9,8 @@
 	<dimen name="font_size_huge">38sp</dimen>
 	<dimen name="symbol_size_normal">13sp</dimen>
 	<dimen name="wallet_address_qr_size">80dp</dimen>
-
+    <dimen name="wallet_address_qr_size_large">160dp</dimen>
+    <dimen name="font_size_wallet_address">13sp</dimen>
+    <bool name="values_small">true</bool>
+    <dimen name="dialog_pager">240dp</dimen>
 </resources>

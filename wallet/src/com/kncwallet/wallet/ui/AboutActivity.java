@@ -25,23 +25,23 @@ import android.preference.Preference;
 import android.preference.PreferenceScreen;
 
 import com.actionbarsherlock.app.ActionBar;
-import com.actionbarsherlock.app.SherlockPreferenceActivity;
 import com.actionbarsherlock.view.MenuItem;
 import com.google.bitcoin.core.VersionMessage;
 import com.kncwallet.wallet.Constants;
 import com.kncwallet.wallet.WalletApplication;
 
-import com.kncwallet.wallet_test.R;
+import com.kncwallet.wallet.R;
 
 /**
  * @author Andreas Schildbach
  */
-public final class AboutActivity extends SherlockPreferenceActivity
+public final class AboutActivity extends AbstractPreferenceActivity
 {
 	private static final String KEY_ABOUT_VERSION = "about_version";
 	private static final String KEY_ABOUT_CREDITS_WALLET = "about_credits_wallet";
 	private static final String KEY_ABOUT_CREDITS_BITCOINJ = "about_credits_bitcoinj";
 	private static final String KEY_ABOUT_CREDITS_ZXING = "about_credits_zxing";
+    private static final String KEY_ABOUT_CREDITS_ICON_DRAWER = "about_icon_drawer";
 
 	@Override
 	protected void onCreate(final Bundle savedInstanceState)
@@ -52,19 +52,19 @@ public final class AboutActivity extends SherlockPreferenceActivity
 
 		final ActionBar actionBar = getSupportActionBar();
 		actionBar.setDisplayHomeAsUpEnabled(true);
-		
+
 		actionBar.setBackgroundDrawable(new ColorDrawable(getResources().getColor(R.color.knc_action_bar_background)));
 		actionBar.setStackedBackgroundDrawable(new ColorDrawable(getResources().getColor(R.color.knc_background_lighter)));
 		actionBar.setIcon(R.drawable.ic_knclogo);
 
 		findPreference(KEY_ABOUT_VERSION).setSummary(((WalletApplication) getApplication()).packageInfo().versionName);
-		
+
 		findPreference(KEY_ABOUT_CREDITS_WALLET).setTitle(getString(R.string.about_credits_wallet_title));
 		findPreference(KEY_ABOUT_CREDITS_WALLET).setSummary(Constants.CREDITS_WALLET_URL);
-		
+
 		findPreference(KEY_ABOUT_CREDITS_BITCOINJ).setTitle(getString(R.string.about_credits_bitcoinj_title, VersionMessage.BITCOINJ_VERSION));
 		findPreference(KEY_ABOUT_CREDITS_BITCOINJ).setSummary(Constants.CREDITS_BITCOINJ_URL);
-		
+
 		findPreference(KEY_ABOUT_CREDITS_ZXING).setSummary(Constants.CREDITS_ZXING_URL);
 	}
 
@@ -94,7 +94,9 @@ public final class AboutActivity extends SherlockPreferenceActivity
 		{
 			startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(Constants.CREDITS_ZXING_URL)));
 			finish();
-		}
+		}else if(KEY_ABOUT_CREDITS_ICON_DRAWER.equals(key)){
+            startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(Constants.CREDITS_ICONDRAWER_URL)));
+        }
 
 		return false;
 	}

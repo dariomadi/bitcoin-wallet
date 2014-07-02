@@ -31,6 +31,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.ContentObserver;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -40,6 +41,7 @@ import android.view.View;
 import android.widget.BaseAdapter;
 import android.widget.ListAdapter;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import com.actionbarsherlock.app.SherlockListFragment;
 import com.actionbarsherlock.view.ActionMode;
@@ -59,7 +61,7 @@ import com.kncwallet.wallet.util.BitmapFragment;
 import com.kncwallet.wallet.util.Qr;
 import com.kncwallet.wallet.util.WalletUtils;
 
-import com.kncwallet.wallet_test.R;
+import com.kncwallet.wallet.R;
 
 /**
  * @author Andreas Schildbach
@@ -101,6 +103,14 @@ public final class WalletAddressesFragment extends SherlockListFragment
 		setListAdapter(adapter);
 	}
 
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+
+        getListView().setCacheColorHint(Color.TRANSPARENT);
+        getListView().setBackgroundColor(getResources().getColor(R.color.knc_background_darker));
+    }
+
 	@Override
 	public void onResume()
 	{
@@ -140,6 +150,10 @@ public final class WalletAddressesFragment extends SherlockListFragment
 			case R.id.wallet_addresses_options_add:
 				handleAddAddress();
 				return true;
+
+            case R.id.wallet_addresses_options_paper_wallet:
+                activity.handlePaperWallet();
+                return true;
 		}
 
 		return super.onOptionsItemSelected(item);
@@ -222,6 +236,7 @@ public final class WalletAddressesFragment extends SherlockListFragment
 
 						mode.finish();
 						return true;
+
 				}
 
 				return false;
@@ -269,7 +284,24 @@ public final class WalletAddressesFragment extends SherlockListFragment
 		});
 	}
 
-	private void updateView()
+    private void handleExport(Address address) {
+
+        ECKey theKey = null;
+
+        for(ECKey key : wallet.getKeys()){
+            if(key.toAddress(Constants.NETWORK_PARAMETERS).equals(address)){
+                theKey = key;
+                break;
+            }
+        }
+        if(theKey!=null){
+            final int size = (int) (256 * getResources().getDisplayMetrics().density);
+            BitmapFragment.show(getFragmentManager(), Qr.bitmap(theKey.getPrivateKeyEncoded(Constants.NETWORK_PARAMETERS).toString(), size));
+        }
+
+    }
+
+    private void updateView()
 	{
 		final ListAdapter adapter = getListAdapter();
 		if (adapter != null)

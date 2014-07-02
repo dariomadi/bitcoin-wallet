@@ -33,7 +33,6 @@ import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.text.Html;
-import android.text.format.DateUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -48,13 +47,14 @@ import com.google.bitcoin.core.Transaction.Purpose;
 import com.google.bitcoin.core.TransactionConfidence;
 import com.google.bitcoin.core.TransactionConfidence.ConfidenceType;
 import com.google.bitcoin.core.Wallet;
-import com.google.bitcoin.core.Wallet.DefaultCoinSelector;
 import com.kncwallet.wallet.AddressBookProvider;
 import com.kncwallet.wallet.Constants;
+import com.kncwallet.wallet.ExchangeRatesProvider;
 import com.kncwallet.wallet.util.CircularProgressView;
+import com.kncwallet.wallet.util.DenominationUtil;
 import com.kncwallet.wallet.util.WalletUtils;
 
-import com.kncwallet.wallet_test.R;
+import com.kncwallet.wallet.R;
 
 /**
  * @author Andreas Schildbach
@@ -87,6 +87,9 @@ public class TransactionsListAdapter extends BaseAdapter
 
 	private static final int VIEW_TYPE_TRANSACTION = 0;
 	private static final int VIEW_TYPE_WARNING = 1;
+
+    private boolean useBtc = true;
+    private ExchangeRatesProvider.ExchangeRate exchangeRate = null;
 
 	public TransactionsListAdapter(final Context context, @Nonnull final Wallet wallet, final int maxConnectedPeers, final boolean showBackupWarning)
 	{
@@ -139,6 +142,12 @@ public class TransactionsListAdapter extends BaseAdapter
 
 		notifyDataSetChanged();
 	}
+
+    public void updateUseBtc(boolean useBtc, ExchangeRatesProvider.ExchangeRate exchangeRate){
+        this.useBtc = useBtc;
+        this.exchangeRate = exchangeRate;
+        notifyDataSetChanged();
+    }
 
 	@Override
 	public boolean isEmpty()
@@ -282,12 +291,6 @@ public class TransactionsListAdapter extends BaseAdapter
 				rowConfidenceTextual.setTextColor(colorInsignificant);
 			}
 
-			// spendability
-			final int textColor;
-			if (confidenceType == ConfidenceType.DEAD)
-				textColor = Color.RED;
-			else
-				textColor = DefaultCoinSelector.isSelectable(tx) ? colorSignificant : colorInsignificant;
 
 			// time
 			final TextView rowTime = (TextView) row.findViewById(R.id.transaction_row_time);
@@ -309,7 +312,7 @@ public class TransactionsListAdapter extends BaseAdapter
 			} else {
 				rowFromTo.setText(R.string.transaction_direction_received);
 			}
-			
+
 			//if(textColor != colorSignificant)
 			//	rowFromTo.setTextColor(textColor);
 			// coinbase
@@ -336,17 +339,21 @@ public class TransactionsListAdapter extends BaseAdapter
 			rowAddress.setTypeface(label != null ? Typeface.DEFAULT : Typeface.MONOSPACE);
 
 			ImageView img = (ImageView) row.findViewById(R.id.transaction_row_contact_image);
-			
-			if(label != null)
+
+            if(address == null) {
+
+                img.setImageResource(R.drawable.mined_btc);
+
+            }else if(label != null)
 			{
 			    Bitmap contactImage = AddressBookProvider.bitmapForAddress(context, address.toString());
 			    if(contactImage != null) {
 			    	img.setImageBitmap(contactImage);
 			    } else {
-			    	img.setImageResource(R.drawable.ic_contact_placeholder);
+			    	img.setImageResource(R.drawable.contact_placeholder);
 			    }
 			} else {
-				img.setImageResource(R.drawable.ic_contact_placeholder);
+				img.setImageResource(R.drawable.contact_placeholder);
 			}
 			
 			// value
@@ -354,15 +361,31 @@ public class TransactionsListAdapter extends BaseAdapter
 			
 			//if(textColor != colorSignificant)
 			//	rowValue.setTextColor(textColor);
-			
-			rowValue.setAlwaysSigned(false);
-			rowValue.setPrecision(precision, shift);
-			rowValue.setAmount(value.abs());
-			
-			final String suffix = shift == 0 ? Constants.CURRENCY_CODE_BTC : Constants.CURRENCY_CODE_MBTC;
 
-			rowValue.setSuffix(suffix);
-			
+
+            rowValue.setVisibility(View.VISIBLE);
+
+            if(useBtc){
+                rowValue.setAlwaysSigned(false);
+                rowValue.setPrecision(precision, shift);
+                rowValue.setAmount(value.abs());
+                rowValue.setStrikeThru(false);
+                final String suffix = DenominationUtil.getCurrencyCode(shift);
+
+                rowValue.setSuffix(suffix);
+            }else{
+                rowValue.setPrecision(Constants.LOCAL_PRECISION, 0);
+                rowValue.setStrikeThru(Constants.TEST);
+
+                if(exchangeRate != null && exchangeRate.rate != null) {
+                    final BigInteger localValue = WalletUtils.localValue(value.abs(), exchangeRate.rate);
+                    rowValue.setSuffix(exchangeRate.currencyCode);
+                    rowValue.setAmount(localValue);
+                }else{
+                    rowValue.setVisibility(View.INVISIBLE);
+                }
+            }
+
 			// extended message
 			final View rowExtend = row.findViewById(R.id.transaction_row_extend);
 			if (rowExtend != null)
@@ -401,6 +424,12 @@ public class TransactionsListAdapter extends BaseAdapter
 					rowMessage.setText(R.string.transaction_row_message_received_unconfirmed_unlocked);
 					rowMessage.setTextColor(colorInsignificant);
 				}
+                else if (isCoinBase && confidence.getDepthInBlocks() < Constants.NETWORK_PARAMETERS.getSpendableCoinbaseDepth())
+                {
+                    rowExtend.setVisibility(View.VISIBLE);
+                    rowMessage.setText(R.string.transaction_row_message_received_building);
+                    rowMessage.setTextColor(colorInsignificant);
+                }
 				else if (!sent && confidenceType == ConfidenceType.DEAD)
 				{
 					rowExtend.setVisibility(View.VISIBLE);

@@ -54,6 +54,7 @@ public class AddressBookProvider extends ContentProvider
 	public static final String SELECTION_QUERY = "q";
 	public static final String SELECTION_IN = "in";
 	public static final String SELECTION_NOTIN = "notin";
+    public static final String SELECTION_COMPLEX = "c";
 
 	public static Uri contentUri(@Nonnull final String packageName)
 	{
@@ -178,7 +179,7 @@ public class AddressBookProvider extends ContentProvider
 
 	public static Bitmap loadContactPhoto(ContentResolver cr, long  id,long photo_id) 
 	{
-		if(id < 0)
+		if(id == -1)
 			return null;
 	    Uri uri = ContentUris.withAppendedId(ContactsContract.Contacts.CONTENT_URI, id);
 	    InputStream input = ContactsContract.Contacts.openContactPhotoInputStream(cr, uri);
@@ -327,7 +328,10 @@ public class AddressBookProvider extends ContentProvider
 			//selection = KEY_ADDRESS + " LIKE ? OR " + KEY_LABEL + " LIKE ? OR " + KEY_TELEPHONE + " LIKE ? OR " + KEY_RAW_TELEPHONE + " LIKE ?";
 			selection = KEY_LABEL + " LIKE ? OR " + KEY_TELEPHONE + " LIKE ? OR " + KEY_RAW_TELEPHONE + " LIKE ?";
 			selectionArgs = new String[] { query, query, query };
-		}
+		}else{
+            selection = originalSelection;
+            selectionArgs = originalSelectionArgs;
+        }
 
 		final Cursor cursor = qb.query(helper.getReadableDatabase(), projection, selection, selectionArgs, null, null, sortOrder);
 

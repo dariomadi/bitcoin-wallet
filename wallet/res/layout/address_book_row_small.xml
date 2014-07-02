@@ -6,8 +6,8 @@
 	android:orientation="horizontal"
 	android:layout_marginTop="0dp"
 	android:layout_marginBottom="0dp"
-	android:paddingTop="0dp"
-	android:paddingBottom="0dp"
+	android:paddingTop="2dp"
+	android:paddingBottom="2dp"
 	android:paddingLeft="@dimen/list_entry_padding_horizontal"
 	android:paddingRight="@dimen/list_entry_padding_horizontal" >
 
@@ -42,7 +42,7 @@
 		    android:maxWidth="48dp"
 		    android:maxHeight="48dp"
 		    android:layout_marginRight="0dp"
-		    android:src="#FF0000"
+            android:background="#2a2a2a"
 		    android:scaleType="fitXY"
 		    android:gravity="right"
 		    />	

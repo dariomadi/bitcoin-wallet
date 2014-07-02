@@ -22,4 +22,5 @@ public class RegistrationResult
 	public String code;
 	public String secret;
 	public String clientID;
+    public String serverTelephoneNumber;
 }

@@ -95,7 +95,7 @@
 		    android:minWidth="72dp"
 		    android:maxWidth="72dp"
 		    android:layout_marginTop="16dp"
-		    android:src="#FF0000"
+            android:background="#2a2a2a"
 		    android:scaleType="fitXY"
 		    android:layout_gravity="right"
 		    />	    

@@ -36,7 +36,7 @@ import android.text.style.RelativeSizeSpan;
 import android.text.style.StyleSpan;
 import android.util.AttributeSet;
 import android.widget.TextView;
-import com.kncwallet.wallet_test.R;
+import com.kncwallet.wallet.R;
 
 /**
  * @author Andreas Schildbach
@@ -63,7 +63,7 @@ public final class CurrencyTextView extends TextView
 
 	public void setSuffix(@Nonnull final String suffix)
 	{
-		this.suffix = Constants.CHAR_HAIR_SPACE + suffix ;
+		this.suffix = Constants.CHAR_HAIR_SPACE + suffix + " " ;
 		updateView();
 	}
 

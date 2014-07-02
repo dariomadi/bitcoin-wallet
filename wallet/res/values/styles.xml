@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-	<style name="My.Theme" parent="@style/Theme.Sherlock.ForceOverflow">
+	<style name="My.Theme" parent="@style/Theme.Sherlock">
 		<item name="actionBarStyle">@style/My.Widget.ActionBar</item>
 		<item name="android:actionBarStyle">@style/My.Widget.ActionBar</item>
 		<item name="actionModeStyle">@style/My.Widget.ActionMode</item>
@@ -10,11 +10,12 @@
 		<item name="android:autoCompleteTextViewStyle">@style/My.Widget.AutoCompleteTextView</item>
 		<item name="android:spinnerStyle">@style/My.Widget.Spinner</item>
 		<item name="android:checkboxStyle">@style/My.Widget.CompoundButton.CheckBox</item>
+        <item name="android:dropDownListViewStyle">@style/DropDownListViewStyle</item>
 	</style>
 
 	<style name="My.Theme.Fullscreen" parent="@android:style/Theme.NoTitleBar.Fullscreen" />
 
-	<style name="My.Theme.Dialog" parent="@style/Theme.Sherlock.Dialog" />
+	<style name="My.Theme.Dialog" parent="@style/Theme.Sherlock" />
 
 	<style name="My.Widget.ActionBar" parent="@style/Widget.Sherlock.ActionBar.Solid">
 		<item name="background">@drawable/action_bar_background</item>
@@ -82,5 +83,13 @@
 		<item name="android:drawablePadding">8dp</item>
 		<item name="android:minHeight">48dp</item>
 	</style>
+
+    <style name="DropDownListViewStyle" parent="android:style/Widget.ListView.DropDown">
+        <item name="android:divider">@color/knc_header_line</item>
+        <item name="android:dividerHeight">1dp</item>
+        <item name="android:background">@color/knc_background_lighter</item>
+        <item name="android:textColor">#fff</item>
+        <item name="android:listSelector">@color/knc_background_darker</item>
+    </style>
 
 </resources>

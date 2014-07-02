@@ -28,6 +28,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -57,7 +58,7 @@ import com.kncwallet.wallet.util.BitmapFragment;
 import com.kncwallet.wallet.util.Qr;
 import com.kncwallet.wallet.util.WalletUtils;
 
-import com.kncwallet.wallet_test.R;
+import com.kncwallet.wallet.R;
 
 /**
  * @author Andreas Schildbach
@@ -116,7 +117,7 @@ public final class SendingAddressesFragment extends SherlockListFragment impleme
 			           if(contactImage != null) {
 			        	   img.setImageBitmap(contactImage);
 			           } else {
-			        	   img.setImageResource(R.drawable.ic_contact_placeholder);
+			        	   img.setImageResource(R.drawable.contact_placeholder);
 			           }
 			           
 			           return true; //true because the data was bound to the view
@@ -141,6 +142,10 @@ public final class SendingAddressesFragment extends SherlockListFragment impleme
 		setListAdapter(adapter);
 
 		loaderManager.initLoader(0, null, this);
+
+        getListView().setCacheColorHint(Color.TRANSPARENT);
+        getListView().setBackgroundColor(getResources().getColor(R.color.knc_background_darker));
+        getView().setBackgroundColor(getResources().getColor(R.color.knc_background_darker));
 	}
 
 	@Override

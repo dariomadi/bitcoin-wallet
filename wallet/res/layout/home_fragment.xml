@@ -67,12 +67,35 @@
 		android:paddingTop="8dp"
 		android:layout_marginTop="24dp" />
 
+    <RelativeLayout android:layout_width="match_parent" android:layout_height="wrap_content">
+
+
 	<android.support.v4.view.ViewPager
 		android:id="@+id/transactions_pager"
 		android:layout_width="match_parent"
 		android:layout_height="wrap_content"
 		android:layout_gravity="bottom|center_horizontal"
+        android:layout_above="@+id/home_bottom"
 		android:background="@color/knc_background_darker" />
+
+    <LinearLayout
+            android:id="@+id/home_bottom"
+            android:orientation="vertical"
+            android:layout_alignParentBottom="true"
+            android:background="@color/knc_background_lighter"
+            android:layout_width="match_parent"
+            android:layout_height="50dp">
+
+        <TextView
+                android:id="@+id/home_bottom_backup_info"
+                android:layout_width="match_parent"
+                android:gravity="center"
+                android:layout_height="match_parent"/>
+
+
+    </LinearLayout>
+
+    </RelativeLayout>
 	
 	<!-- <LinearLayout
 		android:id="@+id/wallet_transactions"

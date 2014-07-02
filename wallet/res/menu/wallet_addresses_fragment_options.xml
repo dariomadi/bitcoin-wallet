@@ -8,4 +8,10 @@
 		android:title="@string/wallet_addresses_fragment_add_dialog_title"
 		android:titleCondensed="@string/button_add"/>
 
+    <item
+        android:id="@+id/wallet_addresses_options_paper_wallet"
+        android:title="@string/menu_paper_wallet_title"
+        android:icon="@drawable/ic_action_camera"
+        android:showAsAction="always|withText"/>
+
 </menu>

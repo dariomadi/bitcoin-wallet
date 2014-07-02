@@ -95,7 +95,7 @@
 			android:id="@+id/send_coins_amount_btc"
 			android:layout_width="0px"
 			android:layout_height="wrap_content"
-			android:layout_weight="1"
+			android:layout_weight="2"
 			 >
 			
 
@@ -113,7 +113,7 @@
 			android:id="@+id/send_coins_amount_local"
 			android:layout_width="0px"
 			android:layout_height="wrap_content"
-			android:layout_weight="1" >
+			android:layout_weight="2" >
 
 			<EditText
 				android:id="@+id/send_coins_amount_local_edittext"
@@ -136,18 +136,10 @@
 		android:layout_marginBottom="12dp"
 		android:gravity="center"
 		android:orientation="horizontal" >
-		
-		<Button
-		    android:id="@+id/send_button_qr"
-		    android:text="@string/send_button_qr_text"
-		    android:layout_width="0dp"
-		    android:layout_height="wrap_content"
-		    android:layout_weight="10"
-		/>
-		
+
 		<Button
 		    android:id="@+id/send_coins_go"
-		    android:layout_width="0dp"
+		    android:layout_width="match_parent"
 		    android:layout_height="wrap_content"
 		    android:layout_weight="10"
 		    android:text="Send"

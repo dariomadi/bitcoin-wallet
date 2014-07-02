@@ -28,7 +28,7 @@ import android.support.v4.view.ViewPager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import com.kncwallet.wallet_test.R;
+import com.kncwallet.wallet.R;
 
 /**
  * @author Andreas Schildbach
@@ -42,7 +42,7 @@ public final class WalletTransactionsFragment extends Fragment
 	{
 		super.onCreate(savedInstanceState);
 
-		//setRetainInstance(true);
+		setRetainInstance(true);
 	}
 
 	@Override

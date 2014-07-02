@@ -104,6 +104,7 @@
     <string name="transaction_row_message_purpose_key_rotation">This transaction strengthens your wallet against theft. &lt;u>More info.&lt;/u></string>
     <string name="transaction_row_message_own_unbroadcasted">This payment has not been transmitted yet.</string>
     <string name="transaction_row_message_received_unconfirmed_unlocked">This payment should become spendable in a few minutes.</string>
+    <string name="transaction_row_message_received_building">This payment has not yet confirmed.</string>
     <string name="transaction_row_message_received_unconfirmed_locked">This payment is not standard and should not be trusted.</string>
     <string name="transaction_row_message_received_dead">This payment has been reversed by the sender.</string>
     <string name="transaction_row_message_received_dust">This small amount can probably never be spent economically.</string>
@@ -250,4 +251,79 @@
 	<string name="receive_email_button_text">Send by email</string>
 	<string name="send_button_qr_text">Scan QR Code</string>
 	<string name="send_heading">SEND BITCOINS</string>
+
+    <string name="pin_settings_incorrect_supplied">Incorrect pin supplied.</string>
+    <string name="pin_settings_enable">Enable App Pin</string>
+    <string name="pin_settings_will_disable">Pin will be disabled</string>
+    <string name="pin_settings_pin_disabled">Access pin disabled</string>
+    <string name="pin_settings_pin_enabled">Access pin enabled</string>
+    <string name="pin_settings_pin_changed">Access pin changed</string>
+    <string name="pin_invalid">Invalid pin, please try again!</string>
+    <string name="pin_notice_text">Please be careful, KnC are unable to reset this PIN</string>
+    <string name="pin_enter_current">Enter Your Current Pin</string>
+    <string name="pin_enter_new">Enter Your New Pin</string>
+    <string name="pin_enter_confirm">Confirm Pin</string>
+
+
+    <string name="activity_back_double_tap">"Press back again to leave the application.</string>
+
+    <string name="nfc_new_address_dialog_title">Would you like to save this address to your Address Book?</string>
+    <string name="nfc_new_address_dialog_save">Save</string>
+    <string name="nfc_new_address_cancel">Cancel</string>
+
+    <string name="share_this_address">Share My Address</string>
+
+    <string name="preferences_app_pin_lock_title">Configure lock</string>
+    <string name="preferences_app_pin_lock_summary">Select when the app locks when having an access pin</string>
+
+    <string name="preferences_remove_dust_tx_title">Remove dust transacations</string>
+    <string name="preferences_remove_dust_tx_summary">Small amount transactions that can probably never be spent economically</string>
+
+    <string name="wizard_phone_number_invalid_title">Invalid phone number</string>
+    <string name="wizard_phone_number_invalid_country_pattern">The phone number you entered is not valid for the country %1$s</string>
+    <string name="wizard_phone_number_will_verify_pattern">We will be verifying the phone number:\n\n%1$s\n\nIs this OK, or would you like to edit the number?</string>
+
+    <string name="wizard_waiting_sms_title">Verify</string>
+    <string name="wizard_waiting_sms_message">Waiting to automatically detect an SMS sent to</string>
+    <string name="wizard_sms_verified">Phone number verified</string>
+
+    <string name="wizard_profile_title">Profile</string>
+    <string name="wizard_profile_message">Please provide your name</string>
+    <string name="wizard_profile_button_done">Start using KnC Wallet</string>
+    <string name="wizard_profile_name_hint">Name</string>
+
+    <string name="wizard_sms_verify_fail_title">SMS verification failed</string>
+    <string name="wizard_sms_verify_fail_message">We were unable to verify your phone number via SMS.</string>
+
+    <string name="dialog_transaction_fee_info">There is a fee for every transaction. The fee is processed by and received by the Bitcoin miner.</string>
+    <string name="dialog_transaction_fee_acknowledge">Got it, don\'t show me this again</string>
+    <string name="dialog_transaction_title">Confirm transaction</string>
+    <string name="dialog_transaction_learn_more">Learn more</string>
+    <string name="dialog_transaction_to_user">to %1$s</string>
+    <string name="dialog_transaction_total">Total including estimated transaction fee</string>
+
+    <string name="dialog_fee_info_title">About transaction fees</string>
+    <string name="dialog_fee_info_message">Content</string>
+
+    <string name="transaction_fee_confirm_setting_title">Transaction fee confirmation</string>
+    <string name="transaction_fee_confirm_setting_summary">Show confirmation with estimated fee for every transaction</string>
+
+    <string name="widget_label_small">KnC Wallet (small)</string>
+    <string name="widget_label_large">KnC Wallet (large)</string>
+
+    <string name="http_connection_error">Unable to connect to the Internet. Please make sure your device is connected to the Internet.</string>
+
+    <string name="sms_code_manually">Enter code manually</string>
+    
+    <string name="menu_paper_wallet_title">Import Paper wallet</string>
+    <string name="menu_paper_wallet_message">Import private key from QR code</string>
+    <string name="menu_paper_wallet_import_error">Unable to read private key</string>
+    <string name="menu_paper_wallet_import_key_exist">Key already imported</string>
+
+    <string name="send_invalid_address_pattern">Invalid address: %1$s</string>
+
+    <string name="send_coins_error_adjust_downwards">The total amount of money we were trying to empty after being reduced for the fee was smaller than the min payment.</string>
+    <string name="send_coins_error_insufficient_money">You don\'t have enough money available to perform the requested operation.</string>
+
+    <string name="bitcoin_sent">Bitcoin Sent</string>
 </resources>

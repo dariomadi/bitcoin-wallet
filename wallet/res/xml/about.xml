@@ -25,5 +25,12 @@
 			android:title="zxing"
 			android:summary="https://github.com/zxing/zxing" />
 	</PreferenceCategory>
+    <PreferenceCategory android:title="Additional Credits">
+        <Preference
+            android:key="about_icon_drawer"
+            android:title="IconDrawer"
+            android:summary="Flag icons are made by www.IconDrawer.com" />
+
+    </PreferenceCategory>
 
 </PreferenceScreen>

@@ -20,7 +20,7 @@
 		    android:layout_width="64dp"
 		    android:layout_height="64dp"
 		    android:layout_marginRight="5dp"
-		    android:src="#FF0000"
+            android:background="#2a2a2a"
 		    android:scaleType="fitXY"
 		    />	    
 	    

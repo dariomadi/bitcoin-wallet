@@ -35,6 +35,8 @@ import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import com.google.bitcoin.net.discovery.PeerDiscovery;
+import com.google.bitcoin.net.discovery.PeerDiscoveryException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,6 +61,7 @@ import android.os.PowerManager.WakeLock;
 import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
 import android.text.format.DateUtils;
+import android.util.Log;
 
 import com.google.bitcoin.core.AbstractPeerEventListener;
 import com.google.bitcoin.core.Address;
@@ -76,9 +79,9 @@ import com.google.bitcoin.core.TransactionConfidence.ConfidenceType;
 import com.google.bitcoin.core.Wallet;
 import com.google.bitcoin.core.Wallet.BalanceType;
 import com.google.bitcoin.core.WalletEventListener;
-import com.google.bitcoin.discovery.DnsDiscovery;
-import com.google.bitcoin.discovery.PeerDiscovery;
-import com.google.bitcoin.discovery.PeerDiscoveryException;
+import com.google.bitcoin.net.discovery.DnsDiscovery;
+import com.google.bitcoin.net.discovery.PeerDiscovery;
+import com.google.bitcoin.net.discovery.PeerDiscoveryException;
 import com.google.bitcoin.store.BlockStore;
 import com.google.bitcoin.store.BlockStoreException;
 import com.google.bitcoin.store.SPVBlockStore;
@@ -86,12 +89,14 @@ import com.kncwallet.wallet.AddressBookProvider;
 import com.kncwallet.wallet.Constants;
 import com.kncwallet.wallet.WalletApplication;
 import com.kncwallet.wallet.ui.WalletActivity;
+import com.kncwallet.wallet.ui.util.TxUtil;
 import com.kncwallet.wallet.util.CrashReporter;
+import com.kncwallet.wallet.util.DenominationUtil;
 import com.kncwallet.wallet.util.GenericUtils;
 import com.kncwallet.wallet.util.ThrottlingWalletChangeListener;
 import com.kncwallet.wallet.util.WalletUtils;
 
-import com.kncwallet.wallet_test.R;
+import com.kncwallet.wallet.R;
 
 /**
  * @author Andreas Schildbach
@@ -137,7 +142,7 @@ public class BlockchainServiceImpl extends android.app.Service implements Blockc
 		@Override
 		public void onThrottledWalletChanged()
 		{
-		}
+        }
 
 		@Override
 		public void onCoinsReceived(final Wallet wallet, final Transaction tx, final BigInteger prevBalance, final BigInteger newBalance)
@@ -170,17 +175,33 @@ public class BlockchainServiceImpl extends android.app.Service implements Blockc
 			{
 				throw new RuntimeException(x);
 			}
+
+            broadcastWidgetUpdate();
 		}
 
 		@Override
 		public void onCoinsSent(final Wallet wallet, final Transaction tx, final BigInteger prevBalance, final BigInteger newBalance)
 		{
 			transactionsReceived.incrementAndGet();
+            broadcastWidgetUpdate();
 		}
 	};
 
+    private void broadcastWidgetUpdate()
+    {
+        Intent broadcast = new Intent();
+        broadcast.setAction(Constants.ACTION_APP_WIDGET_UPDATE);
+        sendBroadcast(broadcast);
+    }
+
 	private void notifyCoinsReceived(@Nullable final Address from, @Nonnull final BigInteger amount)
 	{
+
+        if(TxUtil.isDust(amount) && prefs.getBoolean(Constants.PREFS_KEY_REMOVE_DUST_TX, true)){
+            //user has removed dust transactions, do not notify
+            return;
+        }
+
 		if (notificationCount == 1)
 			nm.cancel(NOTIFICATION_ID_COINS_RECEIVED);
 
@@ -192,10 +213,15 @@ public class BlockchainServiceImpl extends android.app.Service implements Blockc
 		final String precision = prefs.getString(Constants.PREFS_KEY_BTC_PRECISION, Constants.PREFS_DEFAULT_BTC_PRECISION);
 		final int btcPrecision = precision.charAt(0) - '0';
 		final int btcShift = precision.length() == 3 ? precision.charAt(2) - '0' : 0;
-		final String btcPrefix = btcShift == 0 ? Constants.CURRENCY_CODE_BTC : Constants.CURRENCY_CODE_MBTC;
+		String btcPrefix = DenominationUtil.getCurrencyCode(btcShift);
 
 		final String packageFlavor = application.applicationPackageFlavor();
-		final String msgSuffix = packageFlavor != null ? " [" + packageFlavor + "]" : "";
+		String msgSuffix = packageFlavor != null ? " [" + packageFlavor + "]" : "";
+
+        if(Constants.CURRENCY_CODE_BITS.equals(btcPrefix)){
+            msgSuffix = " "+btcPrefix + ' ' + msgSuffix;
+            btcPrefix = "";
+        }
 
 		final String tickerMsg = getString(R.string.notification_coins_received_msg,
 				btcPrefix + ' ' + GenericUtils.formatValue(amount, btcPrecision, btcShift))
@@ -216,8 +242,10 @@ public class BlockchainServiceImpl extends android.app.Service implements Blockc
 			text.append(label != null ? label : addressStr);
 		}
 
+
+
 		final NotificationCompat.Builder notification = new NotificationCompat.Builder(this);
-		notification.setSmallIcon(R.drawable.stat_notify_received);
+		notification.setSmallIcon(R.drawable.ic_new_btc);
 		notification.setTicker(tickerMsg);
 		notification.setContentTitle(msg);
 		if (text.length() > 0)
@@ -403,6 +431,18 @@ public class BlockchainServiceImpl extends android.app.Service implements Blockc
 
 				final boolean connectTrustedPeerOnly = hasTrustedPeer && prefs.getBoolean(Constants.PREFS_KEY_TRUSTED_PEER_ONLY, false);
 				peerGroup.setMaxConnections(connectTrustedPeerOnly ? 1 : maxConnectedPeers);
+
+                peerGroup.addPeerDiscovery(new PeerDiscovery() {
+                    @Override
+                    public InetSocketAddress[] getPeers(long l, TimeUnit timeUnit) throws PeerDiscoveryException {
+                        return new InetSocketAddress[0];
+                    }
+
+                    @Override
+                    public void shutdown() {
+
+                    }
+                });
 
 				peerGroup.addPeerDiscovery(new PeerDiscovery()
 				{

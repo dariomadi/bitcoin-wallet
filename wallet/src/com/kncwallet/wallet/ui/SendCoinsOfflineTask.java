@@ -18,55 +18,84 @@
 package com.kncwallet.wallet.ui;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 import android.os.Handler;
 import android.os.Looper;
 
+import com.google.bitcoin.core.InsufficientMoneyException;
 import com.google.bitcoin.core.Transaction;
 import com.google.bitcoin.core.Wallet;
 import com.google.bitcoin.core.Wallet.SendRequest;
+
+import java.math.BigInteger;
 
 /**
  * @author Andreas Schildbach
  */
 public abstract class SendCoinsOfflineTask
 {
-	private final Wallet wallet;
-	private final Handler backgroundHandler;
-	private final Handler callbackHandler;
+    private final Wallet wallet;
+    private final Handler backgroundHandler;
+    private final Handler callbackHandler;
 
-	public SendCoinsOfflineTask(@Nonnull final Wallet wallet, @Nonnull final Handler backgroundHandler)
-	{
-		this.wallet = wallet;
-		this.backgroundHandler = backgroundHandler;
-		this.callbackHandler = new Handler(Looper.myLooper());
-	}
+    public SendCoinsOfflineTask(@Nonnull final Wallet wallet, @Nonnull final Handler backgroundHandler)
+    {
+        this.wallet = wallet;
+        this.backgroundHandler = backgroundHandler;
+        this.callbackHandler = new Handler(Looper.myLooper());
+    }
 
-	public final void sendCoinsOffline(@Nonnull final SendRequest sendRequest)
-	{
-		backgroundHandler.post(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				final Transaction transaction = wallet.sendCoinsOffline(sendRequest); // can take long
+    public final void sendCoinsOffline(@Nonnull final SendRequest sendRequest)
+    {
+        backgroundHandler.post(new Runnable()
+        {
+            @Override
+            public void run()
+            {
+                try
+                {
+                    final Transaction transaction = wallet.sendCoinsOffline(sendRequest); // can take long
 
-				callbackHandler.post(new Runnable()
-				{
-					@Override
-					public void run()
-					{
-						if (transaction != null)
-							onSuccess(transaction);
-						else
-							onFailure();
-					}
-				});
-			}
-		});
-	}
+                    callbackHandler.post(new Runnable()
+                    {
+                        @Override
+                        public void run()
+                        {
+                            onSuccess(transaction);
+                        }
+                    });
+                }
+                catch (final InsufficientMoneyException x)
+                {
+                    callbackHandler.post(new Runnable()
+                    {
+                        @Override
+                        public void run()
+                        {
+                            onInsufficientMoney(x.missing);
+                        }
+                    });
+                }
+                catch (final IllegalArgumentException x)
+                {
+                    callbackHandler.post(new Runnable()
+                    {
+                        @Override
+                        public void run()
+                        {
+                            onFailure();
+                        }
+                    });
+                }
+            }
+        });
+    }
 
-	protected abstract void onSuccess(@Nonnull Transaction transaction);
+    protected abstract void onSuccess(@Nonnull Transaction transaction);
 
-	protected abstract void onFailure();
+    protected abstract void onInsufficientMoney(@Nullable BigInteger missing);
+
+    protected abstract void onFailure();
 }
+

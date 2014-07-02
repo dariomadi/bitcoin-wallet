@@ -21,6 +21,8 @@ import java.io.IOException;
 
 import javax.annotation.Nonnull;
 
+import android.util.Log;
+import com.kncwallet.wallet.util.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,22 +42,16 @@ import android.preference.PreferenceScreen;
 import android.widget.Toast;
 
 import com.actionbarsherlock.app.ActionBar;
-import com.actionbarsherlock.app.SherlockPreferenceActivity;
 import com.actionbarsherlock.view.MenuItem;
 import com.kncwallet.wallet.Constants;
 import com.kncwallet.wallet.WalletApplication;
-import com.kncwallet.wallet.util.AsyncWebRequest;
-import com.kncwallet.wallet.util.CrashReporter;
-import com.kncwallet.wallet.util.ErrorResponse;
-import com.kncwallet.wallet.util.WebRequestCompleted;
 
-import com.kncwallet.wallet_test.R;
+import com.kncwallet.wallet.R;
 
 /**
  * @author Andreas Schildbach
  */
-public final class PreferencesActivity extends SherlockPreferenceActivity implements OnPreferenceChangeListener
-{
+public final class PreferencesActivity extends AbstractPreferenceActivity implements OnPreferenceChangeListener, SharedPreferences.OnSharedPreferenceChangeListener {
 	private WalletApplication application;
 	private Preference trustedPeerPreference;
 	private Preference trustedPeerOnlyPreference;
@@ -66,9 +62,8 @@ public final class PreferencesActivity extends SherlockPreferenceActivity implem
 	private static final String PREFS_KEY_INITIATE_RESET = "initiate_reset";
 	private static final String PREFS_KEY_DATA_USAGE = "data_usage";
 	private static final String PREFS_KEY_DELETE_ENTRY = "remove_from_directory";
-	private static final String PREFS_KEY_APP_PIN_ENABLED = "app_pin_enabled";
 	private static final String PREFS_KEY_ENTRY_DELETED = "entry_deleted";
-	
+
 	private static final Intent dataUsageIntent = new Intent();
 	static
 	{
@@ -81,7 +76,7 @@ public final class PreferencesActivity extends SherlockPreferenceActivity implem
 	@Override
 	protected void onCreate(final Bundle savedInstanceState)
 	{
-		
+
 		super.onCreate(savedInstanceState);
 
 		application = (WalletApplication) getApplication();
@@ -89,17 +84,18 @@ public final class PreferencesActivity extends SherlockPreferenceActivity implem
 
 		final Preference dataUsagePreference = findPreference(PREFS_KEY_DATA_USAGE);
 		dataUsagePreference.setEnabled(getPackageManager().resolveActivity(dataUsageIntent, 0) != null);
-		
+
 		deleteEntryPreference = findPreference(PREFS_KEY_DELETE_ENTRY);
-	
-		
+
+
 		final ActionBar actionBar = getSupportActionBar();
 		actionBar.setDisplayHomeAsUpEnabled(true);
 		actionBar.setBackgroundDrawable(new ColorDrawable(getResources().getColor(R.color.knc_action_bar_background)));
 		actionBar.setStackedBackgroundDrawable(new ColorDrawable(getResources().getColor(R.color.knc_background_lighter)));
 		actionBar.setIcon(R.drawable.ic_knclogo);
-		
+
 		prefs = PreferenceManager.getDefaultSharedPreferences(this);
+
 
 		if(prefs.getBoolean(PREFS_KEY_ENTRY_DELETED, false))
 			deleteEntryPreference.setEnabled(false);
@@ -135,15 +131,15 @@ public final class PreferencesActivity extends SherlockPreferenceActivity implem
 			startActivity(dataUsageIntent);
 			finish();
 		}
-		
+
 		else if (PREFS_KEY_DELETE_ENTRY.equals(key))
 		{
 			AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(
 					this);
-	 
+
 			// set title
 			alertDialogBuilder.setTitle("KnC Wallet");
- 
+
 			// set dialog message
 			alertDialogBuilder
 				.setMessage("Are you sure?")
@@ -158,7 +154,7 @@ public final class PreferencesActivity extends SherlockPreferenceActivity implem
                             	PreferencesActivity.this.doRemoveEntry();
                             }
 						});
-						
+
 					}
 				  })
 				.setNegativeButton("No",new DialogInterface.OnClickListener() {
@@ -168,14 +164,14 @@ public final class PreferencesActivity extends SherlockPreferenceActivity implem
 						dialog.cancel();
 					}
 				});
- 
+
 				// create alert dialog
 				AlertDialog alertDialog = alertDialogBuilder.create();
- 
+
 				// show it
 				alertDialog.show();
 		}
-		
+
 		else if (PREFS_KEY_REPORT_ISSUE.equals(key))
 		{
 			final ReportIssueDialogBuilder dialog = new ReportIssueDialogBuilder(this, R.string.report_issue_dialog_title_issue,
@@ -244,15 +240,15 @@ public final class PreferencesActivity extends SherlockPreferenceActivity implem
 
 		return false;
 	}
-	
+
 	public void doRemoveEntry()
 	{
 
 		String uri = Constants.API_BASE_URL;
 		uri += "entries/";
 		uri += application.GetPhoneNumber();
-		
-		AsyncWebRequest<Void, Void> req = 
+
+		AsyncWebRequest<Void, Void> req =
 			new AsyncWebRequest<Void, Void>(
 				getBaseContext(),
 				uri,
@@ -260,15 +256,15 @@ public final class PreferencesActivity extends SherlockPreferenceActivity implem
 				true,
 				null,
 				null);
-		
+
 		req.setOnCompletedCallback(
-			new WebRequestCompleted<Void>() {	
+			new WebRequestCompleted<Void>() {
 				@Override
 				public void onErrorOccurred(ErrorResponse err)
 				{
 					Toast.makeText(PreferencesActivity.this, "Error deleting entry (" + err.code + ")", Toast.LENGTH_SHORT).show();
 				}
-				
+
 				@Override
 				public void onComplete(Void result) {
 					Toast.makeText(PreferencesActivity.this, "Entry Deleted", Toast.LENGTH_SHORT).show();
@@ -277,7 +273,7 @@ public final class PreferencesActivity extends SherlockPreferenceActivity implem
 					deleteEntryPreference.setEnabled(false);
 				}
 			});
-		
+
 		req.execute();
 	}
 
@@ -293,6 +289,8 @@ public final class PreferencesActivity extends SherlockPreferenceActivity implem
 		{
 			application.stopBlockchainService();
 		}
+
+        broadcastWidgetUpdate();
 
 		return true;
 	}
@@ -310,4 +308,37 @@ public final class PreferencesActivity extends SherlockPreferenceActivity implem
 			trustedPeerOnlyPreference.setEnabled(true);
 		}
 	}
+
+    @Override
+    public void onResume()
+    {
+        super.onResume();
+        prefs.registerOnSharedPreferenceChangeListener(this);
+    }
+
+    @Override
+    public void onPause()
+    {
+        super.onPause();
+        prefs.unregisterOnSharedPreferenceChangeListener(this);
+    }
+
+    @Override
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+
+        if(Constants.PREFS_KEY_APP_PIN_VALUE.equals(key)){
+            boolean setAppPinEnabled = !sharedPreferences.getString(Constants.PREFS_KEY_APP_PIN_VALUE,"").equals("");
+            sharedPreferences.edit().putBoolean(Constants.PREFS_KEY_APP_PIN_ENABLED, setAppPinEnabled).commit();
+            Pin.setPinAuthorized(this, true);
+        }
+
+        broadcastWidgetUpdate();
+    }
+
+    private void broadcastWidgetUpdate()
+    {
+        Intent broadcast = new Intent();
+        broadcast.setAction(Constants.ACTION_APP_WIDGET_UPDATE);
+        sendBroadcast(broadcast);
+    }
 }

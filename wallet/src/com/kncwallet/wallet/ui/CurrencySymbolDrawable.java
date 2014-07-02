@@ -19,6 +19,7 @@ package com.kncwallet.wallet.ui;
 
 import javax.annotation.Nonnull;
 
+import android.graphics.Typeface;
 import com.kncwallet.wallet.Constants;
 
 import android.graphics.Canvas;
@@ -35,11 +36,20 @@ public final class CurrencySymbolDrawable extends Drawable
 	private final String symbol;
 	private final float y;
 
-	public CurrencySymbolDrawable(@Nonnull final String symbol, final float textSize, final int color, final float y)
+    public CurrencySymbolDrawable(@Nonnull final String symbol, final float textSize, final int color, final float y)
+    {
+        this(symbol, textSize, color, y, null);
+    }
+
+	public CurrencySymbolDrawable(@Nonnull final String symbol, final float textSize, final int color, final float y, Typeface typeface)
 	{
 		paint.setColor(color);
 		paint.setAntiAlias(true);
 		paint.setTextSize(textSize);
+
+        if(typeface != null){
+            paint.setTypeface(typeface);
+        }
 
 		this.symbol = symbol + Constants.CHAR_HAIR_SPACE;
 		this.y = y;

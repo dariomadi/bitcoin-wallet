@@ -18,7 +18,7 @@
 		android:layout_height="wrap_content"
 		android:gravity="center"
 		android:orientation="vertical" >
-		
+
 		<com.kncwallet.wallet.ui.CurrencyTextView
 			android:id="@+id/wallet_balance_btc"
 			android:layout_width="wrap_content"
@@ -26,7 +26,7 @@
 			android:textSize="@dimen/font_size_wallet_balance_small"
 			android:textColor="@color/knc_highlight"
 		 />
-		
+
 		<com.kncwallet.wallet.ui.CurrencyTextView
 			android:id="@+id/wallet_balance_local"
 			android:layout_width="wrap_content"
@@ -34,7 +34,7 @@
 			android:textSize="@dimen/font_size_wallet_balance_small"
 			android:textColor="@color/knc_highlight"
 			android:visibility="gone" />
-		
+
 		<TextView
 			android:id="@+id/wallet_balance_progress"
 			android:layout_width="wrap_content"
@@ -43,21 +43,16 @@
 			android:textColor="@color/fg_less_significant"
 			android:textSize="@dimen/font_size_small"
 			android:visibility="gone" />
-		
-		<FrameLayout
-			android:layout_width="wrap_content"
-			android:layout_height="wrap_content"
-			android:layout_gravity="center"
-			android:layout_marginTop="8dp" >
 
 			<ImageView
 				android:id="@+id/request_coins_qr"
+                android:layout_marginTop="8dp"
 				android:layout_width="@dimen/wallet_address_qr_size_large"
 				android:layout_height="@dimen/wallet_address_qr_size_large"
 				android:layout_gravity="center"
 				android:background="@drawable/qrcode_frame"
 				android:scaleType="centerInside" />
-		</FrameLayout>
+
 		
 		<TextView android:id="@+id/bitcoin_address_label"
 		    android:textSize="@dimen/font_size_wallet_address"
@@ -69,31 +64,17 @@
 		    android:layout_marginTop="12dp"
 		     />
    	</LinearLayout>
-   	<LinearLayout
-   	    android:id="@+id/receive_buttons"
-		android:layout_width="match_parent"
-		android:layout_height="wrap_content"
-		android:layout_marginTop="12dp"
-		android:gravity="center"
-		android:orientation="horizontal"
-		android:visibility="gone"
-		>
-		<Button
-		    android:id="@+id/receive_button_email"
-		    android:text="@string/receive_email_button_text"
-		    android:layout_width="0dp"
-		    android:layout_height="wrap_content"
-		    android:layout_weight="10"
-		/>
-		
-		<Button
-		    android:id="@+id/receive_button_copy"
-		    android:layout_width="0dp"
-		    android:layout_height="wrap_content"
-		    android:layout_weight="10"
-		    android:text="@string/receive_clipboard_button_text"
-		/>
-   	    
-   	</LinearLayout>
+
+    <Button
+            android:layout_gravity="center"
+            android:id="@+id/button_share_this_address"
+            android:layout_width="@dimen/wallet_address_qr_size_large"
+            android:drawableStart="@drawable/ic_action_share"
+            android:text="@string/share_this_address"
+            android:drawablePadding="15dp"
+            android:gravity="left|center_vertical"
+            android:layout_height="50dp"
+            android:visibility="gone"
+            android:layout_marginTop="10dp"/>
 
 </LinearLayout>

@@ -27,6 +27,7 @@ import javax.annotation.Nullable;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Paint;
+import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Parcelable;
@@ -50,7 +51,8 @@ import com.kncwallet.wallet.Constants;
 import com.kncwallet.wallet.util.GenericUtils;
 import com.kncwallet.wallet.util.WalletUtils;
 
-import com.kncwallet.wallet_test.R;
+import com.kncwallet.wallet.R;
+import org.h2.schema.Constant;
 
 /**
  * @author Andreas Schildbach
@@ -138,20 +140,14 @@ public final class CurrencyAmountView extends FrameLayout
 
 	public void setCurrencySymbol(@Nullable final String currencyCode)
 	{
-		if (Constants.CURRENCY_CODE_BTC.equals(currencyCode))
-		{
-			currencySymbolDrawable = getResources().getDrawable(R.drawable.currency_symbol_btc);
-		}
-		else if (Constants.CURRENCY_CODE_MBTC.equals(currencyCode))
-		{
-			currencySymbolDrawable = getResources().getDrawable(R.drawable.currency_symbol_mbtc);
-		}
-		else if (currencyCode != null)
+        Typeface typeface = Typeface.createFromAsset(getContext().getAssets(), "DejaVuSansCondensed.ttf");
+
+        if (currencyCode != null)
 		{
 			final String currencySymbol = currencySymbol(currencyCode);
 			final float textSize = textView.getTextSize();
 			final float smallerTextSize = textSize * (smallerInsignificant ? (20f / 24f) : 1);
-			currencySymbolDrawable = new CurrencySymbolDrawable(currencySymbol, smallerTextSize, lessSignificantColor, textSize * 0.37f);
+			currencySymbolDrawable = new CurrencySymbolDrawable(currencySymbol, smallerTextSize, lessSignificantColor, textSize * 0.37f, typeface);
 		}
 		else
 		{
@@ -425,6 +421,19 @@ public final class CurrencyAmountView extends FrameLayout
 	{
 		try
 		{
+            if (Constants.CURRENCY_CODE_BTC.equals(currencyCode))
+            {
+                return Constants.BITCOIN_BTC;
+            }
+            else if (Constants.CURRENCY_CODE_MBTC.equals(currencyCode))
+            {
+                return Constants.BITCOIN_MBTC;
+            }
+            else if(Constants.CURRENCY_CODE_BITS.equals(currencyCode)){
+                return Constants.BITCOIN_BITS;
+            }
+
+
 			final Currency currency = Currency.getInstance(currencyCode);
 			return currency.getSymbol();
 		}

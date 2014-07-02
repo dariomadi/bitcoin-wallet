@@ -65,7 +65,7 @@ import com.kncwallet.wallet.service.BlockchainService;
 import com.kncwallet.wallet.service.BlockchainServiceImpl;
 import com.kncwallet.wallet.util.WalletUtils;
 
-import com.kncwallet.wallet_test.R;
+import com.kncwallet.wallet.R;
 
 /**
  * @author Andreas Schildbach

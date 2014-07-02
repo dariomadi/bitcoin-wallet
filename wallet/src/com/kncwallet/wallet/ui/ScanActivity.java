@@ -24,7 +24,6 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
@@ -59,12 +58,12 @@ import com.google.zxing.common.HybridBinarizer;
 import com.google.zxing.qrcode.QRCodeReader;
 import com.kncwallet.wallet.camera.CameraManager;
 
-import com.kncwallet.wallet_test.R;
+import com.kncwallet.wallet.R;
 
 /**
  * @author Andreas Schildbach
  */
-public final class ScanActivity extends Activity implements SurfaceHolder.Callback
+public final class ScanActivity extends AbstractActivity implements SurfaceHolder.Callback
 {
 	public static final String INTENT_EXTRA_RESULT = "result";
 

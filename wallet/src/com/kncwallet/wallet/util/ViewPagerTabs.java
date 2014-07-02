@@ -31,7 +31,7 @@ import android.os.Parcelable;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
 import android.util.AttributeSet;
 import android.view.View;
-import com.kncwallet.wallet_test.R;
+import com.kncwallet.wallet.R;
 
 /**
  * @author Andreas Schildbach
@@ -128,6 +128,12 @@ public class ViewPagerTabs extends View implements OnPageChangeListener
 		}
 	}
 
+    public void forceRedrawAtPosition(int position){
+        pagePosition = position;
+        pageOffset = position;
+        invalidate();
+    }
+
 	@Override
 	protected void onMeasure(final int widthMeasureSpec, final int heightMeasureSpec)
 	{
@@ -154,6 +160,8 @@ public class ViewPagerTabs extends View implements OnPageChangeListener
 			height = getSuggestedMinimumHeight();
 
 		setMeasuredDimension(width, height);
+
+
 	}
 
 	@Override

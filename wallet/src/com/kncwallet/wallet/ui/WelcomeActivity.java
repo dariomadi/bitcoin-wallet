@@ -6,6 +6,8 @@
 package com.kncwallet.wallet.ui;
 
 import com.actionbarsherlock.app.ActionBar;
+import com.actionbarsherlock.app.SherlockActivity;
+
 import com.google.bitcoin.core.Address;
 import com.google.gson.reflect.TypeToken;
 import com.kncwallet.wallet.Constants;
@@ -19,7 +21,7 @@ import com.kncwallet.wallet.util.AsyncWebRequest;
 import com.kncwallet.wallet.util.ErrorResponse;
 import com.kncwallet.wallet.util.WebRequestCompleted;
 
-import com.kncwallet.wallet_test.R;
+import com.kncwallet.wallet.R;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.app.Activity;
@@ -37,18 +39,18 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
 
-public class WelcomeActivity extends Activity {
+public class WelcomeActivity extends AbstractSherlockActivity {
 	private static final String TAG = "WelcomeActivity";
-	
+
 	private static final int DIALOG_WELCOME = 0;
 	private static final int DIALOG_CODE = 1;
-	
+
 	private WalletApplication application;
 	private Address bitcoinAddress;
 	private String phoneNumber;
 	private String phoneID;
 	private SharedPreferences prefs;
-	
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -58,20 +60,20 @@ public class WelcomeActivity extends Activity {
 		phoneNumber = application.GetPhoneNumber();
 		phoneID = application.GetPhoneID();
 		prefs = PreferenceManager.getDefaultSharedPreferences(this);
-		
-		final android.app.ActionBar actionBar = getActionBar();
+
+		final ActionBar actionBar = getSupportActionBar();
 		actionBar.setBackgroundDrawable(new ColorDrawable(getResources().getColor(R.color.knc_action_bar_background)));
 		actionBar.setStackedBackgroundDrawable(new ColorDrawable(getResources().getColor(R.color.knc_background_lighter)));
 		actionBar.setIcon(R.drawable.ic_knclogo);
-		
+
 		showCurrentDialog();
 	}
-	
+
 	private void showCurrentDialog()
 	{
 		if(this.isFinishing())
 			return;
-		
+
 		if(!prefs.getBoolean("registrationComplete", false))
 		{
 			if(prefs.getString("clientID", null) != null)
@@ -91,38 +93,39 @@ public class WelcomeActivity extends Activity {
 	{
 		if(id == DIALOG_WELCOME)
 			return createWelcomeDialog();
-		
+
 		if(id == DIALOG_CODE)
 			return createSmsCodeDialog();
-		
+
 		throw new IllegalArgumentException();
 	}
-	
+
 	//initial dialog on first run
 	private Dialog createWelcomeDialog()
 	{
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        
+
         View inflated = getLayoutInflater().inflate(R.layout.welcome_dialog, null);
         final EditText editor = (EditText)inflated.findViewById(R.id.welcome_phone_number_input);
-    
-        editor.setText(phoneNumber);    
+
+        editor.setText(phoneNumber);
         builder.setView(inflated);
         builder.setCancelable(false);
         builder.setTitle(R.string.welcome_title);
         builder
                .setPositiveButton(R.string.welcome_confirm, new DialogInterface.OnClickListener() {
                    public void onClick(DialogInterface dialog, int id) {
-                	   phoneNumber = WalletApplication.FixPhoneNumber(getApplicationContext(), editor.getText().toString());
+                       phoneNumber = WalletApplication.FixPhoneNumber(getApplicationContext(), editor.getText().toString());
                 	   prefs.edit().putString("phoneNumber", phoneNumber).commit();
                 	   if(phoneNumber == null)
                 	   {
-                		   dialog.cancel();
                 		   runOnUiThread(new Runnable() {
                                @Override
                                public void run() {
                             	   Toast.makeText(WelcomeActivity.this, "Invalid phone number", Toast.LENGTH_SHORT).show();
-                            	   showCurrentDialog();
+
+                           createWelcomeDialog();
+
                                }
                 		   });
                 	   } else {
@@ -131,23 +134,23 @@ public class WelcomeActivity extends Activity {
                 	   }
                    }
                });
-        
+
         editor.addTextChangedListener(new PhoneNumberFormattingTextWatcher());
-        
+
         // Create the AlertDialog object and return it
 		return builder.create();
 	}
-	
+
 	//initial post of registration details
 	private void submitRegistration()
 	{
 		RegistrationRequest payload = new RegistrationRequest(new RegistrationEntry(phoneNumber,bitcoinAddress.toString(), phoneID));
 		String uri = Constants.API_BASE_URL;
 		uri += "entries";
-		
+
 		TypeToken<ServerResponse<RegistrationResult>> typeHelper = new TypeToken<ServerResponse<RegistrationResult>>(){};
-				 	
-		AsyncWebRequest<RegistrationRequest, RegistrationResult> req = 
+
+		AsyncWebRequest<RegistrationRequest, RegistrationResult> req =
 				new AsyncWebRequest<RegistrationRequest, RegistrationResult>(
 									getBaseContext(),
 									uri,
@@ -155,14 +158,14 @@ public class WelcomeActivity extends Activity {
 									false,
 									payload,
 									typeHelper);
-		
+
 		req.setOnCompletedCallback(
 			new WebRequestCompleted<RegistrationResult>() {
 				@Override
 				public void onComplete(RegistrationResult result) {
 					WelcomeActivity.this.handleRegistrationComplete(result);
 				}
-					
+
 				@Override
 				public void onErrorOccurred(ErrorResponse err)
 				{
@@ -170,10 +173,10 @@ public class WelcomeActivity extends Activity {
 				}
 			}
 		);
-		
+
 		req.execute();
 	}
-	
+
 	//code returned for debugging currently - will be sent to user via SMS
 	private String code;
 	//on completion of registration request
@@ -188,23 +191,23 @@ public class WelcomeActivity extends Activity {
 		Log.d(TAG, "Server returned sms code: " + res.code);
 		showCurrentDialog();
 	}
-	
+
 	//dialog once registration has been submitted and awaiting sms
 	private Dialog createSmsCodeDialog()
 	{
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setCancelable(false);
         builder.setTitle(R.string.welcome_title);
-       
+
         View inflated = getLayoutInflater().inflate(R.layout.sms_code_dialog, null);
         final EditText editor = (EditText)inflated.findViewById(R.id.sms_code_dialog_input);
-        
+
         if(code != null)
         	editor.setText(code);
-        
-               
+
+
         builder.setView(inflated)
-        
+
                .setPositiveButton(R.string.sms_confirm, new DialogInterface.OnClickListener() {
                    public void onClick(DialogInterface dialog, int id) {
                        dialog.cancel();
@@ -218,9 +221,9 @@ public class WelcomeActivity extends Activity {
             	   }
                });
         // Create the AlertDialog object and return it
-        final AlertDialog dialog = builder.create();        	
-        
-        
+        final AlertDialog dialog = builder.create();
+
+
         dialog.setOnShowListener(new OnShowListener() {
             @Override
             public void onShow(DialogInterface dialog) {
@@ -228,7 +231,7 @@ public class WelcomeActivity extends Activity {
             		((AlertDialog)dialog).getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(false);
             }
         });
-        
+
         editor.addTextChangedListener(new TextWatcher() {
 
             @Override
@@ -250,10 +253,10 @@ public class WelcomeActivity extends Activity {
 			     }
 			}
         });
-        
+
 		return dialog;
 	}
-	
+
 	//request to resend sms message if it never came through
 	private void submitResend()
 	{
@@ -261,10 +264,10 @@ public class WelcomeActivity extends Activity {
 		uri += "entries/";
 		uri += phoneNumber;
 		uri += "/authToken";
-		
+
 		TypeToken<ServerResponse<RegistrationResult>> typeHelper = new TypeToken<ServerResponse<RegistrationResult>>(){};
-		
-		AsyncWebRequest<Void, RegistrationResult> req = 
+
+		AsyncWebRequest<Void, RegistrationResult> req =
 				new AsyncWebRequest<Void, RegistrationResult>(
 									getBaseContext(),
 									uri,
@@ -272,14 +275,14 @@ public class WelcomeActivity extends Activity {
 									true,
 									null,
 									typeHelper);
-		
+
 		req.setOnCompletedCallback(
 			new WebRequestCompleted<RegistrationResult>() {
 				@Override
 				public void onComplete(RegistrationResult result) {
 					WelcomeActivity.this.handleSMSResent();
 				}
-					
+
 				@Override
 				public void onErrorOccurred(ErrorResponse err)
 				{
@@ -290,7 +293,7 @@ public class WelcomeActivity extends Activity {
 
 		req.execute();
 	}
-	
+
 	//on successful sms re-send
 	private void handleSMSResent()
 	{
@@ -298,18 +301,18 @@ public class WelcomeActivity extends Activity {
 		Toast.makeText(WelcomeActivity.this, "SMS Re-sent", Toast.LENGTH_SHORT).show();
 		showCurrentDialog();
 	}
-	
+
 	//user has entered code, validate their registration
 	private void submitValidation(String authCode)
 	{
 		ValidateRegistrationRequest payload = new ValidateRegistrationRequest(
 													authCode);
-		
+
 		String uri = Constants.API_BASE_URL;
 		uri += "entries/";
 		uri += phoneNumber;
-		
-		AsyncWebRequest<ValidateRegistrationRequest, Void> req = 
+
+		AsyncWebRequest<ValidateRegistrationRequest, Void> req =
 				new AsyncWebRequest<ValidateRegistrationRequest, Void>(
 									getBaseContext(),
 									uri,
@@ -317,9 +320,9 @@ public class WelcomeActivity extends Activity {
 									true,
 									payload,
 									null);
-		
+
 		req.setOnCompletedCallback(
-			new WebRequestCompleted<Void>() {	
+			new WebRequestCompleted<Void>() {
 				@Override
 				public void onErrorOccurred(ErrorResponse err)
 				{
@@ -335,24 +338,24 @@ public class WelcomeActivity extends Activity {
 
 		req.execute();
 	}
-	
+
 	//registration is complete
 	private void handleEntryValidated()
 	{
 		prefs.edit().putBoolean("registrationComplete", true).commit();
 		showCurrentDialog();
 	}
-	
+
 	//display error alert if things go wrong
 	private void displayError(String errorText)
 	{
 		if(this.isFinishing())
 			return;
-		
+
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setCancelable(false);
         builder.setTitle(R.string.welcome_title);
-        
+
         String message = getString(R.string.http_error_message) + errorText;
         builder.setMessage(message)
                .setPositiveButton(R.string.http_error_ok, new DialogInterface.OnClickListener() {

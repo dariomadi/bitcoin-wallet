@@ -75,7 +75,7 @@ import com.kncwallet.wallet.util.Qr;
 import com.kncwallet.wallet.util.ThrottlingWalletChangeListener;
 import com.kncwallet.wallet.util.WalletUtils;
 
-import com.kncwallet.wallet_test.R;
+import com.kncwallet.wallet.R;
 
 /**
  * @author Andreas Schildbach
@@ -145,7 +145,7 @@ public class TransactionsListFragment extends SherlockListFragment implements Lo
 	{
 		super.onCreate(savedInstanceState);
 
-		//setRetainInstance(true);
+		setRetainInstance(true);
 
 		this.direction = (Direction) getArguments().getSerializable(KEY_DIRECTION);
 
@@ -241,9 +241,6 @@ public class TransactionsListFragment extends SherlockListFragment implements Lo
 			@Override
 			public boolean onPrepareActionMode(final ActionMode mode, final Menu menu)
 			{
-				if(!isAdded())
-					return false;
-				
 				try
 				{
 					final Date time = tx.getUpdateTime();

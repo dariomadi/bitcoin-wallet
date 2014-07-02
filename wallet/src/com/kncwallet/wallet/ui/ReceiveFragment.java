@@ -32,6 +32,7 @@ import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.nfc.NfcManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.LoaderManager;
@@ -64,16 +65,19 @@ import com.kncwallet.wallet.ExchangeRatesProvider;
 import com.kncwallet.wallet.WalletApplication;
 import com.kncwallet.wallet.ExchangeRatesProvider.ExchangeRate;
 import com.kncwallet.wallet.service.BlockchainService;
+import com.kncwallet.wallet.ui.util.AnimationUtil;
+import com.kncwallet.wallet.ui.view.KnCFragment;
 import com.kncwallet.wallet.util.Bluetooth;
+import com.kncwallet.wallet.util.DenominationUtil;
 import com.kncwallet.wallet.util.Nfc;
 import com.kncwallet.wallet.util.Qr;
 import com.kncwallet.wallet.util.ViewPagerTabs;
 import com.kncwallet.wallet.util.WalletUtils;
 
-import com.kncwallet.wallet_test.R;
+import com.kncwallet.wallet.R;
 
 
-public class ReceiveFragment extends SherlockFragment {
+public class ReceiveFragment extends KnCFragment {
 
 	private WalletApplication application;
 	private AbstractWalletActivity activity;
@@ -127,7 +131,7 @@ public class ReceiveFragment extends SherlockFragment {
 		super.onCreate(savedInstanceState);
 		
 		//TODO: make sure this doesnt break anything!
-		//setRetainInstance(true);
+		setRetainInstance(true);
 	}
 	
 	@Override
@@ -174,16 +178,8 @@ public class ReceiveFragment extends SherlockFragment {
 			viewBalanceLocal.setVisibility(View.GONE);
 			return;
 		}
-		
-		if(viewBalanceBtc.getVisibility() == View.VISIBLE)
-		{
-			viewBalanceBtc.setVisibility(View.GONE);
-			viewBalanceLocal.setVisibility(View.VISIBLE);
-		} else {
-			viewBalanceBtc.setVisibility(View.VISIBLE);
-			viewBalanceLocal.setVisibility(View.GONE);
-		}
-		
+
+        AnimationUtil.toggleViews(viewBalanceBtc, viewBalanceLocal);
 	}
 	
 	@Override
@@ -222,31 +218,47 @@ public class ReceiveFragment extends SherlockFragment {
 		viewProgress = (TextView) view.findViewById(R.id.wallet_balance_progress);
 		
 		qrView = (ImageView) view.findViewById(R.id.request_coins_qr);
+        qrView.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                shareThisAddress();
+            }
+        });
 		
 		TextView header = ((TextView) view.findViewById(R.id.header_text));
 		
 		bitcoinAddressLabel = (TextView) view.findViewById(R.id.bitcoin_address_label);
-		
+
+        if(Build.VERSION.SDK_INT < 14){
+            bitcoinAddressLabel.setOnClickListener(new OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    shareThisAddress();
+                }
+            });
+        }
+
 		header.setText(R.string.receive_heading);
-	
-		final Button copybutton = (Button) view.findViewById(R.id.receive_button_copy);
-	    copybutton.setOnClickListener(new View.OnClickListener() {
-	         public void onClick(View v) {
-	        	 handleCopy();
-	         }
-	     });
-	     
-	     final Button emailbutton = (Button) view.findViewById(R.id.receive_button_email);
-		 emailbutton.setOnClickListener(new View.OnClickListener() {
-		         public void onClick(View v) {
-		        	 handleEmail();
-		         }
-		 });
+
+        final Button shareButton = (Button) view.findViewById(R.id.button_share_this_address);
+        shareButton.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                shareThisAddress();
+            }
+        });
 		 
 		 setHasOptionsMenu(true);
 	}
-	
-	@Override
+
+    private void shareThisAddress() {
+        Intent shareIntent = new Intent(android.content.Intent.ACTION_SEND);
+        shareIntent.putExtra(Intent.EXTRA_TEXT, lastSelectedAddress.toString());
+        shareIntent.setType("text/plain");
+        getActivity().startActivity(Intent.createChooser(shareIntent, getString(R.string.share_this_address)));
+    }
+
+    @Override
 	public void onResume()
 	{
 		super.onResume();
@@ -338,7 +350,7 @@ public class ReceiveFragment extends SherlockFragment {
 				final String precision = prefs.getString(Constants.PREFS_KEY_BTC_PRECISION, Constants.PREFS_DEFAULT_BTC_PRECISION);
 				final int btcPrecision = precision.charAt(0) - '0';
 				final int btcShift = precision.length() == 3 ? precision.charAt(2) - '0' : 0;
-				final String prefix = btcShift == 0 ? Constants.CURRENCY_CODE_BTC : Constants.CURRENCY_CODE_MBTC;
+				final String prefix = DenominationUtil.getCurrencyCode(btcShift);
 
 				viewBalanceBtc.setVisibility(View.VISIBLE);
 				viewBalanceBtc.setPrecision(btcPrecision, btcShift);
@@ -358,7 +370,7 @@ public class ReceiveFragment extends SherlockFragment {
 			viewBalance.setVisibility(View.INVISIBLE);
 		}
 		
-		if (exchangeRate != null)
+		if (exchangeRate != null && exchangeRate.rate != null && balance != null)
 		{
 			final BigInteger localValue = WalletUtils.localValue(balance, exchangeRate.rate);
 			viewBalanceLocal.setSuffix(exchangeRate.currencyCode);
@@ -485,5 +497,10 @@ public class ReceiveFragment extends SherlockFragment {
 			}
 		}
 	};
+
+    @Override
+    public void isShowing() {
+
+    }
 	
 }

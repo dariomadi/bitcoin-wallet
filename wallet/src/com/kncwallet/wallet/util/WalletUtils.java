@@ -45,6 +45,7 @@ import android.text.format.DateUtils;
 import android.text.style.RelativeSizeSpan;
 import android.text.style.StyleSpan;
 import android.text.style.TypefaceSpan;
+import android.util.Log;
 
 import com.google.bitcoin.core.Address;
 import com.google.bitcoin.core.AddressFormatException;
@@ -115,7 +116,7 @@ public class WalletUtils
 	private static final Object SIGNIFICANT_SPAN = new StyleSpan(Typeface.BOLD);
 	public static final RelativeSizeSpan SMALLER_SPAN = new RelativeSizeSpan(0.85f);
 
-	public static void formatSignificant(@Nonnull final Editable s, @Nullable final RelativeSizeSpan insignificantRelativeSizeSpan)
+	public static void formatSignificant(@Nonnull final Spannable s, @Nullable final RelativeSizeSpan insignificantRelativeSizeSpan)
 	{
 		s.removeSpan(SIGNIFICANT_SPAN);
 		if (insignificantRelativeSizeSpan != null)
@@ -133,9 +134,6 @@ public class WalletUtils
 
 	public static BigInteger localValue(@Nonnull final BigInteger btcValue, @Nonnull final BigInteger rate)
 	{
-		if(btcValue == null || rate == null)
-			return BigInteger.valueOf(0);
-		
 		return btcValue.multiply(rate).divide(GenericUtils.ONE_BTC);
 	}
 
@@ -261,6 +259,16 @@ public class WalletUtils
 			throw new IOException("cannot read keys", x);
 		}
 	}
+
+    public static ECKey readKey(String input){
+        try {
+            return new DumpedPrivateKey(Constants.NETWORK_PARAMETERS, input).getKey();
+        } catch (AddressFormatException e) {
+            Log.e("knc",e.getMessage(),e);
+        }
+
+        return null;
+    }
 
 	public static final FileFilter KEYS_FILE_FILTER = new FileFilter()
 	{

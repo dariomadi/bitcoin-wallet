@@ -9,6 +9,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Type;
+import java.net.UnknownHostException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 
@@ -32,6 +33,7 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.os.AsyncTask;
 import android.preference.PreferenceManager;
+import android.util.Log;
 
 import com.google.common.base.Charsets;
 import com.google.common.io.CharStreams;
@@ -39,6 +41,7 @@ import com.google.common.io.Closeables;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.kncwallet.wallet.Constants;
+import com.kncwallet.wallet.R;
 import com.kncwallet.wallet.dto.ServerResponse;
 
 
@@ -121,10 +124,10 @@ public class AsyncWebRequest<TPayload, TResult> extends AsyncTask<Void, Void, Ob
 			{
 				
 				try {
-					
+
 					ErrorResponseWrapper err = deserialize(response, new TypeToken<ErrorResponseWrapper>(){}.getType());
-					if(err.error.code != 0)
-						return err.error;
+					if(err.error.code != 0 && err.error.message != null)
+                        return new ErrorResponse(statusCode, err.error.message);
 				
 				} catch (Exception ex) {}
 				
@@ -146,9 +149,14 @@ public class AsyncWebRequest<TPayload, TResult> extends AsyncTask<Void, Void, Ob
 				return new ErrorResponse(statusCode, "The server returned an invalid response");
 								
 			}
-		} catch (Exception ex)
+		}
+        catch (UnknownHostException ex) {
+            return new ErrorResponse(-1,_context.getString(R.string.http_connection_error));
+        }
+        catch (Exception ex)
 		{
-			return new ErrorResponse(-1,ex.getMessage().replace("api.kncwallet.com", "directory service"));
+            Log.e("knc",ex.getMessage()+" "+ex.getClass(),ex);
+            return new ErrorResponse(-1,ex.getMessage().replace("api.kncwallet.com", "directory service"));
 		}
 	}
 	

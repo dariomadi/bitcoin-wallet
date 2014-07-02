@@ -22,125 +22,212 @@ import java.util.List;
 
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentStatePagerAdapter;
+import android.support.v4.app.FragmentTransaction;
+import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.view.View;
+import android.view.ViewGroup;
 
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.view.MenuItem;
 import com.google.bitcoin.core.Address;
 import com.google.bitcoin.core.ECKey;
 import com.kncwallet.wallet.Constants;
+import com.kncwallet.wallet.R;
 import com.kncwallet.wallet.util.ViewPagerTabs;
 
-import com.kncwallet.wallet_test.R;
 
 /**
  * @author Andreas Schildbach
  */
 public final class AddressBookActivity extends AbstractWalletActivity
 {
+    public static void start(final Context context, final boolean sending)
+    {
+        final Intent intent = new Intent(context, AddressBookActivity.class);
+        intent.putExtra(EXTRA_SENDING, sending);
+        context.startActivity(intent);
+    }
 
-	private WalletAddressesFragment walletAddressesFragment;
-	private SendingAddressesFragment sendingAddressesFragment;
+    private static final String EXTRA_SENDING = "sending";
 
-	@Override
-	protected void onCreate(final Bundle savedInstanceState)
-	{
-		super.onCreate(savedInstanceState);
+    private WalletAddressesFragment walletAddressesFragment;
+    private SendingAddressesFragment sendingAddressesFragment;
 
-		setContentView(R.layout.address_book_content);
+    private static final String TAG_LEFT = "wallet_addresses";
+    private static final String TAG_RIGHT = "sending_addresses";
 
-		final ActionBar actionBar = getSupportActionBar();
-		actionBar.setDisplayHomeAsUpEnabled(true);
+    @Override
+    protected void onCreate(final Bundle savedInstanceState)
+    {
+        super.onCreate(savedInstanceState);
 
-		final ViewPager pager = (ViewPager) findViewById(R.id.address_book_pager);
+        setContentView(R.layout.address_book_content);
 
-		final FragmentManager fm = getSupportFragmentManager();
+        final ActionBar actionBar = getSupportActionBar();
+        actionBar.setDisplayHomeAsUpEnabled(true);
+        actionBar.setIcon(R.drawable.ic_knclogo);
+        final FragmentManager fragmentManager = getSupportFragmentManager();
 
-		if (pager != null)
-		{
-			final ViewPagerTabs pagerTabs = (ViewPagerTabs) findViewById(R.id.address_book_pager_tabs);
-			pagerTabs.addTabLabels(R.string.address_book_list_receiving_title, R.string.address_book_list_sending_title);
+        walletAddressesFragment = (WalletAddressesFragment) fragmentManager.findFragmentByTag(TAG_LEFT);
+        sendingAddressesFragment = (SendingAddressesFragment) fragmentManager.findFragmentByTag(TAG_RIGHT);
 
-			final PagerAdapter pagerAdapter = new PagerAdapter(fm);
+        final FragmentTransaction removal = fragmentManager.beginTransaction();
 
-			pager.setAdapter(pagerAdapter);
-			pager.setOnPageChangeListener(pagerTabs);
-			final int position = 1;
-			pager.setCurrentItem(position);
-			pager.setPageMargin(2);
-			pager.setPageMarginDrawable(R.color.bg_less_bright);
+        if (walletAddressesFragment == null)
+            walletAddressesFragment = new WalletAddressesFragment();
+        else
+            removal.remove(walletAddressesFragment);
 
-			pagerTabs.onPageSelected(position);
-			pagerTabs.onPageScrolled(position, 0, 0);
+        if (sendingAddressesFragment == null)
+            sendingAddressesFragment = new SendingAddressesFragment();
+        else
+            removal.remove(sendingAddressesFragment);
 
-			walletAddressesFragment = new WalletAddressesFragment();
-			sendingAddressesFragment = new SendingAddressesFragment();
-		}
-		else
-		{
-			walletAddressesFragment = (WalletAddressesFragment) fm.findFragmentById(R.id.wallet_addresses_fragment);
-			sendingAddressesFragment = (SendingAddressesFragment) fm.findFragmentById(R.id.sending_addresses_fragment);
-		}
+        if (!removal.isEmpty())
+        {
+            removal.commit();
+            fragmentManager.executePendingTransactions();
+        }
 
-		
-		actionBar.setBackgroundDrawable(new ColorDrawable(getResources().getColor(R.color.knc_action_bar_background)));
-		actionBar.setStackedBackgroundDrawable(new ColorDrawable(getResources().getColor(R.color.knc_background_lighter)));
-		actionBar.setIcon(R.drawable.ic_knclogo);
-		updateFragments();
-	}
+        final ViewPager pager = (ViewPager) findViewById(R.id.address_book_pager);
+        if (pager != null)
+        {
+            pager.setAdapter(new TwoFragmentAdapter(fragmentManager, walletAddressesFragment, sendingAddressesFragment));
 
-	@Override
-	public boolean onOptionsItemSelected(final MenuItem item)
-	{
-		switch (item.getItemId())
-		{
-			case android.R.id.home:
-				finish();
-				return true;
-		}
+            final ViewPagerTabs pagerTabs = (ViewPagerTabs) findViewById(R.id.address_book_pager_tabs);
+            pagerTabs.addTabLabels(R.string.address_book_list_receiving_title, R.string.address_book_list_sending_title);
 
-		return super.onOptionsItemSelected(item);
-	}
+            pager.setOnPageChangeListener(pagerTabs);
+            final int position = getIntent().getBooleanExtra(EXTRA_SENDING, true) ? 1 : 0;
+            pager.setCurrentItem(position);
+            pager.setPageMargin(2);
+            pager.setPageMarginDrawable(R.color.bg_less_bright);
 
-	/* private */void updateFragments()
-	{
-		final List<ECKey> keys = getWalletApplication().getWallet().getKeys();
-		final ArrayList<Address> addresses = new ArrayList<Address>(keys.size());
+            pagerTabs.onPageSelected(position);
+            pagerTabs.onPageScrolled(position, 0, 0);
+        }
+        else
+        {
+            fragmentManager.beginTransaction().add(R.id.wallet_addresses_fragment, walletAddressesFragment, TAG_LEFT)
+                    .add(R.id.sending_addresses_fragment, sendingAddressesFragment, TAG_RIGHT).commit();
+        }
 
-		for (final ECKey key : keys)
-		{
-			final Address address = key.toAddress(Constants.NETWORK_PARAMETERS);
-			addresses.add(address);
-		}
+        updateFragments();
+    }
 
-		sendingAddressesFragment.setWalletAddresses(addresses);
-	}
+    @Override
+    public boolean onOptionsItemSelected(final MenuItem item)
+    {
+        switch (item.getItemId())
+        {
+            case android.R.id.home:
+                finish();
+                return true;
+        }
 
-	private class PagerAdapter extends FragmentStatePagerAdapter
-	{
-		public PagerAdapter(final FragmentManager fm)
-		{
-			super(fm);
-		}
+        return super.onOptionsItemSelected(item);
+    }
 
-		@Override
-		public int getCount()
-		{
-			return 2;
-		}
+    /* private */void updateFragments()
+    {
+        final List<ECKey> keys = getWalletApplication().getWallet().getKeys();
+        final ArrayList<Address> addresses = new ArrayList<Address>(keys.size());
 
-		@Override
-		public Fragment getItem(final int position)
-		{
-			if (position == 0)
-				return walletAddressesFragment;
-			else
-				return sendingAddressesFragment;
-		}
-	}
+        for (final ECKey key : keys)
+        {
+            final Address address = key.toAddress(Constants.NETWORK_PARAMETERS);
+            addresses.add(address);
+        }
+
+        sendingAddressesFragment.setWalletAddresses(addresses);
+    }
+
+    private static class TwoFragmentAdapter extends PagerAdapter
+    {
+        private final FragmentManager fragmentManager;
+        private final Fragment left;
+        private final Fragment right;
+
+        private FragmentTransaction currentTransaction = null;
+        private Fragment currentPrimaryItem = null;
+
+        public TwoFragmentAdapter(final FragmentManager fragmentManager, final Fragment left, final Fragment right)
+        {
+            this.fragmentManager = fragmentManager;
+            this.left = left;
+            this.right = right;
+        }
+
+        @Override
+        public int getCount()
+        {
+            return 2;
+        }
+
+        @Override
+        public Object instantiateItem(final ViewGroup container, final int position)
+        {
+            if (currentTransaction == null)
+                currentTransaction = fragmentManager.beginTransaction();
+
+            final String tag = (position == 0) ? TAG_LEFT : TAG_RIGHT;
+            final Fragment fragment = (position == 0) ? left : right;
+            currentTransaction.add(container.getId(), fragment, tag);
+
+            if (fragment != currentPrimaryItem)
+            {
+                fragment.setMenuVisibility(false);
+                fragment.setUserVisibleHint(false);
+            }
+
+            return fragment;
+        }
+
+        @Override
+        public void destroyItem(final ViewGroup container, final int position, final Object object)
+        {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public void setPrimaryItem(final ViewGroup container, final int position, final Object object)
+        {
+            final Fragment fragment = (Fragment) object;
+            if (fragment != currentPrimaryItem)
+            {
+                if (currentPrimaryItem != null)
+                {
+                    currentPrimaryItem.setMenuVisibility(false);
+                    currentPrimaryItem.setUserVisibleHint(false);
+                }
+                if (fragment != null)
+                {
+                    fragment.setMenuVisibility(true);
+                    fragment.setUserVisibleHint(true);
+                }
+                currentPrimaryItem = fragment;
+            }
+        }
+
+        @Override
+        public void finishUpdate(final ViewGroup container)
+        {
+            if (currentTransaction != null)
+            {
+                currentTransaction.commitAllowingStateLoss();
+                currentTransaction = null;
+                fragmentManager.executePendingTransactions();
+            }
+        }
+
+        @Override
+        public boolean isViewFromObject(final View view, final Object object)
+        {
+            return ((Fragment) object).getView() == view;
+        }
+    }
 }

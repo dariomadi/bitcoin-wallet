@@ -22,6 +22,10 @@ import javax.annotation.Nonnull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -30,11 +34,18 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.SherlockFragmentActivity;
+import com.google.bitcoin.core.Address;
+import com.google.bitcoin.core.ECKey;
+import com.google.bitcoin.core.Transaction;
 import com.kncwallet.wallet.Constants;
 import com.kncwallet.wallet.WalletApplication;
 
-import com.kncwallet.wallet_test.R;
+import com.kncwallet.wallet.R;
+import com.kncwallet.wallet.util.WalletUtils;
+
+import java.math.BigInteger;
 
 /**
  * @author Andreas Schildbach
@@ -45,12 +56,30 @@ public abstract class AbstractWalletActivity extends SherlockFragmentActivity
 
 	protected static final Logger log = LoggerFactory.getLogger(AbstractWalletActivity.class);
 
+    private static final int REQUEST_SCAN_PAPER_WALLET = 12;
+
 	@Override
 	protected void onCreate(final Bundle savedInstanceState)
 	{
 		application = (WalletApplication) getApplication();
 
 		super.onCreate(savedInstanceState);
+	}
+
+	@Override
+	protected void onResume()
+	{
+		super.onResume();
+		application.stopActivityTransitionTimer();
+	}
+
+	@Override
+	protected void onPause()
+	{
+		super.onPause();
+		application.startActivityTransitionTimer();
+
+        application.checkPin();
 	}
 
 	protected WalletApplication getWalletApplication()
@@ -98,4 +127,62 @@ public abstract class AbstractWalletActivity extends SherlockFragmentActivity
 
 		log.info("just being used - last used {} minutes ago", (now - prefsLastUsed) / DateUtils.MINUTE_IN_MILLIS);
 	}
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode,
+                                    Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == REQUEST_SCAN_PAPER_WALLET && resultCode == RESULT_OK){
+            final String input = data.getStringExtra(ScanActivity.INTENT_EXTRA_RESULT);
+            handleImportKey(input);
+        }
+
+    }
+
+    protected void handlePaperWallet()
+    {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(R.string.menu_paper_wallet_title)
+                .setMessage(R.string.menu_paper_wallet_message)
+                .setPositiveButton(R.string.button_scan, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        scanPaperWallet();
+                    }
+                })
+                .setNegativeButton(R.string.button_cancel, null)
+                .show();
+    }
+
+    private void scanPaperWallet()
+    {
+        startActivityForResult(new Intent(this, ScanActivity.class), REQUEST_SCAN_PAPER_WALLET);
+    }
+
+    private void handleImportKey(String input){
+        ECKey ecKey = WalletUtils.readKey(input);
+        if(ecKey != null){
+            if(application.getWallet().hasKey(ecKey)) {
+                Toast.makeText(this, R.string.menu_paper_wallet_import_key_exist, Toast.LENGTH_LONG).show();
+            }else if(application.getWallet().addKey(ecKey)){
+                String address = ecKey.toAddress(Constants.NETWORK_PARAMETERS).toString();
+                EditAddressBookEntryFragment.edit(getSupportFragmentManager(), address);
+            }else{
+                errorImportingPrivateKey();
+            }
+
+        }else{
+            errorImportingPrivateKey();
+        }
+    }
+
+    private void errorImportingPrivateKey()
+    {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(R.string.menu_paper_wallet_title)
+                .setMessage(R.string.menu_paper_wallet_import_error)
+                .setPositiveButton(R.string.button_ok, null)
+                .show();
+    }
 }

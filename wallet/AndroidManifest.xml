@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="com.kncwallet.wallet_test"
+    package="com.kncwallet.wallet"
     android:installLocation="internalOnly"
-    android:versionCode="5"
-    android:versionName="0.9.1-test" >
+    android:versionCode="8"
+    android:versionName="0.9.4" >
 
     <uses-sdk
-        android:minSdkVersion="14"
+        android:minSdkVersion="10"
         android:targetSdkVersion="14"
         tools:ignore="OldTargetApi" />
 
@@ -24,6 +24,8 @@
     <uses-permission android:name="android.permission.READ_CONTACTS" />
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.GET_TASKS"/>
+    <uses-permission android:name="android.permission.READ_SMS" />
 
     <uses-feature
         android:name="android.hardware.touchscreen"
@@ -64,11 +66,7 @@
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
         android:theme="@style/My.Theme" >
-        <activity
-            android:name="com.kncwallet.wallet.ui.PinSettingsActivity"
-            android:configChanges="keyboard|keyboardHidden"
-            android:label="@string/title_activity_pin_settings"
-            android:screenOrientation="portrait" />
+
         <activity
             android:name="com.kncwallet.wallet.ui.WalletActivity"
             android:label="@string/app_name"
@@ -76,7 +74,7 @@
             android:launchMode="singleTask"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustNothing" />
-        
+
         <activity-alias
             android:name="com.kncwallet.wallet.WalletActivity"
             android:clearTaskOnLaunch="true"
@@ -101,7 +99,7 @@
             android:label="@string/send_coins_activity_title"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustResize" >
-            <!-- <intent-filter android:label="@string/send_coins_activity_title" >
+            <intent-filter android:label="@string/send_coins_activity_title" >
                 <action android:name="android.intent.action.VIEW" />
 
                 <data android:scheme="bitcoin" />
@@ -115,20 +113,8 @@
                 <data android:scheme="bitcoin" />
 
                 <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>-->
+            </intent-filter>
         </activity>
-        <activity
-            android:name="com.kncwallet.wallet.ui.SendCoinsQrActivity"
-            android:configChanges="keyboard|keyboardHidden"
-            android:screenOrientation="portrait"
-            android:theme="@android:style/Theme.Translucent.NoTitleBar" >
-        </activity>
-        <activity
-            android:name="com.kncwallet.wallet.ui.RequestCoinsActivity"
-            android:configChanges="keyboard|keyboardHidden"
-            android:label="@string/request_coins_activity_title"
-            android:screenOrientation="portrait"
-            android:windowSoftInputMode="adjustResize" />
         <activity
             android:name="com.kncwallet.wallet.ui.AddressBookActivity"
             android:configChanges="keyboard|keyboardHidden"
@@ -176,11 +162,11 @@
 
         <provider
             android:name="com.kncwallet.wallet.AddressBookProvider"
-            android:authorities="com.kncwallet.wallet_test.address_book"
+            android:authorities="com.kncwallet.wallet.address_book"
             android:exported="false" />
         <provider
             android:name="com.kncwallet.wallet.ExchangeRatesProvider"
-            android:authorities="com.kncwallet.wallet_test.exchange_rates"
+            android:authorities="com.kncwallet.wallet.exchange_rates"
             android:exported="false" />
 
         <service
@@ -217,6 +203,40 @@
             android:label="@string/title_activity_welcome"
             android:screenOrientation="portrait" >
         </activity>
+
+        <activity
+                android:name="com.kncwallet.wallet.ui.WelcomeWizardActivity"
+                android:label="@string/title_activity_welcome"
+                android:screenOrientation="portrait" >
+        </activity>
+
+        <receiver android:name=".ui.KnCAppWidgetSmallProvider" android:label="@string/widget_label_small">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+
+            <intent-filter>
+                <action android:name="com.kncwallet.wallet.action.WIDGET_UPDATE" />
+            </intent-filter>
+
+            <meta-data android:name="android.appwidget.provider"
+                android:resource="@xml/wallet_balance_widget_small" />
+        </receiver>
+
+        <receiver android:name=".ui.KnCAppWidgetLargeProvider" android:label="@string/widget_label_large">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+
+            <intent-filter>
+                <action android:name="com.kncwallet.wallet.action.WIDGET_UPDATE" />
+            </intent-filter>
+
+            <meta-data android:name="android.appwidget.provider"
+                android:resource="@xml/wallet_balance_widget_large" />
+        </receiver>
+
+
 
     </application>
 

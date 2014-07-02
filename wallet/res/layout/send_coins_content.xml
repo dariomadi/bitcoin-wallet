@@ -2,9 +2,11 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
 	android:layout_width="match_parent"
 	android:layout_height="match_parent"
-	android:background="@color/bg_form"
+	android:background="@color/knc_background_darker"
 	android:fillViewport="true"
-	android:scrollbars="none" >
+	android:scrollbars="none"
+
+        >
 
 	<fragment
 		android:id="@+id/send_coins_fragment"
