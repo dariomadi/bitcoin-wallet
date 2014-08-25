@@ -8,7 +8,7 @@
 
 
 
-		<ListPreference
+		<com.kncwallet.wallet.ui.dialog.ListPreference
 			android:defaultValue="2/3"
 			android:entries="@array/preferences_precision_labels"
 			android:entryValues="@array/preferences_precision_values"

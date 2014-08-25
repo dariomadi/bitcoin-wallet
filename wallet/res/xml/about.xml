@@ -24,12 +24,29 @@
 		    android:key="about_credits_zxing"
 			android:title="zxing"
 			android:summary="https://github.com/zxing/zxing" />
+
+        <Preference
+            android:key="about_credits_loopjimage"
+            android:title="Smart Image View for Android"
+            android:summary="http://loopj.com/android-smart-image-view" />
+
 	</PreferenceCategory>
     <PreferenceCategory android:title="Additional Credits">
         <Preference
             android:key="about_icon_drawer"
             android:title="IconDrawer"
             android:summary="Flag icons are made by www.IconDrawer.com" />
+
+        <Preference
+            android:key="about_action_bar_generator"
+            android:title="Android Action Bar Style Generator"
+            android:summary="http://jgilfelt.github.io/android-actionbarstylegenerator" />
+
+
+        <Preference
+            android:key="about_holo_colors_generator"
+            android:title="Android Holo Colors Generator"
+            android:summary="http://android-holo-colors.com" />
 
     </PreferenceCategory>
 

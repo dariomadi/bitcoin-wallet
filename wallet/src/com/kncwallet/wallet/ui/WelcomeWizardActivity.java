@@ -33,6 +33,7 @@ import com.kncwallet.wallet.dto.RegistrationRequest;
 import com.kncwallet.wallet.dto.RegistrationResult;
 import com.kncwallet.wallet.dto.ServerResponse;
 import com.kncwallet.wallet.dto.ValidateRegistrationRequest;
+import com.kncwallet.wallet.ui.dialog.KnCDialog;
 import com.kncwallet.wallet.ui.wizard.WizardProfileView;
 import com.kncwallet.wallet.ui.wizard.WizardView;
 import com.kncwallet.wallet.ui.wizard.WizardWaitingSmsView;
@@ -182,7 +183,7 @@ public class WelcomeWizardActivity extends AbstractSherlockActivity implements W
         final EditText editText = new EditText(this);
         editText.setHint(R.string.sms_code_input_hint);
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        KnCDialog.Builder builder = new KnCDialog.Builder(this);
         builder.setTitle(R.string.sms_code_manually)
                 .setView(editText)
                 .setPositiveButton(R.string.button_ok, new DialogInterface.OnClickListener() {
@@ -270,7 +271,7 @@ public class WelcomeWizardActivity extends AbstractSherlockActivity implements W
         if (this.isFinishing())
             return;
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        KnCDialog.Builder builder = new KnCDialog.Builder(this);
         builder.setCancelable(false);
         builder.setTitle(R.string.welcome_title);
 
@@ -281,7 +282,7 @@ public class WelcomeWizardActivity extends AbstractSherlockActivity implements W
                         dialog.cancel();
                     }
                 });
-        builder.create().show();
+        builder.show();
     }
 
     private void submitValidation(String authCode) {
@@ -448,7 +449,7 @@ public class WelcomeWizardActivity extends AbstractSherlockActivity implements W
         if (numberOfResends < 3) {
 
 
-            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            KnCDialog.Builder builder = new KnCDialog.Builder(this);
             builder.setTitle(R.string.wizard_sms_verify_fail_title)
                     .setMessage(R.string.wizard_sms_verify_fail_message)
                     .setCancelable(false)

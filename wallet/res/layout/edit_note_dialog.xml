@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true"
+    android:scrollbars="none" >
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="8dp"
+        android:orientation="vertical" >
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="12dp"
+            android:layout_marginTop="8dp"
+            android:text="@string/tx_label"
+            android:textSize="@dimen/font_size_small"
+            android:textStyle="bold" />
+
+        <EditText
+            android:id="@+id/edit_note_edit_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="12dp"
+            android:layout_marginRight="24dp"
+            android:imeOptions="flagNoExtractUi"
+            android:inputType="none"
+            android:textSize="@dimen/font_size_normal" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="12dp"
+            android:layout_marginTop="8dp"
+            android:text="@string/tx_message"
+            android:textSize="@dimen/font_size_small"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/edit_note_message"
+            android:layout_width="match_parent"
+            android:layout_marginLeft="12dp"
+            android:layout_marginRight="12dp"
+            android:layout_height="wrap_content"
+            android:textColor="@color/knc_mid_text"
+            android:textSize="@dimen/font_size_small" />
+
+    </LinearLayout>
+</ScrollView>

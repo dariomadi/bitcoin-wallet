@@ -33,6 +33,9 @@ import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.text.Html;
+import android.text.SpannableStringBuilder;
+import android.text.style.ForegroundColorSpan;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -49,12 +52,16 @@ import com.google.bitcoin.core.TransactionConfidence.ConfidenceType;
 import com.google.bitcoin.core.Wallet;
 import com.kncwallet.wallet.AddressBookProvider;
 import com.kncwallet.wallet.Constants;
+import com.kncwallet.wallet.ContactImage;
 import com.kncwallet.wallet.ExchangeRatesProvider;
+import com.kncwallet.wallet.KnownAddressProvider;
+import com.kncwallet.wallet.TransactionDataProvider;
 import com.kncwallet.wallet.util.CircularProgressView;
 import com.kncwallet.wallet.util.DenominationUtil;
 import com.kncwallet.wallet.util.WalletUtils;
 
 import com.kncwallet.wallet.R;
+import com.loopj.android.image.SmartImageView;
 
 /**
  * @author Andreas Schildbach
@@ -79,7 +86,10 @@ public class TransactionsListAdapter extends BaseAdapter
 	private final String textCoinBase;
 	private final String textInternal;
 
+    private final HashMap<String, Object> contactImageUrlsCache = new HashMap<String, Object>();
+    private final HashMap<String, Object> contactImageCache = new HashMap<String, Object>();
 	private final Map<String, String> labelCache = new HashMap<String, String>();
+    private final Map<String, Object> txDataCache = new HashMap<String, Object>();
 	private final static String CACHE_NULL_MARKER = "";
 
 	private static final String CONFIDENCE_SYMBOL_DEAD = "\u271D"; // latin cross
@@ -100,7 +110,7 @@ public class TransactionsListAdapter extends BaseAdapter
 		this.maxConnectedPeers = maxConnectedPeers;
 		//this.showBackupWarning = showBackupWarning;
 		this.showBackupWarning = false;
-		
+
 		final Resources resources = context.getResources();
 		colorCircularBuilding = resources.getColor(R.color.knc_highlight);
 		colorSignificant = resources.getColor(R.color.knc_highlight);
@@ -298,11 +308,11 @@ public class TransactionsListAdapter extends BaseAdapter
 			{
 				final Date time = tx.getUpdateTime();
 				rowTime.setText(time != null ? time.toLocaleString() : null);
-				
+
 				//if(textColor != colorSignificant)
 				//	rowTime.setTextColor(textColor);
 			}
-			
+
 			// receiving or sending
 			final TextView rowFromTo = (TextView) row.findViewById(R.id.transaction_row_fromto);
 			if (isInternal) {
@@ -331,14 +341,14 @@ public class TransactionsListAdapter extends BaseAdapter
 				label = resolveLabel(address.toString());
 			else
 				label = "?";
-			
+
 			//if(textColor != colorSignificant)
 			//	rowAddress.setTextColor(textColor);
-			
+
 			rowAddress.setText(label != null ? label : address.toString());
 			rowAddress.setTypeface(label != null ? Typeface.DEFAULT : Typeface.MONOSPACE);
 
-			ImageView img = (ImageView) row.findViewById(R.id.transaction_row_contact_image);
+			SmartImageView img = (SmartImageView) row.findViewById(R.id.transaction_row_contact_image);
 
             if(address == null) {
 
@@ -346,19 +356,25 @@ public class TransactionsListAdapter extends BaseAdapter
 
             }else if(label != null)
 			{
-			    Bitmap contactImage = AddressBookProvider.bitmapForAddress(context, address.toString());
+			    Bitmap contactImage = cachedContactImage(address.toString());
 			    if(contactImage != null) {
 			    	img.setImageBitmap(contactImage);
 			    } else {
-			    	img.setImageResource(R.drawable.contact_placeholder);
+
+                    String imageUrl = cachedImageUrl(address.toString());
+                    if(imageUrl != null){
+                        img.setImageUrl(imageUrl, R.drawable.contact_placeholder);
+                    }else {
+                        img.setImageResource(R.drawable.contact_placeholder);
+                    }
 			    }
 			} else {
 				img.setImageResource(R.drawable.contact_placeholder);
 			}
-			
+
 			// value
 			final CurrencyTextView rowValue = (CurrencyTextView) row.findViewById(R.id.transaction_row_value);
-			
+
 			//if(textColor != colorSignificant)
 			//	rowValue.setTextColor(textColor);
 
@@ -385,6 +401,9 @@ public class TransactionsListAdapter extends BaseAdapter
                     rowValue.setVisibility(View.INVISIBLE);
                 }
             }
+
+
+
 
 			// extended message
 			final View rowExtend = row.findViewById(R.id.transaction_row_extend);
@@ -436,13 +455,79 @@ public class TransactionsListAdapter extends BaseAdapter
 					rowMessage.setText(R.string.transaction_row_message_received_dead);
 					rowMessage.setTextColor(colorError);
 				}
-			}
+
+            }
+
+
+            final View rowExtra = row.findViewById(R.id.transaction_row_extra);
+            if(rowExtra != null){
+                rowExtra.setVisibility(View.GONE);
+                final TextView rowText = (TextView) row.findViewById(R.id.transaction_row_extra_message);
+                SpannableStringBuilder txDataString = resolveTxData(tx.getHashAsString(), address.toString(), sent);
+                if(txDataString != null){
+                    rowExtra.setVisibility(View.VISIBLE);
+                    rowText.setText(txDataString);
+                }
+            }
 		}
 		catch (final ScriptException x)
 		{
 			throw new RuntimeException(x);
 		}
 	}
+    private String cachedImageUrl(String address){
+        Object cached = contactImageUrlsCache.get(address);
+        if(cached == null){
+            int contactId = AddressBookProvider.resolveContactId(context, address);
+            String imageUrl = ContactImage.getImageUrl(context, contactId);
+
+            if(imageUrl != null){
+                contactImageUrlsCache.put(address, imageUrl);
+                cached = imageUrl;
+            }else{
+                contactImageUrlsCache.put(address, new Object());
+                cached = new Object();
+            }
+        }
+
+        if(cached instanceof String){
+            return (String)cached;
+        }
+
+        return null;
+    }
+
+    private Bitmap cachedContactImage(String address) {
+
+        Object cached = contactImageCache.get(address);
+        if(cached == null) {
+            Bitmap bitmap = AddressBookProvider.bitmapForAddress(context, address);
+
+            if(bitmap == null){ //check if its a known old address
+
+                KnownAddressProvider.KnownAddress knownAddress = KnownAddressProvider.getKnown(context, address);
+                if(knownAddress != null){
+                    String currentAddress = AddressBookProvider.getAddress(context, knownAddress.contactId);
+                    if(currentAddress != null){
+                        bitmap = AddressBookProvider.bitmapForAddress(context, currentAddress);
+                    }
+                }
+            }
+
+            if(bitmap != null){
+                contactImageCache.put(address, bitmap);
+                cached = bitmap;
+            }else{
+                contactImageCache.put(address, new Object());
+                cached = new Object();
+            }
+        }
+
+        if(cached instanceof Bitmap){
+            return (Bitmap)cached;
+        }
+        return null;
+    }
 
 	private String resolveLabel(@Nonnull final String address)
 	{
@@ -462,10 +547,84 @@ public class TransactionsListAdapter extends BaseAdapter
 		}
 	}
 
+    public void clearTxDataCache()
+    {
+        txDataCache.clear();
+        contactImageCache.clear();
+        contactImageUrlsCache.clear();
+        notifyDataSetChanged();
+    }
+
 	public void clearLabelCache()
 	{
 		labelCache.clear();
-
+        contactImageCache.clear();
+        contactImageUrlsCache.clear();
 		notifyDataSetChanged();
 	}
+
+    public void loadTxDataFromDirectory(final String txId, final String address, final boolean sent)
+    {
+        TransactionDataProvider.getTxDataFromDirectory(context, txId, address, sent, new TransactionDataProvider.TransactionDataProviderDirectoryListener() {
+            @Override
+            public void foundData(TransactionDataProvider.TxData txData) {
+                TransactionDataProvider.saveTxData(context, txId, txData.message, txData.label);
+                txDataCache.remove(txId);
+                labelCache.remove(address);
+                contactImageCache.remove(address);
+                notifyDataSetChanged();
+            }
+
+            @Override
+            public void noData(String txId) {
+                TransactionDataProvider.markLookedUp(context, txId);
+            }
+        });
+    }
+
+    public SpannableStringBuilder resolveTxData(final String txId, final String address, final boolean sent){
+
+        final Object cached = txDataCache.get(txId);
+        if(cached == null){
+
+
+            TransactionDataProvider.TxData txData = TransactionDataProvider.getTxData(context, txId);
+
+            if(txData == null){
+                loadTxDataFromDirectory(txId, address, sent);
+            }
+
+            if(txData != null && (txData.message!=null || txData.label != null)){
+
+                String note = txData.label != null ? txData.label : "";
+
+                String message = txData.message != null ? txData.message : "";
+
+                if(note.length()>0 && message.length()>0){
+                    note+="\n";
+                }
+
+                if((note+message).length() == 0){
+                    txDataCache.put(txId, new Object());
+                    return null;
+                }
+
+                SpannableStringBuilder spannableStringBuilder = new SpannableStringBuilder(note+message);
+                if(note.length() > 0) {
+                    spannableStringBuilder.setSpan(new ForegroundColorSpan(context.getResources().getColor(R.color.knc_highlight)), 0, note.length(), SpannableStringBuilder.SPAN_EXCLUSIVE_EXCLUSIVE);
+                }
+                if(message.length() > 0) {
+                    spannableStringBuilder.setSpan(new ForegroundColorSpan(context.getResources().getColor(R.color.knc_mid_text)), note.length(), note.length() + message.length(), SpannableStringBuilder.SPAN_EXCLUSIVE_EXCLUSIVE);
+                }
+                txDataCache.put(txId, spannableStringBuilder);
+                return spannableStringBuilder;
+            }else{
+                txDataCache.put(txId, new Object());
+                return null;
+            }
+
+        }else{
+            return cached.getClass() == SpannableStringBuilder.class ? (SpannableStringBuilder)cached : null;
+        }
+    }
 }

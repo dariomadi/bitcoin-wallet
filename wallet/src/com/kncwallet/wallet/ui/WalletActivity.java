@@ -49,6 +49,9 @@ import javax.annotation.Nullable;
 
 import android.app.ActivityManager;
 import com.actionbarsherlock.view.ActionMode;
+import com.kncwallet.wallet.KnownAddressProvider;
+import com.kncwallet.wallet.TransactionDataProvider;
+import com.kncwallet.wallet.ui.dialog.KnCDialog;
 import com.kncwallet.wallet.ui.view.KnCFragment;
 import com.kncwallet.wallet.ui.wizard.WizardWelcomeView;
 import com.kncwallet.wallet.util.*;
@@ -167,7 +170,6 @@ public final class WalletActivity extends AbstractBindServiceActivity implements
 	public static final String INTENT_EXTRA_AMOUNT = "amount";
 	public static final String INTENT_EXTRA_BLUETOOTH_MAC = "bluetooth_mac";
 
-
 	private static final int REQUEST_CODE_SCAN = 0;
 
     private ActionMode currentActionMode;
@@ -255,6 +257,7 @@ public final class WalletActivity extends AbstractBindServiceActivity implements
         Pin.setPinAuthorized(this, false);
 
 	}
+
 
     @Override
     public ActionMode startActionMode(ActionMode.Callback callback) {
@@ -350,143 +353,7 @@ public final class WalletActivity extends AbstractBindServiceActivity implements
 	    return activeNetworkInfo != null && activeNetworkInfo.isConnected();
 	}
 
-	//get the list of local contacts from the address book
-	//on complete, look them up on the server
-	public void doContactsLookup()
-	{
-		final boolean hasNetwork = isNetworkAvailable();
-		if(!hasNetwork)
-			return;
 
-		if(prefs.getBoolean("entry_deleted", false))
-			return;
-
-		ContactsFetcher fetcher = new ContactsFetcher(getBaseContext(), application.GetPhoneNumber());
-		fetcher.setOnCompletedCallback(new ContactsRetrieved() {
-			@Override
-			public void onContactsRetrieved(List<AddressBookContact> contacts)
-			{
-				WalletActivity.this.lookupRemoteContacts(contacts);
-			}
-
-			@Override
-			public void onErrorOccurred() {
-				// TODO Auto-generated method stub
-				Toast.makeText(WalletActivity.this, "Failed to load Contacts.", Toast.LENGTH_SHORT).show();
-			}
-		});
-
-		fetcher.execute();
-	}
-
-	//send web request to the server with contacts
-	//on complete, save them locally
-	private List<AddressBookContact> requestedContacts;
-	public void lookupRemoteContacts(List<AddressBookContact> contacts)
-	{
-		requestedContacts = contacts;
-
-		if(requestedContacts == null)
-			return;
-
-		ContactsRequest payload = new ContactsRequest(contacts);
-
-		String uri = Constants.API_BASE_URL;
-		uri += "entries/";
-		uri += application.GetPhoneNumber();
-		uri += "/contacts";
-
-		TypeToken<ServerResponse<ArrayList<ContactResponse>>> typeHelper = new TypeToken<ServerResponse<ArrayList<ContactResponse>>>(){};
-
-		AsyncWebRequest<ContactsRequest, ArrayList<ContactResponse>> req =
-				new AsyncWebRequest<ContactsRequest, ArrayList<ContactResponse>>(
-									getBaseContext(),
-									uri,
-									"POST",
-									true,
-									payload,
-									typeHelper);
-
-		req.setOnCompletedCallback(
-			new WebRequestCompleted<ArrayList<ContactResponse>>() {
-				@Override
-				public void onComplete(ArrayList<ContactResponse> result) {
-					//WelcomeActivity.this.handleSMSResent();
-					WalletActivity.this.saveMatchingContacts(result);
-				}
-
-				@Override
-				public void onErrorOccurred(ErrorResponse err)
-				{
-					Toast.makeText(WalletActivity.this, "Error downloading contacts", Toast.LENGTH_SHORT).show();
-					//WelcomeActivity.this.displayError(String.format("%s (%d)", err.message, err.code));
-				}
-			}
-		);
-
-		req.execute();
-	}
-
-	//Save the contacts we just downloaded
-	//TODO: make this async!
-	public void saveMatchingContacts(ArrayList<ContactResponse> matchedContacts)
-	{
-		int newContacts = 0;
-		for(ContactResponse item : matchedContacts)
-		{
-			for(AddressBookContact contact : requestedContacts)
-			{
-				if(contact.TelephoneNumber.equals(item.telephoneNumber))
-				{
-					//something that we requested returned a match!
-					final Uri uri = AddressBookProvider.contentUri(WalletActivity.this.getPackageName()).buildUpon().appendPath(item.bitcoinWalletAddress).build();
-					Boolean isAdd = true;
-
-					ContentResolver contentResolver = getContentResolver();
-
-					//if the address is already in there, just update its stuff
-					if(AddressBookProvider.addressExists(WalletActivity.this, item.bitcoinWalletAddress))
-						isAdd = false;
-
-					String existingAddressForNumber = AddressBookProvider.resolveAddress(WalletActivity.this, item.telephoneNumber);
-					//if the phone number is already in there
-					if(existingAddressForNumber != null)
-					{
-						//and it is different
-						if(!existingAddressForNumber.equals(item.bitcoinWalletAddress))
-						{
-							//delete the old address
-							final Uri existingAddressUri = AddressBookProvider.contentUri(WalletActivity.this.getPackageName()).buildUpon().appendPath(existingAddressForNumber).build();
-							contentResolver.delete(existingAddressUri, null, null);
-
-							//don't count this as new when displaying to user
-							newContacts--;
-							//we will then just treat the new one as normal
-						}
-					}
-
-					final ContentValues values = new ContentValues();
-					values.put(AddressBookProvider.KEY_LABEL, contact.Label);
-					values.put(AddressBookProvider.KEY_TELEPHONE, contact.TelephoneNumber);
-					values.put(AddressBookProvider.KEY_RAW_TELEPHONE, contact.RawNumber);
-
-					if (isAdd)
-					{
-						contentResolver.insert(uri, values);
-						newContacts++;
-					} else
-					{
-						contentResolver.update(uri, values, null, null);
-						break;
-					}
-				}
-			}
-		}
-
-		if(newContacts > 0)
-			Toast.makeText(WalletActivity.this, newContacts + " new contacts added", Toast.LENGTH_SHORT).show();
-
-	}
 
 	public static Boolean IsRestartingFromBackground = false;
 	public static Boolean IsFirstRun = true;
@@ -516,8 +383,6 @@ public final class WalletActivity extends AbstractBindServiceActivity implements
             if(IsFirstRun)
             {
                 IsFirstRun = false;
-                //kick off an async task to fetch the contacts from the server
-                doContactsLookup();
             }
         }
 
@@ -544,6 +409,18 @@ public final class WalletActivity extends AbstractBindServiceActivity implements
 
         checkPin();
 
+        new ContactsDownloader(this, prefs, application.GetPhoneNumber(), new ContactsDownloader.ContactsDownloaderListener() {
+            @Override
+            public void onSuccess(int newContacts) {
+                if(newContacts > 0)
+                    Toast.makeText(getBaseContext(), getString(R.string.contacts_lookup_contacts_added, ""+newContacts), Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onError(String message) {
+                Toast.makeText(getBaseContext(), message, Toast.LENGTH_SHORT).show();
+            }
+        }).checkContactsLookup();
 	}
 
     private void checkPin() {
@@ -816,7 +693,7 @@ public final class WalletActivity extends AbstractBindServiceActivity implements
 		final Spinner fileView = (Spinner) view.findViewById(R.id.import_keys_from_storage_file);
 		final EditText passwordView = (EditText) view.findViewById(R.id.import_keys_from_storage_password);
 
-		final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+		final KnCDialog.Builder builder = new KnCDialog.Builder(this);
 		builder.setInverseBackgroundForced(true);
 		builder.setTitle(R.string.import_keys_dialog_title);
 		builder.setView(view);
@@ -936,6 +813,8 @@ public final class WalletActivity extends AbstractBindServiceActivity implements
 
 		final CheckBox showView = (CheckBox) alertDialog.findViewById(R.id.import_keys_from_storage_show);
 		showView.setOnCheckedChangeListener(new ShowPasswordCheckListener(passwordView));
+
+        KnCDialog.fixDialogDivider(alertDialog);
 	}
 
 	private Dialog createExportKeysDialog()
@@ -943,7 +822,7 @@ public final class WalletActivity extends AbstractBindServiceActivity implements
 		final View view = getLayoutInflater().inflate(R.layout.export_keys_dialog, null);
 		final EditText passwordView = (EditText) view.findViewById(R.id.export_keys_dialog_password);
 
-		final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+		final KnCDialog.Builder builder = new KnCDialog.Builder(this);
 		builder.setInverseBackgroundForced(true);
 		builder.setTitle(R.string.export_keys_dialog_title);
 		builder.setView(view);
@@ -990,11 +869,13 @@ public final class WalletActivity extends AbstractBindServiceActivity implements
 
 		final CheckBox showView = (CheckBox) alertDialog.findViewById(R.id.export_keys_dialog_show);
 		showView.setOnCheckedChangeListener(new ShowPasswordCheckListener(passwordView));
+
+        KnCDialog.fixDialogDivider(alertDialog);
 	}
 
 	private Dialog createAlertOldSdkDialog()
 	{
-		final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+		final KnCDialog.Builder builder = new KnCDialog.Builder(this);
 		builder.setIcon(android.R.drawable.ic_dialog_alert);
 		builder.setTitle(R.string.wallet_old_sdk_dialog_title);
 		builder.setMessage(R.string.wallet_old_sdk_dialog_message);
@@ -1016,7 +897,7 @@ public final class WalletActivity extends AbstractBindServiceActivity implements
 		final Intent stickyIntent = registerReceiver(null, new IntentFilter(Intent.ACTION_DEVICE_STORAGE_LOW));
 		if (stickyIntent != null)
 		{
-			final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+			final KnCDialog.Builder builder = new KnCDialog.Builder(this);
 			builder.setIcon(android.R.drawable.ic_dialog_alert);
 			builder.setTitle(R.string.wallet_low_storage_dialog_title);
 			builder.setMessage(R.string.wallet_low_storage_dialog_msg);
@@ -1167,7 +1048,7 @@ public final class WalletActivity extends AbstractBindServiceActivity implements
 		final PackageManager pm = getPackageManager();
 		final Intent settingsIntent = new Intent(android.provider.Settings.ACTION_DATE_SETTINGS);
 
-		final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+		final KnCDialog.Builder builder = new KnCDialog.Builder(this);
 		builder.setIcon(android.R.drawable.ic_dialog_alert);
 		builder.setTitle(R.string.wallet_timeskew_dialog_title);
 		builder.setMessage(getString(R.string.wallet_timeskew_dialog_msg, diffMinutes));
@@ -1195,7 +1076,7 @@ public final class WalletActivity extends AbstractBindServiceActivity implements
 		final Intent marketIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(String.format(Constants.MARKET_APP_URL, getPackageName())));
 		final Intent binaryIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(Constants.BINARY_URL));
 
-		final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+		final KnCDialog.Builder builder = new KnCDialog.Builder(this);
 		builder.setIcon(android.R.drawable.ic_dialog_alert);
 		builder.setTitle(R.string.wallet_version_dialog_title);
 		builder.setMessage(getString(R.string.wallet_version_dialog_msg));
@@ -1266,7 +1147,7 @@ public final class WalletActivity extends AbstractBindServiceActivity implements
 			final int numKeysToImport = importedKeys.size();
 			final int numKeysImported = wallet.addKeys(importedKeys);
 
-			final AlertDialog.Builder dialog = new AlertDialog.Builder(this);
+			final KnCDialog.Builder dialog = new KnCDialog.Builder(this);
 			dialog.setInverseBackgroundForced(true);
 			final StringBuilder message = new StringBuilder();
 			if (numKeysImported > 0)
@@ -1307,7 +1188,7 @@ public final class WalletActivity extends AbstractBindServiceActivity implements
 		}
 		catch (final IOException x)
 		{
-			new AlertDialog.Builder(this).setInverseBackgroundForced(true).setIcon(android.R.drawable.ic_dialog_alert)
+			new KnCDialog.Builder(this).setInverseBackgroundForced(true).setIcon(android.R.drawable.ic_dialog_alert)
 					.setTitle(R.string.import_export_keys_dialog_failure_title)
 					.setMessage(getString(R.string.import_keys_dialog_failure, x.getMessage())).setNeutralButton(R.string.button_dismiss, null)
 					.show();
@@ -1342,7 +1223,7 @@ public final class WalletActivity extends AbstractBindServiceActivity implements
 			cipherOut.write(cipherText);
 			cipherOut.close();
 
-			final AlertDialog.Builder dialog = new AlertDialog.Builder(this).setInverseBackgroundForced(true).setMessage(
+			final AlertDialog.Builder dialog = new KnCDialog.Builder(this).setInverseBackgroundForced(true).setMessage(
 					getString(R.string.export_keys_dialog_success, file));
 			dialog.setPositiveButton(R.string.export_keys_dialog_button_archive, new OnClickListener()
 			{
@@ -1359,7 +1240,7 @@ public final class WalletActivity extends AbstractBindServiceActivity implements
 		}
 		catch (final IOException x)
 		{
-			new AlertDialog.Builder(this).setInverseBackgroundForced(true).setIcon(android.R.drawable.ic_dialog_alert)
+			new KnCDialog.Builder(this).setInverseBackgroundForced(true).setIcon(android.R.drawable.ic_dialog_alert)
 					.setTitle(R.string.import_export_keys_dialog_failure_title)
 					.setMessage(getString(R.string.export_keys_dialog_failure, x.getMessage())).setNeutralButton(R.string.button_dismiss, null)
 					.show();

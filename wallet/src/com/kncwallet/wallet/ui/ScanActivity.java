@@ -59,6 +59,7 @@ import com.google.zxing.qrcode.QRCodeReader;
 import com.kncwallet.wallet.camera.CameraManager;
 
 import com.kncwallet.wallet.R;
+import com.kncwallet.wallet.ui.dialog.KnCDialog;
 
 /**
  * @author Andreas Schildbach
@@ -361,7 +362,7 @@ public final class ScanActivity extends AbstractActivity implements SurfaceHolde
 	@Override
 	protected Dialog onCreateDialog(final int id)
 	{
-		final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+		final KnCDialog.Builder builder = new KnCDialog.Builder(this);
 
 		if (id == DIALOG_CAMERA_PROBLEM)
 		{

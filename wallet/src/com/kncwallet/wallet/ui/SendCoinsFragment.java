@@ -19,19 +19,32 @@ package com.kncwallet.wallet.ui;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Hashtable;
 import java.util.List;
 
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import android.app.AlertDialog;
 import android.support.v4.content.CursorLoader;
+import android.util.Log;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.*;
 
 import com.google.bitcoin.core.ECKey;
 import com.google.bitcoin.core.InsufficientMoneyException;
+import com.google.gson.reflect.TypeToken;
+import com.kncwallet.wallet.ContactImage;
+import com.kncwallet.wallet.KnownAddressProvider;
+import com.kncwallet.wallet.TransactionDataProvider;
+import com.kncwallet.wallet.dto.AddressBookContact;
+import com.kncwallet.wallet.dto.ContactResponse;
+import com.kncwallet.wallet.dto.ContactsRequest;
+import com.kncwallet.wallet.dto.ServerResponse;
+import com.kncwallet.wallet.onename.OneNameAdapter;
+import com.kncwallet.wallet.onename.OneNameService;
+import com.kncwallet.wallet.onename.OneNameUser;
+import com.kncwallet.wallet.ui.dialog.KnCDialog;
 import com.kncwallet.wallet.ui.util.AnimationUtil;
 import com.kncwallet.wallet.ui.view.KnCFragment;
 import org.slf4j.Logger;
@@ -93,11 +106,17 @@ import com.kncwallet.wallet.WalletApplication;
 import com.kncwallet.wallet.ExchangeRatesProvider.ExchangeRate;
 import com.kncwallet.wallet.offline.SendBluetoothTask;
 import com.kncwallet.wallet.ui.InputParser.StringInputParser;
+import com.kncwallet.wallet.util.AsyncWebRequest;
 import com.kncwallet.wallet.util.DenominationUtil;
+import com.kncwallet.wallet.util.ErrorResponse;
 import com.kncwallet.wallet.util.WalletUtils;
 
 import de.schildbach.wallet.integration.android.BitcoinIntegration;
 import com.kncwallet.wallet.R;
+import com.kncwallet.wallet.util.WebRequestCompleted;
+import com.loopj.android.image.SmartImageView;
+
+import android.content.ContentValues;
 
 /**
  * @author Andreas Schildbach
@@ -166,10 +185,12 @@ public final class SendCoinsFragment extends KnCFragment {
 
     private CurrencyAmountView btcAmountView;
 
+    private EditText txText;
+
     private String walletAddressesSelection;
 
     private enum State {
-        INPUT, PREPARATION, SENDING, SENT, FAILED
+        INPUT, PREPARATION, SENDING, SENT, FAILED, LOOKUP
     }
 
     private final class ReceivingAddressListener implements OnFocusChangeListener, TextWatcher {
@@ -192,6 +213,36 @@ public final class SendCoinsFragment extends KnCFragment {
 
         @Override
         public void onTextChanged(final CharSequence s, final int start, final int before, final int count) {
+
+            if (s != null && s.toString().startsWith("+")) {
+                receivingAddressView.setAdapter(new OneNameAdapter(activity, new OneNameAdapter.OneNameUserSelectedListener() {
+                    @Override
+                    public void onOneNameUserSelected(OneNameUser oneNameUser) {
+                        didSelectOneNameUser(oneNameUser);
+                    }
+                }));
+            } else {
+                receivingAddressView.setAdapter(new AutoCompleteAddressAdapter(activity, null));
+            }
+
+        }
+    }
+
+    private void didSelectOneNameUser(OneNameUser oneNameUser) {
+
+        String address = oneNameUser.getAddress();
+
+        String label = AddressBookProvider.resolveLabel(activity, address);
+
+        if (label == null) {
+            label = oneNameUser.getDisplayName();
+            EditAddressBookEntryFragment.edit(getFragmentManager(), oneNameUser);
+        }
+
+        if (setSendAddress(address, label)) {
+            startReceivingAddressActionMode();
+        } else {
+            informInvalidAddress(address, label);
         }
     }
 
@@ -425,6 +476,8 @@ public final class SendCoinsFragment extends KnCFragment {
 
         viewBalanceBtc = (CurrencyTextView) view.findViewById(R.id.wallet_balance_btc);
 
+        txText = (EditText)view.findViewById(R.id.send_coins_text);
+
         viewBalanceLocal = (CurrencyTextView) view.findViewById(R.id.wallet_balance_local);
 
         viewBalanceLocal.setPrecision(Constants.LOCAL_PRECISION, 0);
@@ -526,23 +579,34 @@ public final class SendCoinsFragment extends KnCFragment {
         header.setText(R.string.send_heading);
 
         contactListAdapter = new SimpleCursorAdapter(activity, R.layout.address_book_row_small, null, new String[]{AddressBookProvider.KEY_ADDRESS, AddressBookProvider.KEY_LABEL,
-                AddressBookProvider.KEY_ADDRESS}, new int[]{R.id.address_book_contact_image, R.id.address_book_row_label, R.id.address_book_row_address});
+                AddressBookProvider.KEY_ADDRESS, AddressBookProvider.KEY_ADDRESS}, new int[]{R.id.address_book_contact_image, R.id.address_book_row_label, R.id.address_book_row_address, R.id.address_book_row_source_image});
 
         contactListAdapter.setViewBinder(new ViewBinder() {
             @Override
             public boolean setViewValue(final View view, final Cursor cursor, final int columnIndex) {
                 if (view.getId() == R.id.address_book_contact_image) {
                     //...
-                    ImageView img = (ImageView) view;
+                    SmartImageView img = (SmartImageView) view;
                     //img.setImageBitmap(bm);
-                    Bitmap contactImage = AddressBookProvider.bitmapForAddress(SendCoinsFragment.this.getActivity(), cursor.getString(columnIndex));
+                    String address = cursor.getString(columnIndex);
+                    Bitmap contactImage = AddressBookProvider.bitmapForAddress(SendCoinsFragment.this.getActivity(), address);
                     if (contactImage != null) {
                         img.setImageBitmap(contactImage);
                     } else {
-                        img.setImageResource(R.drawable.contact_placeholder);
+
+                        String imageUrl = ContactImage.getImageUrl(activity, AddressBookProvider.resolveRowId(activity, address));
+                        if(imageUrl != null){
+                            img.setImageUrl(imageUrl, R.drawable.contact_placeholder);
+                        }else {
+                            img.setImageResource(R.drawable.contact_placeholder);
+                        }
+
                     }
 
                     return true; //true because the data was bound to the view
+                } else if(view.getId() == R.id.address_book_row_source_image) {
+                    ((ImageView)view).setImageResource(cachedSourceImageResource(cursor.getString(columnIndex)));
+                    return true;
                 }
 
                 //Constants.ADDRESS_FORMAT_LINE_SIZE));
@@ -580,8 +644,18 @@ public final class SendCoinsFragment extends KnCFragment {
             contactsListView.setVisibility(View.GONE);
         }
 
-
         return view;
+    }
+
+    private Hashtable<String, Integer> sourceCache = new Hashtable<String, Integer>();
+    private int cachedSourceImageResource(String address){
+        Integer resource = sourceCache.get(address);
+        if(resource == null){
+            resource = AddressBookProvider.imageResourceForSource(activity, address);
+            sourceCache.put(address, resource);
+
+        }
+        return resource;
     }
 
     private void startReceivingAddressActionMode() {
@@ -611,16 +685,18 @@ public final class SendCoinsFragment extends KnCFragment {
         try {
             validatedAddress = new AddressAndLabel(Constants.NETWORK_PARAMETERS, address, label);
             receivingAddressView.setText(null);
+            updateView();
             return true;
         } catch (AddressFormatException ex) {
             //who cares, just return
         }
+        updateView();
         return false;
     }
 
     private void informInvalidAddress(String address, String label)
     {
-        AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+        KnCDialog.Builder builder = new KnCDialog.Builder(activity);
         builder.setTitle(getString(R.string.send_invalid_address_pattern, label))
                 .setMessage(""+address)
                 .setPositiveButton(R.string.button_ok, null)
@@ -965,7 +1041,9 @@ public final class SendCoinsFragment extends KnCFragment {
         clearActionMode();
         forceHideKeyboard();
 
-        completeSendRequest(sendRequest);
+
+        lookupContactBeforeSend(sendRequest, validatedAddress.address.toString());
+
     }
 
     private void completeSendRequest(final SendRequest sendRequest){
@@ -979,7 +1057,7 @@ public final class SendCoinsFragment extends KnCFragment {
                 try {
                     wallet.completeTx(sendRequest);
 
-                    boolean showConfirm = prefs.getBoolean(Constants.PREFS_KEY_FEE_INFO, true);
+                    boolean showConfirm = true;//prefs.getBoolean(Constants.PREFS_KEY_FEE_INFO, true);
 
                     if (showConfirm) {
                         showConfirmDialog(sendRequest);
@@ -987,7 +1065,7 @@ public final class SendCoinsFragment extends KnCFragment {
                         commitSendRequest(sendRequest);
                     }
 
-                }catch (InsufficientMoneyException.CouldNotAdjustDownwards e){
+                } catch (InsufficientMoneyException.CouldNotAdjustDownwards e) {
                     couldNotAdjustDownwardsError();
                 } catch (InsufficientMoneyException e) {
                     errorSendingCoins();
@@ -1043,7 +1121,7 @@ public final class SendCoinsFragment extends KnCFragment {
 
         final CheckBox checkBox = (CheckBox) view.findViewById(R.id.checkBox);
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+        KnCDialog.Builder builder = new KnCDialog.Builder(activity);
         builder.setTitle(getString(R.string.dialog_transaction_title, amountIncludingFee))
                 .setView(view)
                 .setPositiveButton(R.string.send_tab_text, new DialogInterface.OnClickListener() {
@@ -1074,7 +1152,7 @@ public final class SendCoinsFragment extends KnCFragment {
 
     private void showTransactionFeeInfo()
     {
-        AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+        KnCDialog.Builder builder = new KnCDialog.Builder(activity);
         builder.setTitle(R.string.dialog_fee_info_title)
                 .setMessage(R.string.dialog_fee_info_message)
                 .setPositiveButton(R.string.button_ok, new DialogInterface.OnClickListener() {
@@ -1086,6 +1164,25 @@ public final class SendCoinsFragment extends KnCFragment {
                 .show();
     }
 
+    private void saveTransactionData(Transaction transaction)
+    {
+        String message = null;
+        String label = null;
+
+        if(!canSendMessage()){
+            label = txText.getText().toString();
+        }else{
+            message = txText.getText().toString();
+        }
+
+        TransactionDataProvider.saveTxData(activity, transaction.getHashAsString(), message, label);
+
+        TransactionDataProvider.uploadTxToDirectory(activity, transaction.getHashAsString(), validatedAddress.address.toString() ,application.GetPhoneNumber(), message, label);
+
+    }
+
+
+
     private void commitSendRequest(final SendRequest sendRequest){
 
         new SendRequestCommitTask(wallet, backgroundHandler){
@@ -1093,6 +1190,8 @@ public final class SendCoinsFragment extends KnCFragment {
             @Override
             protected void onSuccess(@Nonnull Transaction transaction) {
                 sentTransaction = transaction;
+
+                saveTransactionData(transaction);
 
                 state = State.SENDING;
                 updateView();
@@ -1118,6 +1217,9 @@ public final class SendCoinsFragment extends KnCFragment {
                 final Intent result = new Intent();
                 BitcoinIntegration.transactionHashToResult(result, sentTransaction.getHashAsString());
                 activity.setResult(Activity.RESULT_OK, result);
+
+
+
             }
 
             @Override
@@ -1141,7 +1243,7 @@ public final class SendCoinsFragment extends KnCFragment {
         updateView();
 
         if(!activity.isFinishing()) {
-            AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+            KnCDialog.Builder builder = new KnCDialog.Builder(activity);
             builder.setTitle(R.string.send_coins_error_msg)
                     .setMessage(message)
                     .setCancelable(false)
@@ -1166,6 +1268,7 @@ public final class SendCoinsFragment extends KnCFragment {
         amountCalculatorLink.setBtcAmount(available);
     }
 
+
     public class AutoCompleteAddressAdapter extends CursorAdapter {
         public AutoCompleteAddressAdapter(final Context context, final Cursor c) {
             super(context, c);
@@ -1188,13 +1291,19 @@ public final class SendCoinsFragment extends KnCFragment {
             //addressView.setText(WalletUtils.formatHash(address, Constants.ADDRESS_FORMAT_GROUP_SIZE, Constants.ADDRESS_FORMAT_LINE_SIZE));
             addressView.setText(WalletUtils.formatHash(address, Constants.ADDRESS_FORMAT_GROUP_SIZE, 24));
 
-            final ImageView img = (ImageView) view.findViewById(R.id.address_book_contact_image);
+            final SmartImageView img = (SmartImageView) view.findViewById(R.id.address_book_contact_image);
             String formattedAddress = address.toString();
             Bitmap contactImage = AddressBookProvider.bitmapForAddress(context, formattedAddress);
             if (contactImage != null) {
                 img.setImageBitmap(contactImage);
             } else {
-                img.setImageResource(R.drawable.contact_placeholder);
+
+                String imageUrl = ContactImage.getImageUrl(activity, AddressBookProvider.resolveRowId(activity, formattedAddress));
+                if(imageUrl != null){
+                    img.setImageUrl(imageUrl, R.drawable.contact_placeholder);
+                }else {
+                    img.setImageResource(R.drawable.contact_placeholder);
+                }
             }
         }
 
@@ -1314,6 +1423,8 @@ public final class SendCoinsFragment extends KnCFragment {
             activity.toast(getString(R.string.bitcoin_sent));
         } else if (state == State.FAILED) {
             viewGo.setText(R.string.send_coins_failed_msg);
+        } else if( state == State.LOOKUP){
+            viewGo.setText(R.string.send_lookup_in_progress);
         }
 
         if (scanAction != null)
@@ -1321,6 +1432,28 @@ public final class SendCoinsFragment extends KnCFragment {
 
         updateBalanceView();
 
+        if(!canSendMessage()){
+            txText.setHint(R.string.tx_label);
+        }else{
+            txText.setHint(R.string.tx_message);
+        }
+
+        txText.setEnabled(state == State.INPUT);
+    }
+
+    private boolean canSendMessage()
+    {
+        if(prefs.getBoolean("entry_deleted", false)){
+            return false;
+        }
+        if(validatedAddress != null) {
+            String phone = AddressBookProvider.resolveTelephone(activity, validatedAddress.address.toString());
+            if(phone != null){
+                return true;
+            }
+        }
+
+        return false;
     }
 
 
@@ -1362,6 +1495,8 @@ public final class SendCoinsFragment extends KnCFragment {
         sentTransaction = null;
         amountCalculatorLink.setBtcAmount(BigInteger.valueOf(0));
         receivingAddressView.requestFocus();
+        txText.setText(null);
+
         updateView();
     }
 
@@ -1430,6 +1565,231 @@ public final class SendCoinsFragment extends KnCFragment {
             builder.setLength(builder.length() - 1);
 
         walletAddressesSelection = builder.toString();
+
+    }
+
+    private void lookupContactBeforeSend(final SendRequest sendRequest, final String address){
+
+        String telephoneNumber = AddressBookProvider.resolveTelephone(activity, address);
+
+        String source = AddressBookProvider.getSourceForAddress(activity, address);
+
+        if(source != null && source.equals(AddressBookProvider.SOURCE_ONENAME)){
+            lookupOneNameUser(sendRequest, address);
+        }else if(prefs.getBoolean("entry_deleted", false)) {
+            completeSendRequest(sendRequest);
+        }else if(telephoneNumber != null){
+            lookupContact(sendRequest, address, telephoneNumber);
+        }else{
+            completeSendRequest(sendRequest);
+        }
+
+    }
+
+    private void lookupOneNameUser(final SendRequest sendRequest, final String address){
+        state = State.LOOKUP;
+        updateView();
+
+        AddressBookProvider.ContactData contactData = AddressBookProvider.resolveContactData(activity, address);
+
+        if(contactData!=null && contactData.username != null){
+            OneNameService.getUserByUsername(activity, contactData.username, false, new OneNameService.OneNameServiceListener() {
+                @Override
+                public void onSuccess(OneNameUser user) {
+                    lookupContactCheckNewAddress(sendRequest, address, user.getAddress());
+                }
+
+                @Override
+                public void onError(int errorCode, String message) {
+                    displayLookupError(getString(R.string.send_lookup_generic_error));
+                }
+            });
+        }else{
+            displayLookupError(getString(R.string.send_lookup_generic_error));
+        }
+    }
+
+
+    private void lookupContact(final SendRequest sendRequest, final String address, final String telephoneNumber)
+    {
+        state = State.LOOKUP;
+        updateView();
+
+        List<AddressBookContact> contactList = new ArrayList<AddressBookContact>();
+        contactList.add(new AddressBookContact(null, telephoneNumber, null, null));
+        ContactsRequest payload = new ContactsRequest(contactList);
+
+        String uri = Constants.API_BASE_URL;
+        uri += "entries/";
+        uri += application.GetPhoneNumber();
+        uri += "/contacts";
+
+        TypeToken<ServerResponse<ArrayList<ContactResponse>>> typeHelper = new TypeToken<ServerResponse<ArrayList<ContactResponse>>>(){};
+
+        AsyncWebRequest<ContactsRequest, ArrayList<ContactResponse>> req =
+                new AsyncWebRequest<ContactsRequest, ArrayList<ContactResponse>>(
+                        activity,
+                        uri,
+                        "POST",
+                        true,
+                        payload,
+                        typeHelper);
+
+        req.setOnCompletedCallback(
+                new WebRequestCompleted<ArrayList<ContactResponse>>() {
+                    @Override
+                    public void onComplete(ArrayList<ContactResponse> result) {
+                        lookupContactSuccess(sendRequest, address, result);
+                    }
+
+                    @Override
+                    public void onErrorOccurred(ErrorResponse err)
+                    {
+                        lookupContactError(err);
+                    }
+                }
+        );
+
+        req.execute();
+    }
+
+    private void lookupContactSuccess(final SendRequest sendRequest, final String address, ArrayList<ContactResponse> result){
+
+        if(result != null && result.size() > 0){
+
+            ContactResponse contactResponse = result.get(0);
+
+            if(address.equals(contactResponse.bitcoinWalletAddress)){
+                completeSendRequest(sendRequest);
+            }else{
+                contactHasNewAddress(sendRequest, address, contactResponse.bitcoinWalletAddress);
+            }
+
+        }else{
+            displayLookupError(getString(R.string.send_lookup_generic_error));
+        }
+    }
+
+    private void lookupContactCheckNewAddress(final SendRequest sendRequest, final String address, final String newAdress){
+        if(newAdress != null && newAdress.equals(address)){
+            completeSendRequest(sendRequest);
+        }else if(newAdress != null){
+            contactHasNewAddress(sendRequest, address, newAdress);
+        }else{
+            displayLookupError(getString(R.string.send_lookup_generic_error));
+        }
+    }
+
+    private void contactHasNewAddress(final SendRequest sendRequest, final String oldAddress, final String newAddress){
+
+        View content = activity.getLayoutInflater().inflate(R.layout.send_lookup_new_address_dialog, null);
+
+        SmartImageView contactImage = (SmartImageView) content.findViewById(R.id.send_lookup_contact_image);
+        TextView contactLabel = (TextView) content.findViewById(R.id.send_lookup_contact_label);
+        TextView oldAddressTextView = (TextView) content.findViewById(R.id.send_lookup_old_address);
+        TextView newAddressTextView = (TextView) content.findViewById(R.id.send_lookup_new_address);
+
+        Bitmap bitmap = AddressBookProvider.bitmapForAddress(activity, oldAddress);
+        if (bitmap != null) {
+            contactImage.setImageBitmap(bitmap);
+        } else {
+
+            String imageUrl = ContactImage.getImageUrl(activity, AddressBookProvider.resolveRowId(activity, oldAddress));
+            if(imageUrl != null){
+                contactImage.setImageUrl(imageUrl, R.drawable.contact_placeholder);
+            }else {
+                contactImage.setImageResource(R.drawable.contact_placeholder);
+            }
+        }
+
+
+
+        String label = AddressBookProvider.resolveLabel(activity, oldAddress);
+        contactLabel.setText(label);
+
+        oldAddressTextView.setText(WalletUtils.formatHash(oldAddress,
+                Constants.ADDRESS_FORMAT_GROUP_SIZE, 24));
+        newAddressTextView.setText(WalletUtils.formatHash(newAddress,
+                Constants.ADDRESS_FORMAT_GROUP_SIZE, 24));
+
+        KnCDialog.Builder builder = new KnCDialog.Builder(activity);
+        builder.setTitle(R.string.send_lookup_new_address_dialog_title)
+                .setView(content)
+                .setCancelable(false)
+                .setPositiveButton(R.string.send_lookup_save_new_address_and_send, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        saveContactsNewAddressAndSend(sendRequest, oldAddress, newAddress);
+                    }
+                })
+                .setNegativeButton(R.string.button_cancel, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        state = State.INPUT;
+                        updateView();
+                    }
+                })
+                .show();
+    }
+
+    private void saveContactsNewAddressAndSend(final SendRequest sendRequest, final String oldAddress, final String newAddress){
+
+        AddressBookProvider.ContactData oldContactData = AddressBookProvider.resolveContactData(activity, oldAddress);
+
+        final Uri existingAddressUri = AddressBookProvider.contentUri(activity.getPackageName()).buildUpon().appendPath(oldAddress).build();
+        contentResolver.delete(existingAddressUri, null, null);
+
+        final Uri uri = AddressBookProvider.contentUri(activity.getPackageName()).buildUpon().appendPath(newAddress).build();
+
+        final ContentValues values = new ContentValues();
+        values.put(AddressBookProvider.KEY_LABEL, oldContactData.label);
+        values.put(AddressBookProvider.KEY_TELEPHONE, oldContactData.phone);
+        values.put(AddressBookProvider.KEY_RAW_TELEPHONE, oldContactData.rawTelephone);
+
+        contentResolver.insert(uri, values);
+
+        AddressBookProvider.ContactData newContactData = AddressBookProvider.resolveContactData(activity, newAddress);
+
+        KnownAddressProvider.saveKnownAddress(activity, newContactData.id, newContactData.rawTelephone, oldAddress, AddressBookProvider.SOURCE_DIRECTORY);
+
+        KnownAddressProvider.contactHasNewId(activity, oldContactData.id, newContactData.id);
+
+        try {
+
+            validatedAddress = new AddressAndLabel(Constants.NETWORK_PARAMETERS, newAddress, newContactData.label);
+
+            final BigInteger amount = amountCalculatorLink.getAmount();
+            final SendRequest newSendRequest = SendRequest.to(validatedAddress.address, amount);
+            newSendRequest.changeAddress = sendRequest.changeAddress;
+            newSendRequest.emptyWallet = sendRequest.emptyWallet;
+
+            completeSendRequest(newSendRequest);
+
+        }catch (AddressFormatException e){
+            errorSendingCoins();
+        }
+
+    }
+
+    private void lookupContactError(ErrorResponse err){
+        if(err != null && err.message != null) {
+            displayLookupError(err.message);
+        }else{
+            displayLookupError(getString(R.string.send_lookup_generic_error));
+        }
+    }
+
+    private void displayLookupError(String message){
+        state = State.INPUT;
+        updateView();
+
+        if(!activity.isFinishing()) {
+            KnCDialog.Builder builder = new KnCDialog.Builder(activity);
+            builder.setTitle(R.string.send_coins_failed_msg)
+                    .setMessage(message)
+                    .setPositiveButton(R.string.button_ok, null)
+                    .show();
+        }
 
     }
 

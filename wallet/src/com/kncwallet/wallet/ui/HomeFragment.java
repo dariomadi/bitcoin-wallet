@@ -217,6 +217,8 @@ public final class HomeFragment extends KnCFragment {
         subViewPager.setCurrentItem(1);
         subViewPager.setPageMarginDrawable(R.color.knc_background_darker);
 
+        subViewPager.setOffscreenPageLimit(3);
+
         pagerTabs.forceRedrawAtPosition(1);
 
         bottomLayout = (LinearLayout) view.findViewById(R.id.home_bottom);

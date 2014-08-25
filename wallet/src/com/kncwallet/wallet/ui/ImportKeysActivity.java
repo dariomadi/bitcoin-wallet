@@ -41,6 +41,7 @@ import android.widget.EditText;
 import com.google.bitcoin.core.ECKey;
 import com.google.bitcoin.core.Wallet;
 import com.kncwallet.wallet.Constants;
+import com.kncwallet.wallet.ui.dialog.KnCDialog;
 import com.kncwallet.wallet.util.Crypto;
 import com.kncwallet.wallet.util.WalletUtils;
 
@@ -92,7 +93,7 @@ public final class ImportKeysActivity extends AbstractWalletActivity
 		final View view = getLayoutInflater().inflate(R.layout.import_keys_from_content_dialog, null);
 		final EditText passwordView = (EditText) view.findViewById(R.id.import_keys_from_content_dialog_password);
 
-		final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+		final KnCDialog.Builder builder = new KnCDialog.Builder(this);
 		builder.setInverseBackgroundForced(true);
 		builder.setIcon(R.drawable.ic_knclogo);
 		builder.setTitle(R.string.import_keys_dialog_title);
@@ -158,6 +159,8 @@ public final class ImportKeysActivity extends AbstractWalletActivity
 
 		final CheckBox showView = (CheckBox) alertDialog.findViewById(R.id.import_keys_from_content_dialog_show);
 		showView.setOnCheckedChangeListener(new ShowPasswordCheckListener(passwordView));
+
+        KnCDialog.fixDialogDivider(alertDialog);
 	}
 
 	private void importPrivateKeys(final InputStream is, final String password)
@@ -186,7 +189,7 @@ public final class ImportKeysActivity extends AbstractWalletActivity
 			final int numKeysToImport = importedKeys.size();
 			final int numKeysImported = wallet.addKeys(importedKeys);
 
-			final AlertDialog.Builder dialog = new AlertDialog.Builder(this);
+			final KnCDialog.Builder dialog = new KnCDialog.Builder(this);
 			dialog.setInverseBackgroundForced(true);
 			final StringBuilder message = new StringBuilder();
 			if (numKeysImported > 0)
@@ -228,7 +231,7 @@ public final class ImportKeysActivity extends AbstractWalletActivity
 		}
 		catch (final IOException x)
 		{
-			new AlertDialog.Builder(this).setInverseBackgroundForced(true).setIcon(android.R.drawable.ic_dialog_alert)
+			new KnCDialog.Builder(this).setInverseBackgroundForced(true).setIcon(android.R.drawable.ic_dialog_alert)
 					.setTitle(R.string.import_export_keys_dialog_failure_title)
 					.setMessage(getString(R.string.import_keys_dialog_failure, x.getMessage()))
 					.setNeutralButton(R.string.button_dismiss, finishListener).setOnCancelListener(finishListener).show();

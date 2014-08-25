@@ -87,6 +87,7 @@ import com.google.bitcoin.store.BlockStoreException;
 import com.google.bitcoin.store.SPVBlockStore;
 import com.kncwallet.wallet.AddressBookProvider;
 import com.kncwallet.wallet.Constants;
+import com.kncwallet.wallet.TransactionDataProvider;
 import com.kncwallet.wallet.WalletApplication;
 import com.kncwallet.wallet.ui.WalletActivity;
 import com.kncwallet.wallet.ui.util.TxUtil;
@@ -166,8 +167,10 @@ public class BlockchainServiceImpl extends android.app.Service implements Blockc
 						final boolean replaying = bestChainHeight < bestChainHeightEver;
 						final boolean isReplayedTx = confidenceType == ConfidenceType.BUILDING && replaying;
 
-						if (isReceived && !isReplayedTx)
-							notifyCoinsReceived(from, amount);
+						if (isReceived && !isReplayedTx){
+                            checkTxDataBeforeNotify(tx, from, amount);
+                        }
+
 					}
 				});
 			}
@@ -192,6 +195,24 @@ public class BlockchainServiceImpl extends android.app.Service implements Blockc
         Intent broadcast = new Intent();
         broadcast.setAction(Constants.ACTION_APP_WIDGET_UPDATE);
         sendBroadcast(broadcast);
+    }
+
+    private void checkTxDataBeforeNotify(final Transaction tx, @Nullable final Address from, @Nonnull final BigInteger amount)
+    {
+        final Context context = application.getBaseContext();
+        final String txId = tx.getHashAsString();
+        TransactionDataProvider.getTxDataFromDirectory(context, txId, from.toString(), false, new TransactionDataProvider.TransactionDataProviderDirectoryListener() {
+            @Override
+            public void foundData(TransactionDataProvider.TxData txData) {
+                TransactionDataProvider.saveTxData(context, txId, txData.message, txData.label);
+                notifyCoinsReceived(from, amount);
+            }
+
+            @Override
+            public void noData(String txId) {
+                notifyCoinsReceived(from, amount);
+            }
+        });
     }
 
 	private void notifyCoinsReceived(@Nullable final Address from, @Nonnull final BigInteger amount)

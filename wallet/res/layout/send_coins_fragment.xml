@@ -51,14 +51,14 @@
 	    android:dropDownHeight="160dp"
 	    android:hint="@string/send_coins_fragment_receiving_address_hint"
 	    android:imeOptions="actionNext|flagNoExtractUi"
-	    android:popupBackground="#0FFF"
+        android:dropDownVerticalOffset="10dp"
 	    android:singleLine="true"
 	    android:textColor="@color/knc_highlight"
 	    android:textSize="@dimen/font_size_normal" />
 
 	<LinearLayout
 		android:id="@+id/send_coins_receiving_static"
-		style="@style/My.Widget.EditText"
+		style="@style/EditTextTeal"
 		android:layout_width="match_parent"
 		android:layout_height="wrap_content"
 		android:layout_marginLeft="12dp"
@@ -126,6 +126,16 @@
 		</com.kncwallet.wallet.ui.CurrencyAmountView>
 		
 	</LinearLayout>
+
+    <EditText
+        android:visibility="visible"
+        android:id="@+id/send_coins_text"
+        android:hint="@string/tx_message"
+        android:layout_marginLeft="@dimen/list_entry_padding_horizontal"
+        android:layout_marginRight="@dimen/list_entry_padding_horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
 	<LinearLayout
    	    android:id="@+id/send_buttons"
 		android:layout_width="match_parent"

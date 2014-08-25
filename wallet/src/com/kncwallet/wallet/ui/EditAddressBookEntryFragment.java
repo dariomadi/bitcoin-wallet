@@ -22,6 +22,10 @@ import javax.annotation.Nullable;
 
 import com.kncwallet.wallet.AddressBookProvider;
 import com.kncwallet.wallet.Constants;
+import com.kncwallet.wallet.ContactImage;
+import com.kncwallet.wallet.KnownAddressProvider;
+import com.kncwallet.wallet.onename.OneNameUser;
+import com.kncwallet.wallet.ui.dialog.KnCDialog;
 import com.kncwallet.wallet.util.WalletUtils;
 
 import android.app.Activity;
@@ -30,14 +34,20 @@ import android.app.Dialog;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.DialogInterface;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentManager;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
+
 import com.kncwallet.wallet.R;
+import com.loopj.android.image.SmartImageTask;
+import com.loopj.android.image.WebImage;
 
 /**
  * @author Andreas Schildbach
@@ -48,6 +58,23 @@ public final class EditAddressBookEntryFragment extends DialogFragment
 
 	private static final String KEY_ADDRESS = "address";
 	private static final String KEY_SUGGESTED_ADDRESS_LABEL = "suggested_address_label";
+    private static final String KEY_SOURCE = "source";
+    private static final String KEY_IMAGE_URL = "image_url";
+    private static final String KEY_USERNAME = "username";
+
+    public static void edit(final FragmentManager fm, OneNameUser oneNameUser)
+    {
+        final EditAddressBookEntryFragment fragment = new EditAddressBookEntryFragment();
+
+        final Bundle args = new Bundle();
+        args.putString(KEY_ADDRESS, oneNameUser.getAddress());
+        args.putString(KEY_SUGGESTED_ADDRESS_LABEL, oneNameUser.getDisplayName());
+        args.putString(KEY_IMAGE_URL, oneNameUser.getImageUrl());
+        args.putString(KEY_SOURCE, AddressBookProvider.SOURCE_ONENAME);
+        args.putString(KEY_USERNAME, oneNameUser.username);
+        fragment.setArguments(args);
+        fragment.show(fm, FRAGMENT_TAG);
+    }
 
 	public static void edit(final FragmentManager fm, @Nonnull final String address)
 	{
@@ -82,7 +109,15 @@ public final class EditAddressBookEntryFragment extends DialogFragment
 
 		this.activity = activity;
 		this.contentResolver = activity.getContentResolver();
+
 	}
+
+    @Override
+    public void onStart()
+    {
+        super.onStart();
+        KnCDialog.fixDialogDivider(getDialog());
+    }
 
 	@Override
 	public Dialog onCreateDialog(final Bundle savedInstanceState)
@@ -90,6 +125,9 @@ public final class EditAddressBookEntryFragment extends DialogFragment
 		final Bundle args = getArguments();
 		final String address = args.getString(KEY_ADDRESS);
 		final String suggestedAddressLabel = args.getString(KEY_SUGGESTED_ADDRESS_LABEL);
+        final String imageUrl = args.getString(KEY_IMAGE_URL);
+        final String argsSource = args.getString(KEY_SOURCE);
+        final String username = args.getString(KEY_USERNAME);
 
 		final LayoutInflater inflater = LayoutInflater.from(activity);
 
@@ -126,11 +164,21 @@ public final class EditAddressBookEntryFragment extends DialogFragment
 					{
 						final ContentValues values = new ContentValues();
 						values.put(AddressBookProvider.KEY_LABEL, newLabel);
+                        values.put(AddressBookProvider.KEY_USERNAME, username);
+						if (isAdd) {
+                            contentResolver.insert(uri, values);
+                            AddressBookProvider.ContactData contactData = AddressBookProvider.resolveContactData(activity, address);
+                            KnownAddressProvider.saveKnownAddress(activity, contactData.id, contactData.rawTelephone, address, argsSource);
+                        }else {
+                            AddressBookProvider.ContactData contactData = AddressBookProvider.resolveContactData(activity, address);
 
-						if (isAdd)
-							contentResolver.insert(uri, values);
-						else
-							contentResolver.update(uri, values, null, null);
+                            contentResolver.update(uri, values, null, null);
+                            if(contactData != null) {
+                                KnownAddressProvider.saveKnownAddress(activity, contactData.id, contactData.rawTelephone, address, null);
+                            }
+                        }
+
+                        saveImage(imageUrl, newLabel, address);
 					}
 					else if (!isAdd)
 					{
@@ -153,4 +201,22 @@ public final class EditAddressBookEntryFragment extends DialogFragment
 
 		return dialog.create();
 	}
+
+    private void saveImage(final String imageUrl, final String label, final String address)
+    {
+        if (imageUrl != null) {
+            SmartImageTask task = new SmartImageTask(activity, new WebImage(imageUrl));
+            task.setOnCompleteHandler(new SmartImageTask.OnCompleteHandler() {
+                @Override
+                public void onComplete(Bitmap bitmap) {
+                    if (bitmap != null) {
+                        int contactId = AddressBookProvider.resolveRowId(activity, address);
+                        ContactImage.saveBitmap(activity, bitmap, contactId, label, address, imageUrl);
+                    }
+                }
+            });
+            task.run();
+        }
+    }
+
 }

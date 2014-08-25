@@ -24,9 +24,12 @@ import org.slf4j.LoggerFactory;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
+import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.text.format.DateUtils;
@@ -43,6 +46,7 @@ import com.kncwallet.wallet.Constants;
 import com.kncwallet.wallet.WalletApplication;
 
 import com.kncwallet.wallet.R;
+import com.kncwallet.wallet.ui.dialog.KnCDialog;
 import com.kncwallet.wallet.util.WalletUtils;
 
 import java.math.BigInteger;
@@ -142,7 +146,7 @@ public abstract class AbstractWalletActivity extends SherlockFragmentActivity
 
     protected void handlePaperWallet()
     {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        KnCDialog.Builder builder = new KnCDialog.Builder(this);
         builder.setTitle(R.string.menu_paper_wallet_title)
                 .setMessage(R.string.menu_paper_wallet_message)
                 .setPositiveButton(R.string.button_scan, new DialogInterface.OnClickListener() {
@@ -179,7 +183,7 @@ public abstract class AbstractWalletActivity extends SherlockFragmentActivity
 
     private void errorImportingPrivateKey()
     {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        KnCDialog.Builder builder = new KnCDialog.Builder(this);
         builder.setTitle(R.string.menu_paper_wallet_title)
                 .setMessage(R.string.menu_paper_wallet_import_error)
                 .setPositiveButton(R.string.button_ok, null)

@@ -35,9 +35,11 @@ import com.kncwallet.wallet.AddressBookProvider;
 import com.kncwallet.wallet.Constants;
 import com.kncwallet.wallet.ExchangeRatesProvider;
 import com.kncwallet.wallet.R;
+import com.kncwallet.wallet.TransactionDataProvider;
 import com.kncwallet.wallet.WalletApplication;
 import com.kncwallet.wallet.ui.AbstractWalletActivity;
 import com.kncwallet.wallet.ui.EditAddressBookEntryFragment;
+import com.kncwallet.wallet.ui.EditNoteFragment;
 import com.kncwallet.wallet.ui.TransactionsListAdapter;
 import com.kncwallet.wallet.ui.WalletActivity;
 import com.kncwallet.wallet.ui.util.AnimationUtil;
@@ -110,6 +112,13 @@ public class TransactionsListView extends LinearLayout implements LoaderManager.
         }
     };
 
+    private final ContentObserver txDataObserver = new ContentObserver(handler) {
+        @Override
+        public void onChange(final boolean selfChange) {
+            adapter.clearTxDataCache();
+        }
+    };
+
 
     public void setup(final Activity activity) {
 
@@ -153,6 +162,7 @@ public class TransactionsListView extends LinearLayout implements LoaderManager.
         listView.setDividerHeight(1);
 
         resolver.registerContentObserver(AddressBookProvider.contentUri(activity.getPackageName()), true, addressBookObserver);
+        resolver.registerContentObserver(TransactionDataProvider.contentUri(activity.getPackageName()), true, txDataObserver);
 
         prefs.registerOnSharedPreferenceChangeListener(this);
 
@@ -203,6 +213,7 @@ public class TransactionsListView extends LinearLayout implements LoaderManager.
         prefs.unregisterOnSharedPreferenceChangeListener(this);
 
         resolver.unregisterContentObserver(addressBookObserver);
+        resolver.unregisterContentObserver(txDataObserver);
     }
 
 
@@ -260,10 +271,10 @@ public class TransactionsListView extends LinearLayout implements LoaderManager.
                     if (address != null) {
                         if (label != null) {
                             //edit icon only if no number
-                            String number = AddressBookProvider.resolveRawTelephone(activity, address.toString());
+
                             editIcon.setVisible(true);
 
-                            if (number == null || number.equals("")) {
+                            if (AddressBookProvider.canEditAddress(activity, address.toString())) {
                                 editIcon.setIcon(R.drawable.ic_action_edit);
                             } else {
                                 editIcon.setVisible(false);
@@ -307,6 +318,11 @@ public class TransactionsListView extends LinearLayout implements LoaderManager.
 
                         mode.finish();
                         return true;
+
+                    case R.id.wallet_transactions_context_note:
+                        editTxDataForTx(tx);
+                        mode.finish();
+                        return true;
                 }
                 return false;
             }
@@ -326,6 +342,14 @@ public class TransactionsListView extends LinearLayout implements LoaderManager.
                 BitmapFragment.show(getFragmentManager(), qrCodeBitmap);
             }
         });
+    }
+
+    private void editTxDataForTx(Transaction tx) {
+
+        final BigInteger value = tx.getValue(wallet);
+        final boolean sent = value.signum() < 0;
+        EditNoteFragment.edit(getFragmentManager(), tx.getHashAsString(), sent, application.GetPhoneNumber());
+
     }
 
     private void handleKeyRotationClick() {

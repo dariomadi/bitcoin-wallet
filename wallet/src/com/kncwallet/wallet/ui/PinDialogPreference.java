@@ -23,6 +23,8 @@ import android.content.DialogInterface;
 import android.os.Bundle;
 import android.widget.*;
 import com.kncwallet.wallet.R;
+import com.kncwallet.wallet.ui.dialog.KnCDialog;
+
 import android.content.Context;
 import android.preference.DialogPreference;
 import android.util.AttributeSet;
@@ -110,6 +112,8 @@ public class PinDialogPreference extends DialogPreference {
                     }
                 });
             }
+
+            KnCDialog.fixDialogDivider(getDialog());
         }
     }
 

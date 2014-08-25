@@ -88,7 +88,7 @@
 		    
 		</LinearLayout>
 		
-		<ImageView
+		<com.loopj.android.image.SmartImageView
 		    android:id="@+id/transaction_row_contact_image"
 		    android:layout_width="72dp"
 		    android:layout_height="72dp"
@@ -115,6 +115,27 @@
 		
 
 	</LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/transaction_row_extra"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingTop="0dp" >
+
+        <View
+            android:layout_width="@dimen/symbol_size_normal"
+            android:layout_height="@dimen/symbol_size_normal"
+            android:layout_marginRight="8dp" />
+
+        <TextView
+            android:id="@+id/transaction_row_extra_message"
+            android:layout_width="0px"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textColor="@color/fg_error"
+            android:textSize="@dimen/font_size_small" />
+    </LinearLayout>
 
 	<LinearLayout
 		android:id="@+id/transaction_row_extend"

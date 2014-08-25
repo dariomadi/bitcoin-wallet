@@ -13,4 +13,11 @@
 		android:showAsAction="always|withText"
 		android:title="@string/address_book_options_scan_title"/>
 
+    <item
+        android:id="@+id/sending_addresses_options_reload"
+        android:showAsAction="never"
+        android:title="@string/address_book_options_reload_title"/>
+
+
+
 </menu>

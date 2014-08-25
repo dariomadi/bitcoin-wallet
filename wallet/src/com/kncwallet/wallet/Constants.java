@@ -38,6 +38,7 @@ public class Constants {
     /* these are required for the KnC Directory to work */
     public static final String UA_KEY = "";
     public static final String API_BASE_URL = "";
+    public static final boolean ALLOW_ALL_SSL = false;
 
     public static final String WALLET_FILENAME = "wallet" + FILENAME_NETWORK_SUFFIX;
 
@@ -98,10 +99,13 @@ public class Constants {
     public static final String CREDITS_WALLET_URL = "http://code.google.com/p/bitcoin-wallet/";
     public static final String CREDITS_BITCOINJ_URL = "http://code.google.com/p/bitcoinj/";
     public static final String CREDITS_ZXING_URL = "http://code.google.com/p/zxing/";
+    public static final String CREDITS_LOOPJ_IMAGEVIEW_URL = "http://loopj.com/android-smart-image-view";
     public static final String MARKET_APP_URL = "market://details?id=%s";
     public static final String WEBMARKET_APP_URL = "https://play.google.com/store/apps/details?id=%s";
     public static final String MARKET_PUBLISHER_URL = "market://search?q=pub:\"Knc Wallet\"";
     public static final String CREDITS_ICONDRAWER_URL = "http://www.icondrawer.com";
+    public static final String CREDITS_HOLOCOLORS_URL = "http://android-holo-colors.com/";
+    public static final String CREDITS_ACTIONBAR_URL = "http://jgilfelt.github.io/android-actionbarstylegenerator";
 
     public static final int HTTP_TIMEOUT_MS = 15 * (int) DateUtils.SECOND_IN_MILLIS;
 

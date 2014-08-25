@@ -77,7 +77,7 @@ public class ContactsFetcher extends AsyncTask<Void, Void, List<AddressBookConta
 			     
 			     if(Number == null)
 			     {
-			    	 Log.e(TAG, "Skipping contact " + Name + " no normalized number");
+			    	 Log.e(TAG, "Skipping contact " + Name + " no normalized number for "+RawNumber);
 			     } else if(Number.equals(_phoneNumber)) {
 			    	 Log.e(TAG, "Skipping contact " + Name + " with own phone number");
 				 } else {

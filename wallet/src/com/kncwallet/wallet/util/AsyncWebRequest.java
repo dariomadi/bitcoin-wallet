@@ -11,10 +11,18 @@ import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Type;
 import java.net.UnknownHostException;
 import java.security.InvalidKeyException;
+import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.SSLException;
+import javax.net.ssl.SSLSession;
+import javax.net.ssl.TrustManager;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -25,6 +33,9 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.conn.ssl.AbstractVerifier;
+import org.apache.http.conn.ssl.SSLSocketFactory;
+import org.apache.http.conn.ssl.X509HostnameVerifier;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 
@@ -46,8 +57,8 @@ import com.kncwallet.wallet.dto.ServerResponse;
 
 
 public class AsyncWebRequest<TPayload, TResult> extends AsyncTask<Void, Void, Object>
-{	
-	
+{
+
 	private class ErrorResponseWrapper
 	{
 		public ErrorResponse error;
@@ -97,8 +108,9 @@ public class AsyncWebRequest<TPayload, TResult> extends AsyncTask<Void, Void, Ob
 		
 		try {
 			PackageInfo p =_context.getPackageManager()
-			    .getPackageInfo(_context.getPackageName(), 0);	
-			_userAgent = "KnCWallet " + p.versionName + p.versionCode + Constants.UA_KEY;
+			    .getPackageInfo(_context.getPackageName(), 0);
+            _userAgent= "KnCWallet~{"+p.versionName+"}~{"+p.versionCode+"}~{Android}~{"+Constants.UA_KEY+"}";
+
 		} catch (Exception ex)
 		{
 			//never mind
@@ -114,15 +126,18 @@ public class AsyncWebRequest<TPayload, TResult> extends AsyncTask<Void, Void, Ob
 	@Override
 	protected Object doInBackground(Void... params) {
 		try {
+
 			HttpUriRequest request = createRequest();
-			HttpClient client = new DefaultHttpClient();
+			HttpClient client = getClient();
 			HttpResponse response = client.execute(request);
 			
 			StatusLine statusLine = response.getStatusLine();
 			final int statusCode = statusLine.getStatusCode();
+
+
 			if(statusCode < 200 || statusCode > 300)
 			{
-				
+
 				try {
 
 					ErrorResponseWrapper err = deserialize(response, new TypeToken<ErrorResponseWrapper>(){}.getType());
@@ -144,7 +159,11 @@ public class AsyncWebRequest<TPayload, TResult> extends AsyncTask<Void, Void, Ob
 						return parsed.data;
 					}
 			
-				} catch (Exception ex) {}
+				} catch (Exception ex) {
+
+                    Log.e("knc",ex.getMessage()+" "+ex.getClass(),ex);
+
+                }
 				
 				return new ErrorResponse(statusCode, "The server returned an invalid response");
 								
@@ -243,18 +262,126 @@ public class AsyncWebRequest<TPayload, TResult> extends AsyncTask<Void, Void, Ob
 		return sb.toString();
 	}
 
+    private void printResponse(HttpResponse response, int status)
+    {
+
+        try {
+            HttpEntity entity = response.getEntity();
+            InputStream content = entity.getContent();
+
+            String responseString = CharStreams.toString(new InputStreamReader(content, Charsets.UTF_8));
+
+            Log.e("knc","response "+_uri+": "+status+" : "+responseString);
+
+        }catch (Exception e){
+            Log.e("knc",_uri+" "+e.getMessage(),e);
+        }
+    }
+
 	private <T> T deserialize(HttpResponse response, Type typeToDeserialize) throws IllegalStateException, IOException
 	{
 		HttpEntity entity = response.getEntity();
 		InputStream content = entity.getContent();
 		
 		String responseString = CharStreams.toString(new InputStreamReader(content, Charsets.UTF_8));
-		
+
+
 		Closeables.closeQuietly(content);
 		
 		Gson gson = new Gson();
 		T parsed = gson.fromJson(responseString, typeToDeserialize);
+
+        //recheck if server response is just falsely wrapped
+        if(parsed != null && ((ServerResponse<TResult>)parsed).data == null){
+            parsed = gson.fromJson("{\"data\":"+responseString+"}", typeToDeserialize);
+        }
 		
 		return parsed;
 	}
+
+    public DefaultHttpClient getClient()
+    {
+        DefaultHttpClient client = new DefaultHttpClient();
+
+        if(Constants.ALLOW_ALL_SSL) {
+            allowAllSSL();
+            SSLSocketFactory sslSocketFactory = ((SSLSocketFactory) client.getConnectionManager().getSchemeRegistry().getScheme("https").getSocketFactory());
+
+            final X509HostnameVerifier delegate = sslSocketFactory.getHostnameVerifier();
+
+            sslSocketFactory.setHostnameVerifier(new NoneVerifier(delegate));
+        }
+
+        return client;
+    }
+
+    private class NoneVerifier extends AbstractVerifier {
+
+        private final X509HostnameVerifier delegate;
+
+        public NoneVerifier(final X509HostnameVerifier delegate) {
+            this.delegate = delegate;
+        }
+
+        @Override
+        public void verify(String host, String[] cns, String[] subjectAlts)
+                throws SSLException {
+            }
+    }
+
+    private static TrustManager[] trustManagers;
+
+    public static class _FakeX509TrustManager implements
+            javax.net.ssl.X509TrustManager {
+        private static final X509Certificate[] _AcceptedIssuers = new X509Certificate[] {};
+
+        public void checkClientTrusted(X509Certificate[] arg0, String arg1)
+                throws CertificateException {
+        }
+
+        public void checkServerTrusted(X509Certificate[] arg0, String arg1)
+                throws CertificateException {
+        }
+
+        public boolean isClientTrusted(X509Certificate[] chain) {
+            return (true);
+        }
+
+        public boolean isServerTrusted(X509Certificate[] chain) {
+            return (true);
+        }
+
+        public X509Certificate[] getAcceptedIssuers() {
+            return null;
+        }
+    }
+
+    public static  void allowAllSSL() {
+
+        javax.net.ssl.HttpsURLConnection
+                .setDefaultHostnameVerifier(new HostnameVerifier() {
+
+                    @Override
+                    public boolean verify(String hostname, SSLSession session) {
+                        return true;
+                    }
+                });
+
+        javax.net.ssl.SSLContext context = null;
+
+        if (trustManagers == null) {
+            trustManagers = new javax.net.ssl.TrustManager[] { new _FakeX509TrustManager() };
+        }
+
+        try {
+            context = javax.net.ssl.SSLContext.getInstance("TLS");
+            context.init(null, trustManagers, new SecureRandom());
+        } catch (NoSuchAlgorithmException e) {
+            Log.e("allowAllSSL", e.toString());
+        } catch (KeyManagementException e) {
+            Log.e("allowAllSSL", e.toString());
+        }
+        javax.net.ssl.HttpsURLConnection.setDefaultSSLSocketFactory(context
+                .getSocketFactory());
+    }
 }

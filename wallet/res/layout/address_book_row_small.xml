@@ -11,10 +11,23 @@
 	android:paddingLeft="@dimen/list_entry_padding_horizontal"
 	android:paddingRight="@dimen/list_entry_padding_horizontal" >
 
-			
-		<TextView
+
+    <com.loopj.android.image.SmartImageView
+        android:id="@+id/address_book_contact_image"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:maxWidth="48dp"
+        android:maxHeight="48dp"
+        android:layout_marginRight="0dp"
+        android:background="#2a2a2a"
+        android:scaleType="fitXY"
+        android:gravity="right"
+        />
+
+    <TextView
 			android:id="@+id/address_book_row_label"
-			android:layout_width="0dp"
+			android:layout_marginLeft="5dp"
+            android:layout_width="0dp"
 			android:layout_weight="3"
 			android:layout_height="48dp"
 			android:textSize="@dimen/font_size_normal"
@@ -34,17 +47,13 @@
 			android:textStyle="bold"
 			android:visibility="gone"
 			 />
+
+    <ImageView
+        android:id="@+id/address_book_row_source_image"
+        android:visibility="visible"
+        android:layout_width="20dp"
+        android:layout_height="match_parent" />
 		
-		<ImageView
-		    android:id="@+id/address_book_contact_image"
-		    android:layout_width="48dp"
-		    android:layout_height="48dp"
-		    android:maxWidth="48dp"
-		    android:maxHeight="48dp"
-		    android:layout_marginRight="0dp"
-            android:background="#2a2a2a"
-		    android:scaleType="fitXY"
-		    android:gravity="right"
-		    />	
+
 
 </LinearLayout>

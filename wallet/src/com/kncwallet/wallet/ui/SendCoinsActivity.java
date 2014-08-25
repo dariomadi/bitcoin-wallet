@@ -32,6 +32,7 @@ import com.google.bitcoin.core.Address;
 import com.google.bitcoin.core.Transaction;
 import com.kncwallet.wallet.AddressBookProvider;
 import com.kncwallet.wallet.R;
+import com.kncwallet.wallet.ui.dialog.KnCDialog;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -117,7 +118,7 @@ public final class SendCoinsActivity extends AbstractBindServiceActivity {
 
     private void askSaveNewAddress(final Address address) {
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        KnCDialog.Builder builder = new KnCDialog.Builder(this);
         builder.setTitle(R.string.nfc_new_address_dialog_title)
                 .setMessage(address.toString())
                 .setPositiveButton(R.string.nfc_new_address_dialog_save, new DialogInterface.OnClickListener() {

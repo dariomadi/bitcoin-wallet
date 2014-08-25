@@ -6,6 +6,7 @@ import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 import com.kncwallet.wallet.R;
+import com.kncwallet.wallet.ui.dialog.KnCDialog;
 
 public abstract class WizardView extends LinearLayout {
 
@@ -28,7 +29,7 @@ public abstract class WizardView extends LinearLayout {
     }
 
     public void displayError(String message){
-        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+        KnCDialog.Builder builder = new KnCDialog.Builder(getContext());
         builder.setMessage(message)
                 .setPositiveButton(R.string.button_ok, null)
                 .show();

@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!-- Generated with http://android-holo-colors.com -->
+<resources xmlns:android="http://schemas.android.com/apk/res/android">
+
+  <style name="EditTextTeal" parent="android:Widget.EditText">
+	  <item name="android:background">@drawable/teal_edit_text_holo_dark</item>
+	  <item name="android:textColor">#ffffff</item>
+  </style>
+
+  <style name="AutoCompleteTextViewTeal" parent="android:Widget.AutoCompleteTextView">
+      <item name="android:dropDownSelector">@drawable/teal_list_selector_holo_dark</item>
+	  <item name="android:background">@drawable/teal_edit_text_holo_dark</item>
+	  <item name="android:textColor">#ffffff</item>
+  </style>
+
+  <style name="CheckBoxTeal" parent="android:Widget.CompoundButton.CheckBox">
+      <item name="android:button">@drawable/teal_btn_check_holo_dark</item>
+  </style>
+
+  <style name="RadioButtonTeal" parent="android:Widget.CompoundButton.RadioButton">
+      <item name="android:button">@drawable/teal_btn_radio_holo_dark</item>
+  </style>
+
+  <style name="ButtonTeal" parent="android:Widget.Button">
+	  <item name="android:background">@drawable/teal_btn_default_holo_dark</item>
+	  <item name="android:minHeight">48dip</item>
+	  <item name="android:minWidth">64dip</item>
+	  <item name="android:textColor">#ffffff</item>
+  </style>
+
+  <style name="ImageButtonTeal" parent="android:Widget.ImageButton">
+	  <item name="android:background">@drawable/teal_btn_default_holo_dark</item>
+  </style>
+
+  <style name="SpinnerTeal" parent="android:Widget.Spinner">
+      <item name="android:background">@drawable/teal_spinner_background_holo_dark</item>
+      <item name="android:dropDownSelector">@drawable/teal_list_selector_holo_dark</item>
+  </style>
+
+  <style name="SpinnerDropDownItemTeal" parent="android:Widget.DropDownItem.Spinner">
+      <item name="android:checkMark">@drawable/teal_btn_radio_holo_dark</item>
+  </style>
+  <style name="TabTeal">
+      <item name="android:gravity">center_horizontal</item>
+      <item name="android:paddingLeft">16dip</item>
+      <item name="android:paddingRight">16dip</item>
+      <item name="android:background">@drawable/teal_tab_indicator_holo</item>
+      <item name="android:layout_width">0dip</item>
+      <item name="android:layout_weight">1</item>
+      <item name="android:minWidth">80dip</item>
+  </style>
+
+  <style name="TabTextTeal">
+	  <item name="android:textColor">#ffffff</item>
+      <item name="android:textSize">12sp</item>
+      <item name="android:textStyle">bold</item>
+      <!-- v14 <item name="android:textAllCaps">true</item> -->
+      <item name="android:ellipsize">marquee</item>
+      <item name="android:maxLines">2</item>
+      <item name="android:maxWidth">180dip</item>
+  </style>
+
+  <style name="ToggleTeal" parent="android:Widget.Button.Toggle">
+      <item name="android:background">@drawable/teal_btn_toggle_holo_dark</item>
+      <item name="android:minHeight">48dip</item>
+	  <item name="android:textColor">#ffffff</item>
+  </style>
+
+  <style name="ListViewTeal" parent="android:Widget.ListView">
+      <item name="android:listSelector">@drawable/teal_list_selector_holo_dark</item>
+  </style>
+
+  <style name="ListViewTeal.White" parent="android:Widget.ListView.White">
+      <item name="android:listSelector">@drawable/teal_list_selector_holo_dark</item>
+  </style>
+
+  <style name="SpinnerItemTeal" parent="android:TextAppearance.Widget.TextView.SpinnerItem">
+      <item name="android:textColor">#ffffff</item>
+  </style>
+
+</resources>

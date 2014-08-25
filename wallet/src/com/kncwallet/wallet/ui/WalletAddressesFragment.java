@@ -57,6 +57,7 @@ import com.google.bitcoin.uri.BitcoinURI;
 import com.kncwallet.wallet.AddressBookProvider;
 import com.kncwallet.wallet.Constants;
 import com.kncwallet.wallet.WalletApplication;
+import com.kncwallet.wallet.ui.dialog.KnCDialog;
 import com.kncwallet.wallet.util.BitmapFragment;
 import com.kncwallet.wallet.util.Qr;
 import com.kncwallet.wallet.util.WalletUtils;
@@ -161,7 +162,7 @@ public final class WalletAddressesFragment extends SherlockListFragment
 
 	private void handleAddAddress()
 	{
-		new AlertDialog.Builder(activity).setTitle(R.string.wallet_addresses_fragment_add_dialog_title)
+		new KnCDialog.Builder(activity).setTitle(R.string.wallet_addresses_fragment_add_dialog_title)
 				.setMessage(R.string.wallet_addresses_fragment_add_dialog_message)
 				.setPositiveButton(R.string.button_add, new DialogInterface.OnClickListener()
 				{

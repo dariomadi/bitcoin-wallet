@@ -19,12 +19,16 @@ package com.kncwallet.wallet.ui;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Hashtable;
 
 import javax.annotation.Nonnull;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -32,6 +36,7 @@ import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.preference.PreferenceManager;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
@@ -42,6 +47,7 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.actionbarsherlock.app.SherlockListFragment;
 import com.actionbarsherlock.view.ActionMode;
@@ -53,12 +59,17 @@ import com.google.bitcoin.core.Transaction;
 import com.google.bitcoin.uri.BitcoinURI;
 import com.kncwallet.wallet.AddressBookProvider;
 import com.kncwallet.wallet.Constants;
+import com.kncwallet.wallet.ContactImage;
 import com.kncwallet.wallet.ui.InputParser.StringInputParser;
+import com.kncwallet.wallet.ui.dialog.KnCDialog;
 import com.kncwallet.wallet.util.BitmapFragment;
+import com.kncwallet.wallet.util.ContactsDownloader;
 import com.kncwallet.wallet.util.Qr;
 import com.kncwallet.wallet.util.WalletUtils;
 
 import com.kncwallet.wallet.R;
+import com.loopj.android.image.SmartImage;
+import com.loopj.android.image.SmartImageView;
 
 /**
  * @author Andreas Schildbach
@@ -76,6 +87,10 @@ public final class SendingAddressesFragment extends SherlockListFragment impleme
 	private final Handler handler = new Handler();
 
 	private static final int REQUEST_CODE_SCAN = 0;
+
+    private Hashtable<String, Object> contactImageCache = new Hashtable<String, Object>();
+    private Hashtable<String, Object> contactImageUrlsCache = new Hashtable<String, Object>();
+    private Hashtable<String, Integer> sourceCache = new Hashtable<String, Integer>();
 
 	@Override
 	public void onAttach(final Activity activity)
@@ -103,21 +118,28 @@ public final class SendingAddressesFragment extends SherlockListFragment impleme
 		setEmptyText(getString(R.string.address_book_empty_text));
 
 		adapter = new SimpleCursorAdapter(activity, R.layout.address_book_row, null, new String[] { AddressBookProvider.KEY_RAW_TELEPHONE, AddressBookProvider.KEY_ADDRESS, AddressBookProvider.KEY_LABEL,
-				AddressBookProvider.KEY_ADDRESS }, new int[] { R.id.address_book_row_number, R.id.address_book_contact_image, R.id.address_book_row_label, R.id.address_book_row_address }, 0);
+				AddressBookProvider.KEY_ADDRESS, AddressBookProvider.KEY_ADDRESS }, new int[] { R.id.address_book_row_number, R.id.address_book_contact_image, R.id.address_book_row_label, R.id.address_book_row_address, R.id.address_book_row_source_image }, 0);
 		adapter.setViewBinder(new ViewBinder()
 		{
 			@Override
 			public boolean setViewValue(final View view, final Cursor cursor, final int columnIndex)
 			{
 				if(view.getId() == R.id.address_book_contact_image){
-			           //...
-			           ImageView img = (ImageView)view;
-			           //img.setImageBitmap(bm);
-			           Bitmap contactImage = AddressBookProvider.bitmapForAddress(SendingAddressesFragment.this.getActivity(), cursor.getString(columnIndex));
+
+			           SmartImageView img = (SmartImageView)view;
+
+                       String address = cursor.getString(columnIndex);
+			           Bitmap contactImage = cachedBitmap(address);
 			           if(contactImage != null) {
 			        	   img.setImageBitmap(contactImage);
 			           } else {
-			        	   img.setImageResource(R.drawable.contact_placeholder);
+
+                           String imageUrl = cachedImageUrl(address);
+                           if(imageUrl != null){
+                               img.setImageUrl(imageUrl, R.drawable.contact_placeholder);
+                           }else {
+                               img.setImageResource(R.drawable.contact_placeholder);
+                           }
 			           }
 			           
 			           return true; //true because the data was bound to the view
@@ -132,9 +154,16 @@ public final class SendingAddressesFragment extends SherlockListFragment impleme
 				if (!AddressBookProvider.KEY_ADDRESS.equals(cursor.getColumnName(columnIndex)))
 					return false;
 
+                if(view.getId() == R.id.address_book_row_source_image){
+                    ((ImageView)view).setImageResource(cachedSourceImageResource(cursor.getString(columnIndex)));
+                    view.setVisibility(View.VISIBLE);
+                    return true;
+                }
+
 				((TextView) view).setText(WalletUtils.formatHash(cursor.getString(columnIndex), Constants.ADDRESS_FORMAT_GROUP_SIZE,		
 						24));
-				//Constants.ADDRESS_FORMAT_LINE_SIZE));
+
+
 
 				return true;
 			}
@@ -147,6 +176,57 @@ public final class SendingAddressesFragment extends SherlockListFragment impleme
         getListView().setBackgroundColor(getResources().getColor(R.color.knc_background_darker));
         getView().setBackgroundColor(getResources().getColor(R.color.knc_background_darker));
 	}
+
+    private String cachedImageUrl(String address){
+        Object cached = contactImageUrlsCache.get(address);
+        if(cached == null){
+
+            String imageUrl = ContactImage.getImageUrl(activity, AddressBookProvider.resolveRowId(activity, address));
+
+            if(imageUrl != null){
+                contactImageUrlsCache.put(address, imageUrl);
+                cached = imageUrl;
+            }else{
+                contactImageUrlsCache.put(address, new Object());
+                cached = new Object();
+            }
+        }
+
+        if(cached instanceof String){
+            return (String)cached;
+        }
+
+        return null;
+    }
+
+    private Bitmap cachedBitmap(String address){
+        Object cached = contactImageCache.get(address);
+        if(cached == null) {
+            Bitmap bitmap = AddressBookProvider.bitmapForAddress(SendingAddressesFragment.this.getActivity(), address);
+            if(bitmap != null){
+                contactImageCache.put(address, bitmap);
+                cached = bitmap;
+            }else{
+                contactImageCache.put(address, new Object());
+                cached = new Object();
+            }
+        }
+
+        if(cached instanceof Bitmap){
+            return (Bitmap)cached;
+        }
+        return null;
+    }
+
+    private int cachedSourceImageResource(String address){
+        Integer resource = sourceCache.get(address);
+        if(resource == null){
+            resource = AddressBookProvider.imageResourceForSource(activity, address);
+            sourceCache.put(address, resource);
+
+        }
+        return resource;
+    }
 
 	@Override
 	public void onActivityResult(final int requestCode, final int resultCode, final Intent intent)
@@ -210,10 +290,47 @@ public final class SendingAddressesFragment extends SherlockListFragment impleme
 			case R.id.sending_addresses_options_scan:
 				handleScan();
 				return true;
+
+            case R.id.sending_addresses_options_reload:
+                handleReloadContacts();
+                return true;
 		}
 
 		return super.onOptionsItemSelected(item);
 	}
+
+    private void handleReloadContacts()
+    {
+        final Context context = activity;
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        String phoneNumber = activity.getWalletApplication().GetPhoneNumber();
+
+        final ProgressDialog progressDialog = new ProgressDialog(context);
+        progressDialog.setTitle(R.string.contacts_lookup_refresh_title);
+        progressDialog.setMessage(getString(R.string.contacts_lookup_refresh_message));
+        progressDialog.setCancelable(false);
+        progressDialog.show();
+
+        KnCDialog.fixDialogDivider(progressDialog);
+
+        new ContactsDownloader(context, prefs, phoneNumber, new ContactsDownloader.ContactsDownloaderListener() {
+            @Override
+            public void onSuccess(int newContacts) {
+                progressDialog.dismiss();
+                if(newContacts > 0) {
+                    Toast.makeText(context, getString(R.string.contacts_lookup_contacts_added, ""+newContacts), Toast.LENGTH_SHORT).show();
+                }else{
+                    Toast.makeText(context, R.string.contacts_lookup_success, Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onError(String message) {
+                progressDialog.dismiss();
+                Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
+            }
+        }).doContactsLookup();
+    }
 
 	private void handlePasteClipboard()
 	{
@@ -263,14 +380,17 @@ public final class SendingAddressesFragment extends SherlockListFragment impleme
 			{
 				final MenuInflater inflater = mode.getMenuInflater();
 				inflater.inflate(R.menu.sending_addresses_context, menu);
-				
-				TextView numberView = (TextView)v.findViewById(R.id.address_book_row_number);
-				
-				if(numberView.getText().length() > 0)
+
+                String address = getAddress(position);
+
+                if (!AddressBookProvider.canEditAddress(activity, address))
 				{
 					menu.removeItem(R.id.sending_addresses_context_edit);
-					menu.removeItem(R.id.sending_addresses_context_remove);
 				}
+
+                if(!AddressBookProvider.canDeleteAddress(activity, address)) {
+                    menu.removeItem(R.id.sending_addresses_context_remove);
+                }
 
 				return true;
 			}

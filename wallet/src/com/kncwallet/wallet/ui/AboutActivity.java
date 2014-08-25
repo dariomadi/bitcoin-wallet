@@ -41,7 +41,10 @@ public final class AboutActivity extends AbstractPreferenceActivity
 	private static final String KEY_ABOUT_CREDITS_WALLET = "about_credits_wallet";
 	private static final String KEY_ABOUT_CREDITS_BITCOINJ = "about_credits_bitcoinj";
 	private static final String KEY_ABOUT_CREDITS_ZXING = "about_credits_zxing";
+    private static final String KEY_ABOUT_CREDITS_LOOPJ_IMAGEVIEW = "about_credits_loopjimage";
     private static final String KEY_ABOUT_CREDITS_ICON_DRAWER = "about_icon_drawer";
+    private static final String KEY_ABOUT_CREDITS_ACTION_BAR_GENERATOR = "about_action_bar_generator";
+    private static final String KEY_ABOUT_CREDITS_HOLO_COLORS_GENERATOR = "about_holo_colors_generator";
 
 	@Override
 	protected void onCreate(final Bundle savedInstanceState)
@@ -96,7 +99,14 @@ public final class AboutActivity extends AbstractPreferenceActivity
 			finish();
 		}else if(KEY_ABOUT_CREDITS_ICON_DRAWER.equals(key)){
             startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(Constants.CREDITS_ICONDRAWER_URL)));
+        }else if(KEY_ABOUT_CREDITS_HOLO_COLORS_GENERATOR.equals(key)){
+            startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(Constants.CREDITS_HOLOCOLORS_URL)));
+        }else if(KEY_ABOUT_CREDITS_ACTION_BAR_GENERATOR.equals(key)){
+            startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(Constants.CREDITS_ACTIONBAR_URL)));
+        }else if(KEY_ABOUT_CREDITS_LOOPJ_IMAGEVIEW.equals(key)){
+            startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(Constants.CREDITS_LOOPJ_IMAGEVIEW_URL)));
         }
+
 
 		return false;
 	}

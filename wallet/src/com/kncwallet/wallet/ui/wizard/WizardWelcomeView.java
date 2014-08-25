@@ -15,6 +15,7 @@ import com.google.i18n.phonenumbers.PhoneNumberUtil;
 import com.kncwallet.wallet.Constants;
 import com.kncwallet.wallet.R;
 import com.kncwallet.wallet.WalletApplication;
+import com.kncwallet.wallet.ui.dialog.KnCDialog;
 
 import org.w3c.dom.Text;
 
@@ -249,7 +250,7 @@ public class WizardWelcomeView extends WizardView {
 
         String phoneNumber = WalletApplication.getFormattedPhoneNumber(getContext(), getNormalizedPhoneNumber(), getSelectedLocale());
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+        KnCDialog.Builder builder = new KnCDialog.Builder(getContext());
         builder.setMessage(getResources().getString(R.string.wizard_phone_number_will_verify_pattern, phoneNumber))
                 .setPositiveButton(R.string.button_ok, new DialogInterface.OnClickListener() {
                     @Override
@@ -280,7 +281,7 @@ public class WizardWelcomeView extends WizardView {
     private void displayInvalidPhoneNumberForCountryDialog() {
         Country country = countries.get(selectedIndex);
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+        KnCDialog.Builder builder = new KnCDialog.Builder(getContext());
         builder.setTitle(R.string.wizard_phone_number_invalid_title)
                 .setMessage(getResources().getString(R.string.wizard_phone_number_invalid_country_pattern, country.name))
                 .setPositiveButton(R.string.button_ok, null)

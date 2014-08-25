@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="@dimen/list_entry_padding_horizontal">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <com.loopj.android.image.SmartImageView
+            android:id="@+id/send_lookup_contact_image"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_marginRight="0dp"
+            android:background="#2a2a2a"
+            android:gravity="right"
+            android:maxHeight="48dp"
+            android:maxWidth="48dp"
+            android:scaleType="fitXY" />
+
+        <TextView
+            android:id="@+id/send_lookup_contact_label"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:layout_marginLeft="5dp"
+            android:gravity="center|left"
+            android:textColor="@color/knc_header_text"
+            android:textSize="@dimen/font_size_normal"
+            android:textStyle="bold" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:orientation="vertical"
+            android:layout_height="wrap_content"
+            android:layout_weight="1">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                android:text="@string/send_lookup_new_address"
+                android:textColor="@color/knc_mid_text" />
+
+            <TextView
+                android:id="@+id/send_lookup_new_address"
+                android:layout_width="wrap_content"
+                android:layout_height="40dp"
+                android:layout_marginTop="0px"
+                android:textColor="@color/knc_header_text"
+                android:textSize="@dimen/font_size_small" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:orientation="vertical"
+            android:layout_height="wrap_content"
+            android:layout_weight="1">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                android:text="@string/send_lookup_old_address"
+                android:textColor="@color/knc_mid_text" />
+
+            <TextView
+                android:id="@+id/send_lookup_old_address"
+                android:layout_width="wrap_content"
+                android:layout_height="40dp"
+                android:layout_marginTop="0px"
+                android:textColor="@color/knc_header_text"
+                android:textSize="@dimen/font_size_small" />
+        </LinearLayout>
+    </LinearLayout>
+
+
+</LinearLayout>

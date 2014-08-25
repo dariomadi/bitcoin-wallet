@@ -39,6 +39,7 @@ import com.google.bitcoin.core.Transaction;
 import com.google.bitcoin.uri.BitcoinURI;
 import com.google.bitcoin.uri.BitcoinURIParseException;
 import com.kncwallet.wallet.Constants;
+import com.kncwallet.wallet.ui.dialog.KnCDialog;
 import com.kncwallet.wallet.util.Bluetooth;
 import com.kncwallet.wallet.util.Qr;
 
@@ -180,7 +181,7 @@ public abstract class InputParser
 	protected void dialog(final Context context, @Nullable final OnClickListener dismissListener, final int titleResId, final int messageResId,
 			final Object... messageArgs)
 	{
-		final Builder dialog = new AlertDialog.Builder(context);
+		final Builder dialog = new KnCDialog.Builder(context);
 		if (titleResId != 0)
 			dialog.setTitle(titleResId);
 		dialog.setMessage(context.getString(messageResId, messageArgs));

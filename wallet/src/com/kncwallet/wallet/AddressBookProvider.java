@@ -50,11 +50,15 @@ public class AddressBookProvider extends ContentProvider
 	public static final String KEY_LABEL = "label";
 	public static final String KEY_TELEPHONE = "phone";
 	public static final String KEY_RAW_TELEPHONE = "rawphone";
+    public static final String KEY_USERNAME = "username";
 
 	public static final String SELECTION_QUERY = "q";
 	public static final String SELECTION_IN = "in";
 	public static final String SELECTION_NOTIN = "notin";
     public static final String SELECTION_COMPLEX = "c";
+
+    public static final String SOURCE_DIRECTORY = "directory";
+    public static final String SOURCE_ONENAME = "onename";
 
 	public static Uri contentUri(@Nonnull final String packageName)
 	{
@@ -65,20 +69,142 @@ public class AddressBookProvider extends ContentProvider
 	{
 		String label = null;
 
-		final Uri uri = contentUri(context.getPackageName()).buildUpon().appendPath(address).build();
-		final Cursor cursor = context.getContentResolver().query(uri, null, null, null, null);
+        ContactData contactData = resolveContactData(context, address);
+        if(contactData != null){
+            label = contactData.label;
+        }
 
-		if (cursor != null)
-		{
-			if (cursor.moveToFirst())
-				label = cursor.getString(cursor.getColumnIndexOrThrow(AddressBookProvider.KEY_LABEL));
+        if(label == null){
 
-			cursor.close();
-		}
+            KnownAddressProvider.KnownAddress knownAddress = KnownAddressProvider.getKnown(context, address);
+            if(knownAddress != null){
+
+                String currentAddress = getAddress(context, knownAddress.contactId);
+
+                return resolveLabel(context, currentAddress);
+            }
+
+        }
 
 		return label;
+
 	}
-	
+
+    public static int resolveContactId(final Context context, @Nonnull final String address)
+    {
+        int contactId = -1;
+
+        ContactData contactData = resolveContactData(context, address);
+        if(contactData != null){
+            contactId = contactData.id;
+        }
+
+        if(contactId == -1){
+
+            KnownAddressProvider.KnownAddress knownAddress = KnownAddressProvider.getKnown(context, address);
+            if(knownAddress != null){
+                String currentAddress = getAddress(context, knownAddress.contactId);
+                return resolveContactId(context, currentAddress);
+            }
+        }
+        return contactId;
+    }
+
+
+
+    public static String getAddress(final Context context, final int contactId){
+
+        String address = null;
+
+        final String selection = KEY_ROWID + " LIKE ?";
+        final String[] selectionArgs = new String[]{"%"+contactId+"%"};
+
+        final Uri uri = contentUri(context.getPackageName()).buildUpon().build();
+        final Cursor cursor = context.getContentResolver().query(uri, null, selection, selectionArgs, null);
+
+        if(cursor != null){
+
+            if(cursor.moveToFirst()){
+                address = cursor.getString(cursor.getColumnIndexOrThrow(KEY_ADDRESS));
+            }
+
+            cursor.close();
+
+        }
+
+        return address;
+    }
+
+    public static int resolveRowId(final Context context, @Nonnull final String address)
+    {
+        int rowId = -1;
+
+        final Uri uri = contentUri(context.getPackageName()).buildUpon().appendPath(address).build();
+        final Cursor cursor = context.getContentResolver().query(uri, null, null, null, null);
+
+        if (cursor != null)
+        {
+            if (cursor.moveToFirst())
+                rowId = cursor.getInt(cursor.getColumnIndexOrThrow(AddressBookProvider.KEY_ROWID));
+
+            cursor.close();
+        }
+
+        return rowId;
+    }
+
+    public static boolean canDeleteAddress(final Context context, final String address){
+        int contactId = AddressBookProvider.resolveContactId(context, address);
+        String currentMainAddress = AddressBookProvider.getAddress(context, contactId);
+        String number = AddressBookProvider.resolveRawTelephone(context, currentMainAddress);
+        return (number == null || number.equals(""));
+    }
+
+    public static boolean canEditAddress(final Context context, final String address){
+        int contactId = AddressBookProvider.resolveContactId(context, address);
+        String currentMainAddress = AddressBookProvider.getAddress(context, contactId);
+        String number = AddressBookProvider.resolveRawTelephone(context, currentMainAddress);
+        String source = getSourceForAddress(context, address);
+        return (source == null && (number == null || number.equals("")));
+    }
+
+    public static String getSourceForAddress(final Context context, final String address){
+        ContactData contactData = resolveContactData(context, address);
+
+        if(contactData != null) {
+            if (contactData.rawTelephone != null) {
+                return AddressBookProvider.SOURCE_DIRECTORY;
+            }
+
+            List<KnownAddressProvider.KnownAddress> knownAddresses = KnownAddressProvider.getKnownAddresses(context, contactData.id);
+            if (knownAddresses != null) {
+                for (KnownAddressProvider.KnownAddress knownAddress : knownAddresses) {
+                    if (knownAddress.source != null && knownAddress.source.equals(AddressBookProvider.SOURCE_ONENAME)) {
+                        return AddressBookProvider.SOURCE_ONENAME;
+                    }else if (knownAddress.source != null && knownAddress.source.equals(AddressBookProvider.SOURCE_DIRECTORY)) {
+                        return AddressBookProvider.SOURCE_DIRECTORY;
+                    }
+                }
+            }
+        }
+
+        return null;
+    }
+
+    public static int imageResourceForSource(final Context context, final String address){
+
+        String source = getSourceForAddress(context, address);
+        if(source != null){
+            if(source.equals(SOURCE_ONENAME)){
+                return R.drawable.source_on;
+            }else if(source.equals(SOURCE_DIRECTORY)){
+                return R.drawable.source_knc;
+            }
+        }
+
+        return 0;
+    }
+
 	public static String resolveTelephone(final Context context, @Nonnull final String address)
 	{
 		String phone = null;
@@ -96,6 +222,42 @@ public class AddressBookProvider extends ContentProvider
 
 		return phone;
 	}
+
+    public static class ContactData
+    {
+        public String address;
+        public String label;
+        public String phone;
+        public String rawTelephone;
+        public String username;
+        public int id;
+    }
+
+    public static ContactData resolveContactData(final Context context, @Nonnull final String address)
+    {
+        ContactData data = null;
+
+        final Uri uri = contentUri(context.getPackageName()).buildUpon().appendPath(address).build();
+        final Cursor cursor = context.getContentResolver().query(uri, null, null, null, null);
+
+        if (cursor != null)
+        {
+            if (cursor.moveToFirst()) {
+                data = new ContactData();
+                data.rawTelephone = cursor.getString(cursor.getColumnIndexOrThrow(AddressBookProvider.KEY_RAW_TELEPHONE));
+                data.id = cursor.getInt(cursor.getColumnIndexOrThrow(AddressBookProvider.KEY_ROWID));
+                data.phone = cursor.getString(cursor.getColumnIndexOrThrow(AddressBookProvider.KEY_TELEPHONE));
+                data.address = cursor.getString(cursor.getColumnIndexOrThrow(AddressBookProvider.KEY_ADDRESS));
+                data.label = cursor.getString(cursor.getColumnIndexOrThrow(AddressBookProvider.KEY_LABEL));
+                data.username = cursor.getString(cursor.getColumnIndexOrThrow(AddressBookProvider.KEY_USERNAME));
+            }
+
+            cursor.close();
+        }
+
+        return data;
+    }
+
 	
 	public static String resolveRawTelephone(final Context context, @Nonnull final String address)
 	{
@@ -147,11 +309,16 @@ public class AddressBookProvider extends ContentProvider
 	}
 	
 	public static Bitmap bitmapForAddress(final Context context, @Nonnull final String address) {
-		String telephone = resolveRawTelephone(context,address);
-		if(telephone == null || telephone.equals(""))
-			return null;
-		
-		return fetchContactPhoto(context, telephone);
+
+        ContactData data = resolveContactData(context, address);
+
+		if(data != null && data.rawTelephone != null && !data.rawTelephone.equals("")){
+            return fetchContactPhoto(context, data.rawTelephone);
+        }else if (data != null) {
+            return ContactImage.getBitmap(context, data.id);
+        }
+
+        return null;
 	}
 	
 	private static Bitmap fetchContactPhoto(Context context, String phoneNumber) 
@@ -353,13 +520,14 @@ public class AddressBookProvider extends ContentProvider
 	private static class Helper extends SQLiteOpenHelper
 	{
 		private static final String DATABASE_NAME = "address_book";
-		private static final int DATABASE_VERSION = 1;
+		private static final int DATABASE_VERSION = 2;
 
 		private static final String DATABASE_CREATE = "CREATE TABLE " + DATABASE_TABLE + " (" //
 				+ KEY_ROWID + " INTEGER PRIMARY KEY AUTOINCREMENT, " //
 				+ KEY_ADDRESS + " TEXT NOT NULL, " //
 				+ KEY_LABEL + " TEXT NULL, "
 				+ KEY_TELEPHONE + " TEXT NULL, "
+                + KEY_USERNAME + " TEXT NULL, "
 				+ KEY_RAW_TELEPHONE + " TEXT NULL);";
 
 		public Helper(final Context context)
@@ -394,7 +562,7 @@ public class AddressBookProvider extends ContentProvider
 		{
 			if (oldVersion == 1)
 			{
-				// future
+				db.execSQL("ALTER TABLE " + DATABASE_TABLE + " ADD COLUMN " + KEY_USERNAME + " TEXT");
 			}
 			else
 			{

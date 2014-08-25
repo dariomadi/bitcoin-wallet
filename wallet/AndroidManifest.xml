@@ -3,8 +3,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="com.kncwallet.wallet"
     android:installLocation="internalOnly"
-    android:versionCode="8"
-    android:versionName="0.9.4" >
+    android:versionCode="9"
+    android:versionName="0.9.5" >
 
     <uses-sdk
         android:minSdkVersion="10"
@@ -142,7 +142,7 @@
             android:name="com.kncwallet.wallet.ui.ImportKeysActivity"
             android:configChanges="orientation|keyboard|keyboardHidden"
             android:screenOrientation="portrait"
-            android:theme="@style/My.Theme.Dialog" >
+            >
             <intent-filter android:label="@string/import_keys_intent_filter_action" >
                 <action android:name="android.intent.action.VIEW" />
 
@@ -167,6 +167,21 @@
         <provider
             android:name="com.kncwallet.wallet.ExchangeRatesProvider"
             android:authorities="com.kncwallet.wallet.exchange_rates"
+            android:exported="false" />
+
+        <provider
+            android:name=".TransactionDataProvider"
+            android:authorities="com.kncwallet.wallet.transaction_data"
+            android:exported="false" />
+
+        <provider
+            android:name=".KnownAddressProvider"
+            android:authorities="com.kncwallet.wallet.known_address_data"
+            android:exported="false" />
+
+        <provider
+            android:name=".onename.OneNameCacheProvider"
+            android:authorities="com.kncwallet.wallet.onename_cache_data_a"
             android:exported="false" />
 
         <service

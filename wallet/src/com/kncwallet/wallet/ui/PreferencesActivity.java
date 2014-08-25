@@ -22,6 +22,8 @@ import java.io.IOException;
 import javax.annotation.Nonnull;
 
 import android.util.Log;
+
+import com.kncwallet.wallet.ui.dialog.KnCDialog;
 import com.kncwallet.wallet.util.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -101,6 +103,7 @@ public final class PreferencesActivity extends AbstractPreferenceActivity implem
 			deleteEntryPreference.setEnabled(false);
 	}
 
+
 	@Override
 	protected void onDestroy()
 	{
@@ -134,7 +137,7 @@ public final class PreferencesActivity extends AbstractPreferenceActivity implem
 
 		else if (PREFS_KEY_DELETE_ENTRY.equals(key))
 		{
-			AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(
+			KnCDialog.Builder alertDialogBuilder = new KnCDialog.Builder(
 					this);
 
 			// set title
@@ -165,11 +168,8 @@ public final class PreferencesActivity extends AbstractPreferenceActivity implem
 					}
 				});
 
-				// create alert dialog
-				AlertDialog alertDialog = alertDialogBuilder.create();
-
 				// show it
-				alertDialog.show();
+                alertDialogBuilder.show();
 		}
 
 		else if (PREFS_KEY_REPORT_ISSUE.equals(key))
@@ -218,7 +218,7 @@ public final class PreferencesActivity extends AbstractPreferenceActivity implem
 		}
 		else if (PREFS_KEY_INITIATE_RESET.equals(key))
 		{
-			final AlertDialog.Builder dialog = new AlertDialog.Builder(this);
+			final KnCDialog.Builder dialog = new KnCDialog.Builder(this);
 			dialog.setTitle(R.string.preferences_initiate_reset_title);
 			dialog.setMessage(R.string.preferences_initiate_reset_dialog_message);
 			dialog.setPositiveButton(R.string.preferences_initiate_reset_dialog_positive, new OnClickListener()

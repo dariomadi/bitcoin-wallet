@@ -15,7 +15,7 @@
 		android:layout_height="match_parent"
 		android:orientation="horizontal" >
 
-		<ImageView
+		<com.loopj.android.image.SmartImageView
 		    android:id="@+id/address_book_contact_image"
 		    android:layout_width="64dp"
 		    android:layout_height="64dp"
@@ -23,36 +23,51 @@
             android:background="#2a2a2a"
 		    android:scaleType="fitXY"
 		    />	    
-	    
-		<LinearLayout
-			android:layout_width="0px"
-			android:layout_height="match_parent"
-			android:layout_weight="1"
-			android:orientation="vertical" >
 
-			<TextView
-				android:id="@+id/address_book_row_label"
-				android:layout_width="wrap_content"
-				android:layout_height="24dp"
-				android:layout_marginBottom="0px"
-				android:textSize="@dimen/font_size_normal"
-				android:textColor="@color/knc_highlight"
-				android:textStyle="bold" />
-			<TextView
-				android:id="@+id/address_book_row_address"
-				android:layout_marginTop="0px"
-				android:layout_width="wrap_content"
-				android:layout_height="40dp"
-				android:textColor="@color/knc_header_text"
-				android:textSize="@dimen/font_size_small" />
-			
-			<TextView
-			    android:id="@+id/address_book_row_number"
-			    android:layout_width="1dp"
-			    android:layout_height="1dp"
-			    android:visibility="gone" />
-			
-			</LinearLayout>
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <ImageView
+                android:id="@+id/address_book_row_source_image"
+                android:layout_alignParentRight="true"
+                android:visibility="gone"
+                android:layout_marginTop="2dp"
+                android:layout_width="20dp"
+                android:layout_height="20dp" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:orientation="vertical" >
+
+                <TextView
+                    android:id="@+id/address_book_row_label"
+                    android:layout_width="wrap_content"
+                    android:layout_height="24dp"
+                    android:layout_marginBottom="0px"
+                    android:textSize="@dimen/font_size_normal"
+                    android:textColor="@color/knc_highlight"
+                    android:textStyle="bold" />
+                <TextView
+                    android:id="@+id/address_book_row_address"
+                    android:layout_marginTop="0px"
+                    android:layout_width="wrap_content"
+                    android:layout_height="40dp"
+                    android:textColor="@color/knc_header_text"
+                    android:textSize="@dimen/font_size_small" />
+
+                <TextView
+                    android:id="@+id/address_book_row_number"
+                    android:layout_width="1dp"
+                    android:layout_height="1dp"
+                    android:visibility="gone" />
+
+            </LinearLayout>
+
+            </RelativeLayout>
+
 
 		
 	</LinearLayout>
