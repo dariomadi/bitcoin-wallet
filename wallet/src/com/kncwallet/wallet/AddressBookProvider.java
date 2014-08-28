@@ -51,14 +51,19 @@ public class AddressBookProvider extends ContentProvider
 	public static final String KEY_TELEPHONE = "phone";
 	public static final String KEY_RAW_TELEPHONE = "rawphone";
     public static final String KEY_USERNAME = "username";
+    public static final String KEY_STATE = "state";
 
 	public static final String SELECTION_QUERY = "q";
 	public static final String SELECTION_IN = "in";
 	public static final String SELECTION_NOTIN = "notin";
+    public static final String SELECTION_ACTIVE_STATE = "states";
     public static final String SELECTION_COMPLEX = "c";
 
     public static final String SOURCE_DIRECTORY = "directory";
     public static final String SOURCE_ONENAME = "onename";
+
+    public static final int STATE_NONE = 0;
+    public static final int STATE_ACTIVE = 1;
 
 	public static Uri contentUri(@Nonnull final String packageName)
 	{
@@ -489,12 +494,16 @@ public class AddressBookProvider extends ContentProvider
 			appendAddresses(qb, addresses);
 			qb.appendWhere(")");
 		}
-		else if (SELECTION_QUERY.equals(originalSelection))
-		{
-			final String query = '%' + originalSelectionArgs[0].trim() + '%';
-			//selection = KEY_ADDRESS + " LIKE ? OR " + KEY_LABEL + " LIKE ? OR " + KEY_TELEPHONE + " LIKE ? OR " + KEY_RAW_TELEPHONE + " LIKE ?";
-			selection = KEY_LABEL + " LIKE ? OR " + KEY_TELEPHONE + " LIKE ? OR " + KEY_RAW_TELEPHONE + " LIKE ?";
-			selectionArgs = new String[] { query, query, query };
+		else if (SELECTION_QUERY.equals(originalSelection)) {
+            final String query = '%' + originalSelectionArgs[0].trim() + '%';
+            //selection = KEY_ADDRESS + " LIKE ? OR " + KEY_LABEL + " LIKE ? OR " + KEY_TELEPHONE + " LIKE ? OR " + KEY_RAW_TELEPHONE + " LIKE ?";
+            selection = KEY_LABEL + " LIKE ? OR " + KEY_TELEPHONE + " LIKE ? OR " + KEY_RAW_TELEPHONE + " LIKE ?";
+            selectionArgs = new String[]{query, query, query};
+
+        }else if(SELECTION_ACTIVE_STATE.equals(originalSelection)){
+            qb.appendWhere("state == "+STATE_ACTIVE);
+            selection = null;
+            selectionArgs = null;
 		}else{
             selection = originalSelection;
             selectionArgs = originalSelectionArgs;
@@ -520,7 +529,7 @@ public class AddressBookProvider extends ContentProvider
 	private static class Helper extends SQLiteOpenHelper
 	{
 		private static final String DATABASE_NAME = "address_book";
-		private static final int DATABASE_VERSION = 2;
+		private static final int DATABASE_VERSION = 3;
 
 		private static final String DATABASE_CREATE = "CREATE TABLE " + DATABASE_TABLE + " (" //
 				+ KEY_ROWID + " INTEGER PRIMARY KEY AUTOINCREMENT, " //
@@ -528,6 +537,7 @@ public class AddressBookProvider extends ContentProvider
 				+ KEY_LABEL + " TEXT NULL, "
 				+ KEY_TELEPHONE + " TEXT NULL, "
                 + KEY_USERNAME + " TEXT NULL, "
+                + KEY_STATE + " INTEGER, "
 				+ KEY_RAW_TELEPHONE + " TEXT NULL);";
 
 		public Helper(final Context context)
@@ -564,6 +574,9 @@ public class AddressBookProvider extends ContentProvider
 			{
 				db.execSQL("ALTER TABLE " + DATABASE_TABLE + " ADD COLUMN " + KEY_USERNAME + " TEXT");
 			}
+            else if(oldVersion == 2){
+                db.execSQL("ALTER TABLE " + DATABASE_TABLE + " ADD COLUMN " + KEY_STATE + " INTEGER");
+            }
 			else
 			{
 				throw new UnsupportedOperationException("old=" + oldVersion);

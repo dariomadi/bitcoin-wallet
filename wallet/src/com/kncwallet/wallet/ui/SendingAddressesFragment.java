@@ -487,10 +487,9 @@ public final class SendingAddressesFragment extends SherlockListFragment impleme
 	@Override
 	public Loader<Cursor> onCreateLoader(final int id, final Bundle args)
 	{
-		final Uri uri = AddressBookProvider.contentUri(activity.getPackageName());
-		return new CursorLoader(activity, uri, null, AddressBookProvider.SELECTION_NOTIN,
-				new String[] { walletAddressesSelection != null ? walletAddressesSelection : "" }, AddressBookProvider.KEY_LABEL
-						+ " COLLATE LOCALIZED ASC");
+        final Uri uri = AddressBookProvider.contentUri(activity.getPackageName());
+        return new CursorLoader(activity, uri, null, AddressBookProvider.SELECTION_ACTIVE_STATE, new String[] { walletAddressesSelection != null ? walletAddressesSelection : "" }, AddressBookProvider.KEY_LABEL
+                + " COLLATE LOCALIZED ASC");
 	}
 
 	@Override

@@ -4,7 +4,9 @@ import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.net.Uri;
+import android.util.Log;
 
 import com.google.gson.reflect.TypeToken;
 import com.kncwallet.wallet.AddressBookProvider;
@@ -17,6 +19,7 @@ import com.kncwallet.wallet.dto.ContactsRequest;
 import com.kncwallet.wallet.dto.ServerResponse;
 
 import java.util.ArrayList;
+import java.util.Hashtable;
 import java.util.List;
 
 public class ContactsDownloader {
@@ -48,6 +51,8 @@ public class ContactsDownloader {
         long timestamp = prefs.getLong(PREFS_CONTACT_LOOKUP_TIMESTAMP, 0);
 
         long diff = System.currentTimeMillis() - timestamp;
+
+        cleanupContacts();
 
         if(diff > PREFS_CONTACT_LOOKUP_TIME_LIMIT){
             doContactsLookup();
@@ -81,6 +86,68 @@ public class ContactsDownloader {
 
         fetcher.execute();
     }
+
+    public void cleanupContacts(){
+        ContactsFetcher fetcher = new ContactsFetcher(context, phoneNumber);
+        fetcher.setOnCompletedCallback(new ContactsRetrieved() {
+            @Override
+            public void onContactsRetrieved(List<AddressBookContact> contacts) {
+                cleanupContacts(contacts);
+            }
+            @Override
+            public void onErrorOccurred() {}
+        });
+        fetcher.execute();
+    }
+
+
+
+    private void cleanupContacts(final List<AddressBookContact> contacts)
+    {
+        Cursor cursor = context.getContentResolver().query(AddressBookProvider.contentUri(context.getPackageName()), new String[]{AddressBookProvider.KEY_RAW_TELEPHONE, AddressBookProvider.KEY_ADDRESS}, null, null, null);
+
+        ContentResolver contentResolver = context.getContentResolver();
+
+        Hashtable<String, String> numberMap = new Hashtable<String, String>();
+
+        while (cursor.moveToNext()){
+            String number = cursor.getString(cursor.getColumnIndex(AddressBookProvider.KEY_RAW_TELEPHONE));
+            String address = cursor.getString(cursor.getColumnIndex(AddressBookProvider.KEY_ADDRESS));
+
+            if(number != null){
+                numberMap.put(number, address);
+            }else{
+                final Uri uri = AddressBookProvider.contentUri(context.getPackageName()).buildUpon().appendPath(address).build();
+                final ContentValues values = new ContentValues();
+                values.put(AddressBookProvider.KEY_STATE, AddressBookProvider.STATE_ACTIVE);
+                contentResolver.update(uri, values, null, null);
+            }
+        }
+
+        cursor.close();
+
+        for(AddressBookContact contact : contacts){
+            String address = numberMap.get(contact.RawNumber);
+            if(address != null){
+                numberMap.remove(contact.RawNumber);
+                final Uri uri = AddressBookProvider.contentUri(context.getPackageName()).buildUpon().appendPath(address).build();
+                final ContentValues values = new ContentValues();
+                values.put(AddressBookProvider.KEY_STATE, AddressBookProvider.STATE_ACTIVE);
+                contentResolver.update(uri, values, null, null);
+            }
+        }
+
+        for(String address : numberMap.values()){
+            final Uri uri = AddressBookProvider.contentUri(context.getPackageName()).buildUpon().appendPath(address).build();
+            final ContentValues values = new ContentValues();
+            values.put(AddressBookProvider.KEY_STATE, AddressBookProvider.STATE_NONE);
+            contentResolver.update(uri, values, null, null);
+        }
+
+
+
+    }
+
 
     //send web request to the server with contacts
     //on complete, save them locally
@@ -176,6 +243,7 @@ public class ContactsDownloader {
                     values.put(AddressBookProvider.KEY_LABEL, contact.Label);
                     values.put(AddressBookProvider.KEY_TELEPHONE, contact.TelephoneNumber);
                     values.put(AddressBookProvider.KEY_RAW_TELEPHONE, contact.RawNumber);
+                    values.put(AddressBookProvider.KEY_STATE, AddressBookProvider.STATE_ACTIVE);
 
                     if (isAdd)
                     {

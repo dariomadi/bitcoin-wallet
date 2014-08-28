@@ -462,11 +462,13 @@ public class TransactionsListAdapter extends BaseAdapter
             final View rowExtra = row.findViewById(R.id.transaction_row_extra);
             if(rowExtra != null){
                 rowExtra.setVisibility(View.GONE);
-                final TextView rowText = (TextView) row.findViewById(R.id.transaction_row_extra_message);
-                SpannableStringBuilder txDataString = resolveTxData(tx.getHashAsString(), address.toString(), sent);
-                if(txDataString != null){
-                    rowExtra.setVisibility(View.VISIBLE);
-                    rowText.setText(txDataString);
+                if(address != null && tx != null) {
+                    final TextView rowText = (TextView) row.findViewById(R.id.transaction_row_extra_message);
+                    SpannableStringBuilder txDataString = resolveTxData(tx.getHashAsString(), address.toString(), sent);
+                    if (txDataString != null) {
+                        rowExtra.setVisibility(View.VISIBLE);
+                        rowText.setText(txDataString);
+                    }
                 }
             }
 		}

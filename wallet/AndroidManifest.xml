@@ -3,8 +3,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="com.kncwallet.wallet"
     android:installLocation="internalOnly"
-    android:versionCode="9"
-    android:versionName="0.9.5" >
+    android:versionCode="10"
+    android:versionName="0.9.6" >
 
     <uses-sdk
         android:minSdkVersion="10"

@@ -768,8 +768,7 @@ public final class SendCoinsFragment extends KnCFragment {
             public Loader<Cursor> onCreateLoader(final int id, final Bundle args)
             {
                 final Uri uri = AddressBookProvider.contentUri(activity.getPackageName());
-                return new CursorLoader(activity, uri, null, AddressBookProvider.SELECTION_NOTIN,
-                        new String[] { walletAddressesSelection != null ? walletAddressesSelection : "" }, AddressBookProvider.KEY_LABEL
+                return new CursorLoader(activity, uri, null, AddressBookProvider.SELECTION_ACTIVE_STATE, new String[] { walletAddressesSelection != null ? walletAddressesSelection : "" }, AddressBookProvider.KEY_LABEL
                         + " COLLATE LOCALIZED ASC");
             }
 
@@ -1318,7 +1317,7 @@ public final class SendCoinsFragment extends KnCFragment {
             if (constraint != null)
                 cons = '%'+constraint.toString()+'%';
 
-            String sqlNotLike = "";
+            String sqlNotLike = "state == "+AddressBookProvider.STATE_ACTIVE+" AND ";
             String[] args = new String[3];
 
             if(walletAddressesSelection != null) {
@@ -1506,6 +1505,11 @@ public final class SendCoinsFragment extends KnCFragment {
 
     public void update(final String receivingAddress, final String receivingLabel, @Nullable final BigInteger amount,
                        @Nullable final String bluetoothMac) {
+
+        if(receivingAddressView == null){
+            return;
+        }
+
         try {
             validatedAddress = new AddressAndLabel(Constants.NETWORK_PARAMETERS, receivingAddress, receivingLabel);
             receivingAddressView.setText(null);

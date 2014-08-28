@@ -165,6 +165,7 @@ public final class EditAddressBookEntryFragment extends DialogFragment
 						final ContentValues values = new ContentValues();
 						values.put(AddressBookProvider.KEY_LABEL, newLabel);
                         values.put(AddressBookProvider.KEY_USERNAME, username);
+                        values.put(AddressBookProvider.KEY_STATE, AddressBookProvider.STATE_ACTIVE);
 						if (isAdd) {
                             contentResolver.insert(uri, values);
                             AddressBookProvider.ContactData contactData = AddressBookProvider.resolveContactData(activity, address);

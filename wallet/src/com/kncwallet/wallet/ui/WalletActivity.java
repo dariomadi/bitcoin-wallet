@@ -613,6 +613,11 @@ public final class WalletActivity extends AbstractBindServiceActivity implements
 					protected void bitcoinRequest(final Address address, final String addressLabel, final BigInteger amount, final String bluetoothMac)
 					{
 						SendCoinsFragment frag = (SendCoinsFragment)WalletActivity.this.mSectionsPagerAdapter.getItem(0);
+
+                        if(frag == null || frag.getFragmentManager() == null){
+                            frag = (SendCoinsFragment)findFragmentByPosition(0);
+                        }
+
 						if(frag != null)
 							frag.update(address != null ? address.toString() : null, addressLabel, amount, null);
 
@@ -1269,6 +1274,11 @@ public final class WalletActivity extends AbstractBindServiceActivity implements
 		actionBar.setSelectedNavigationItem(1);
 	}
 
+    public Fragment findFragmentByPosition(int position) {
+        return getSupportFragmentManager().findFragmentByTag(
+                "android:switcher:" + mViewPager.getId() + ":"
+                        + mSectionsPagerAdapter.getItemId(position));
+    }
 
     private class SectionsPagerAdapter extends FragmentPagerAdapter {
 
@@ -1364,6 +1374,11 @@ public final class WalletActivity extends AbstractBindServiceActivity implements
     public void presentSendToAddress(String address, String label) {
 
         SendCoinsFragment frag = (SendCoinsFragment) this.mSectionsPagerAdapter.getItem(0);
+
+        if(frag == null || frag.getFragmentManager() == null){
+            frag = (SendCoinsFragment)findFragmentByPosition(0);
+        }
+
         if(frag != null)
             frag.update(address, label, null, null);
 
